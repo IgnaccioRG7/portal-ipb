@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\UserController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use Laravel\Fortify\Features;
@@ -36,9 +37,9 @@ Route::get('/dashboard', function () {
 
 Route::middleware(['auth', 'verified'])->group(function () {
 
-    Route::get('/admin', fn () =>
-        Inertia::render('Admin/dashboard')
-    )->middleware('role:Admin')->name('admin.dashboard');
+    // Route::get('/admin', fn () =>
+    //     Inertia::render('Admin/dashboard')
+    // )->middleware('role:Admin')->name('admin.dashboard');
 
     Route::get('/profesor', fn () =>
         Inertia::render('Professor/dashboard')
@@ -48,6 +49,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Inertia::render('dashboard')
     )->middleware('role:Estudiante')->name('estudiante.dashboard');
 });
+
+// Rutas para el administrador
+Route::middleware(['auth', 'verified', 'role:Admin'])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('/', fn () => Inertia::render('Admin/dashboard'))->name('dashboard');
+    Route::get('/users', [UserController::class, 'index'])->name('users.index');
+});
+
 
 require __DIR__ . '/settings.php';
 

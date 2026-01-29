@@ -8,6 +8,14 @@ export type User = {
     created_at: string;
     updated_at: string;
     [key: string]: unknown;
+    persona: {
+        name: string;
+        paternal_surname: string;
+        maternal_surname: string | null;
+    };
+    rol: {
+        rol_name: string;
+    };
 };
 
 export type Auth = {

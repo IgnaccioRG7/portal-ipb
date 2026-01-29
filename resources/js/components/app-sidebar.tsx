@@ -1,5 +1,5 @@
-import { Link } from '@inertiajs/react';
-import { BookOpen, Folder, LayoutGrid } from 'lucide-react';
+import { Link, usePage } from '@inertiajs/react';
+import { BookOpen, Folder, LayoutGrid, Users } from 'lucide-react';
 // import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
@@ -15,14 +15,22 @@ import {
 import { dashboard } from '@/routes';
 import type { NavItem } from '@/types';
 import AppLogo from './app-logo';
+import admin from '@/routes/admin';
+import type { SharedData } from '@/types';
 
-const mainNavItems: NavItem[] = [
-    {
-        title: 'Inicio',
-        href: dashboard(),
-        icon: LayoutGrid,
-    },
-];
+// const mainNavItems: NavItem[] = [
+//     {
+//         title: 'Inicio',
+//         href: dashboard(),
+//         icon: LayoutGrid,
+//     },
+//     {
+//         title: 'Users',
+//         // href: '/admin/users',
+//         href: admin.users.index(),
+//         icon: LayoutGrid,
+//     },
+// ];
 
 const footerNavItems: NavItem[] = [
     {
@@ -38,6 +46,47 @@ const footerNavItems: NavItem[] = [
 ];
 
 export function AppSidebar() {
+
+    const { auth } = usePage<SharedData>().props;
+    const rol = auth?.user?.rol?.rol_name || '';
+
+    const getNavItems = (): NavItem[] => {
+        const items: NavItem[] = [
+            {
+                title: 'Inicio',
+                href: dashboard(),
+                icon: LayoutGrid,
+            },
+        ];
+
+        if (rol === 'Admin') {
+            items.push({
+                title: 'Usuarios',
+                href: admin.users.index(),
+                icon: Users,
+            });
+        }
+
+        // if (rol === 'Profesor') {
+        //     items.push({
+        //         title: 'Mis Clases',
+        //         href: '/profesor/clases',
+        //         icon: BookMarked,
+        //     });
+        // }
+
+        // if (rol === 'Estudiante') {
+        //     items.push({
+        //         title: 'Mis Cursos',
+        //         href: '/estudiante/cursos',
+        //         icon: GraduationCap,
+        //     });
+        // }
+
+        return items;
+    };
+    
+
     return (
         <Sidebar collapsible="icon" variant="inset">
             <SidebarHeader>
@@ -53,7 +102,8 @@ export function AppSidebar() {
             </SidebarHeader>
 
             <SidebarContent>
-                <NavMain items={mainNavItems} />
+                {/* <NavMain items={mainNavItems} /> */}
+                <NavMain items={getNavItems()} />
             </SidebarContent>
 
             <SidebarFooter>
