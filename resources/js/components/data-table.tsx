@@ -9,42 +9,44 @@ interface Column {
 interface DataTableProps {
   columns: Column[];
   data: any[];
+  onEdit?: (row: any) => void;
+  onToggleStatus?: (row: any) => void;
 }
 
-export function DataTable({ columns, data }: DataTableProps) {
+export function DataTable({ columns, data, onEdit, onToggleStatus }: DataTableProps) {
   return (
     <div className="w-full">
       {/* Vista de tabla para desktop */}
       <div className="hidden md:block overflow-x-auto rounded-lg shadow">
         <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
+          <thead className="bg-gray-50 dark:bg-gray-800">
             <tr>
               {columns.map((column, index) => (
                 <th
                   key={index}
                   scope="col"
-                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  className="px-6 py-3 text-left text-xs font-medium text-gray-800 uppercase tracking-wider dark:text-gray-100"
                 >
                   {column.label}
                 </th>
               ))}
             </tr>
           </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
+          <tbody className="bg-white divide-y divide-gray-200 dark:bg-gray-800 dark:divide-gray-700">
             {data.length === 0 ? (
               <tr>
                 <td
                   colSpan={columns.length}
-                  className="px-6 py-4 text-center text-sm text-gray-500"
+                  className="px-6 py-4 text-center text-sm text-gray-800 dark:text-gray-100"
                 >
                   No hay datos disponibles
                 </td>
               </tr>
             ) : (
               data.map((row, rowIndex) => (
-                <tr key={rowIndex} className="hover:bg-gray-50">
+                <tr key={rowIndex} className="hover:bg-gray-50 dark:hover:bg-gray-700">
                   {columns.map((column, colIndex) => (
-                    <td key={colIndex} className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    <td key={colIndex} className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
                       {column.render ? column.render(row) : row[column.key]}
                     </td>
                   ))}

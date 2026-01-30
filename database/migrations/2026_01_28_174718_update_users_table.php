@@ -15,8 +15,8 @@ return new class extends Migration
             $table->foreignId('persona_id')->after('id')->constrained('personas');
             $table->foreignId('rol_id')->after('persona_id')->constrained('roles');
 
-            $table->enum('estado', ['activo', 'inactivo', 'bloqueado', 'pendiente'])
-                ->default('pendiente');
+            $table->enum('estado', ['activo', 'inactivo'])
+                ->default('activo');
 
             $table->timestamp('ultimo_acceso')->nullable();
             $table->integer('intentos_fallidos')->nullable();

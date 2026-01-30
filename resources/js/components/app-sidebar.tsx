@@ -51,15 +51,21 @@ export function AppSidebar() {
     const rol = auth?.user?.rol?.rol_name || '';
 
     const getNavItems = (): NavItem[] => {
-        const items: NavItem[] = [
-            {
-                title: 'Inicio',
-                href: dashboard(),
-                icon: LayoutGrid,
-            },
-        ];
+        const items: NavItem[] = [];
+        // const items: NavItem[] = [
+        //     {
+        //         title: 'Inicio',
+        //         href: dashboard(),
+        //         icon: LayoutGrid,
+        //     },
+        // ];
 
         if (rol === 'Admin') {
+            items.push({
+                title: 'Inicio',
+                href: admin.dashboard(),
+                icon: LayoutGrid,
+            });
             items.push({
                 title: 'Usuarios',
                 href: admin.users.index(),
@@ -67,21 +73,31 @@ export function AppSidebar() {
             });
         }
 
-        // if (rol === 'Profesor') {
-        //     items.push({
-        //         title: 'Mis Clases',
-        //         href: '/profesor/clases',
-        //         icon: BookMarked,
-        //     });
-        // }
+        if (rol === 'Profesor') {
+            items.push({
+                title: 'Inicio',
+                href: '/profesor',
+                icon: LayoutGrid,
+            });
+            // items.push({
+            //     title: 'Mis Clases',
+            //     href: '/profesor/clases',
+            //     icon: BookMarked,
+            // });
+        }
 
-        // if (rol === 'Estudiante') {
-        //     items.push({
-        //         title: 'Mis Cursos',
-        //         href: '/estudiante/cursos',
-        //         icon: GraduationCap,
-        //     });
-        // }
+        if (rol === 'Estudiante') {
+            items.push({
+                title: 'Inicio',
+                href: '/estudiante',
+                icon: LayoutGrid,
+            });
+            // items.push({
+            //     title: 'Mis Cursos',
+            //     href: '/estudiante/cursos',
+            //     icon: GraduationCap,
+            // });
+        }
 
         return items;
     };
