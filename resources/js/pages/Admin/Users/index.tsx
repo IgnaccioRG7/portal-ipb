@@ -8,7 +8,7 @@ import admin from '@/routes/admin';
 import { BreadcrumbItem } from '@/types';
 import { Head, Link, router } from '@inertiajs/react';
 import { UserPlus, Edit, ShieldOff, Users, UserRoundCheck, UserRoundX, Search, ListFilter } from 'lucide-react';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 
 interface Stats {
   total: number;
@@ -43,8 +43,19 @@ const breadcrumbs: BreadcrumbItem[] = [
 
 export default function Index({ users, stats }: { users: PaginatedUsers, stats: Stats }) {
   const [search, setSearch] = useState('')
+  const debounce = useRef<any>()
 
   console.log(users);
+
+  const debounceIt = (value: string) => {
+    if (debounce.current) {
+      clearTimeout(debounce.current)
+    }
+
+    debounce.current = setTimeout(() => {
+      console.log("search:", value)
+    }, 1000)
+  }
 
   const handleEdit = (userId: number) => {
     // Redirigir a la página de edición
@@ -109,7 +120,8 @@ export default function Index({ users, stats }: { users: PaginatedUsers, stats: 
   const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
     const value = event.target.value
     console.log(value);
-    
+    debounceIt(value)
+
   }
 
   return (
