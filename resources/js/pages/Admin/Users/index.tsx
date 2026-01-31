@@ -8,7 +8,7 @@ import admin from '@/routes/admin';
 import { BreadcrumbItem } from '@/types';
 import { Head, Link, router } from '@inertiajs/react';
 import { UserPlus, Edit, ShieldOff, Users, UserRoundCheck, UserRoundX, Search, ListFilter } from 'lucide-react';
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 interface Stats {
   total: number;
@@ -34,6 +34,11 @@ interface PaginatedUsers {
   }>;
 }
 
+interface Filters {
+  search: string,
+  per_page: number
+}
+
 const breadcrumbs: BreadcrumbItem[] = [
   {
     title: 'Usuarios',
@@ -41,20 +46,110 @@ const breadcrumbs: BreadcrumbItem[] = [
   },
 ];
 
-export default function Index({ users, stats }: { users: PaginatedUsers, stats: Stats }) {
-  const [search, setSearch] = useState('')
-  const debounce = useRef<any>()
+const DEFAULT_VALUE_FILTERS = {
+  search: '',
+  per_page: 4
+}
 
-  console.log(users);
+export default function Index({
+  users,
+  stats,
+  filters = DEFAULT_VALUE_FILTERS
+}:
+  {
+    users: PaginatedUsers,
+    stats: Stats,
+    filters: Filters
+  }) {
+  const [search, setSearch] = useState(() => {
+    return filters?.search
+  })
+  const debounceRef = useRef<any>(null)
+  const [perPage, setPerPage] = useState<number>(() => {
+    return filters.per_page
+  })
 
-  const debounceIt = (value: string) => {
-    if (debounce.current) {
-      clearTimeout(debounce.current)
+  // console.log(users);
+
+  // Filtrando datos por pagina
+  const handlePerPageChange = (results: number) => {
+    setPerPage(results);
+
+    if (results === DEFAULT_VALUE_FILTERS.per_page) {
+      router.get(admin.users.index(), {}, {
+        preserveState: true,
+        preserveScroll: true,
+        replace: true
+      });
+    } else {
+      router.get(admin.users.index(), {
+        per_page: results
+      }, {
+        preserveState: true,
+        preserveScroll: true,
+        replace: true
+      });
+    }
+  }
+
+  // Filtrando datos por el buscador
+  // 1. Función de debounce independiente (NO dentro de useEffect)
+  const debounceSearch = (value: string) => {
+    // Limpiar timeout anterior
+    if (debounceRef.current) {
+      clearTimeout(debounceRef.current);
     }
 
-    debounce.current = setTimeout(() => {
-      console.log("search:", value)
-    }, 1000)
+    debounceRef.current = setTimeout(() => {
+      if (value.trim() === '') {
+        // Si está vacío, quitar el parámetro search de la URL
+        router.get(admin.users.index(), {}, {
+          preserveState: true,
+          preserveScroll: true,
+          replace: true
+        });
+      } else {
+        // Si tiene valor, buscar con el parámetro
+        router.get(admin.users.index(), { search: value }, {
+          preserveState: true,
+          preserveScroll: true,
+          replace: true
+        });
+      }
+    }, 500);
+  };
+
+  // 2. Handler para el input
+  const handleSearchText = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const value = event.target.value;
+    setSearch(value); // Actualizar estado inmediato (para mostrar)
+
+    // Llamar al debounce
+    debounceSearch(value);
+  };
+
+  // 3. Limpieza al desmontar
+  useEffect(() => {
+    return () => {
+      if (debounceRef.current) {
+        clearTimeout(debounceRef.current);
+      }
+    };
+  }, []);
+
+  const handleSearch = (newFilters: Filters) => {
+    const params:any = {}
+    Object.keys(newFilters).forEach(key => {
+      if (newFilters[key as keyof Filters] !== DEFAULT_VALUE_FILTERS[key as keyof Filters]) {
+        params[key] = newFilters[key as keyof Filters]
+      }
+    })
+
+    router.get(admin.users.index(), params, {
+      preserveState: true,
+      preserveScroll: true,
+      replace: true
+    })
   }
 
   const handleEdit = (userId: number) => {
@@ -117,13 +212,6 @@ export default function Index({ users, stats }: { users: PaginatedUsers, stats: 
     },
   ];
 
-  const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const value = event.target.value
-    console.log(value);
-    debounceIt(value)
-
-  }
-
   return (
     <ContentLayout
       breadcrumbs={breadcrumbs}
@@ -173,21 +261,33 @@ export default function Index({ users, stats }: { users: PaginatedUsers, stats: 
             <Input
               id='search'
               type='search'
+              value={search}
               className='border-none px-0 pr-4 focus:outline-none! focus:border-none! ring-0!'
-              placeholder='Busca un usuario en la plataforma'
-              onChange={handleSearch}
+              placeholder='Busca un usuario en la plataforma por correo o nombre'
+              onChange={handleSearchText}
             />
           </label>
         </search>
-        <button className='hidden md:flex flex-row gap-2  items-center border border-gray-200 shadow-xs dark:border-gray-600 px-4 py-1 rounded-full text-sm hover:bg-gray-100 transition-colors duration-300 cursor-pointer dark:bg-gray-600 dark:hover:bg-gray-500'>
-          <ListFilter />
-          Mas filtros
-        </button>
         <div className="roles flex flex-row px-4 py-2 gap-3 items-center text-sm bg-gray-100 md:px-4 rounded-full font-medium text-gray-600 dark:bg-gray-600 dark:text-gray-300">
           <span className='bg-white dark:bg-gray-200 px-2 py-1 rounded-md shadow-md text-black'>Todos</span>
           <span>Profesor</span>
           <span>Estudiante</span>
           <span>Tutor</span>
+        </div>
+        <div className='text-gray-200 flex gap-2 items-center'>
+          {/* <ListFilter /> */}
+          <span>Resultados:</span>
+          <select
+            value={perPage}
+            onChange={(e) => handlePerPageChange(Number(e.target.value))}
+            className="bg-gray-600 border-none outline-none cursor-pointer p-2 rounded-md"
+          >
+            <option value="4">4</option>
+            <option value="10">10</option>
+            <option value="20">20</option>
+            <option value="50">50</option>
+          </select>
+
         </div>
       </section>
 

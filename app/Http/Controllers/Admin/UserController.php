@@ -12,7 +12,7 @@ use Inertia\Inertia;
 
 class UserController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         // $users = User::with(['persona', 'rol'])
         //     ->select(
@@ -36,7 +36,11 @@ class UserController extends Controller
         //             'created_at' => $user->created_at->format('d/m/Y'),
         //         ];
         //     });
-        $users = User::with(['persona', 'rol'])
+
+        $search = $request->query('search', '');
+        $perPage = $request->query('per_page', 4);
+
+        $query = User::with(['persona', 'rol'])
             ->select(
                 'id',
                 'persona_id',
@@ -45,8 +49,26 @@ class UserController extends Controller
                 'estado',
                 // 'ultimo_acceso', 
                 // 'created_at'
-            )
-            ->paginate(4)
+            );
+
+        if (!empty($search)) {
+            $query->where(function ($q) use ($search) {
+                // Buscar en email del usuario
+                $q->where('email', 'LIKE', "%{$search}%")
+                    // Buscar en datos de la persona relacionada
+                    ->orWhereHas('persona', function ($personaQuery) use ($search) {
+                        $personaQuery->where('ci', 'LIKE', "%{$search}%")
+                            ->orWhere('nombre', 'LIKE', "%{$search}%")
+                            ->orWhere('apellido_paterno', 'LIKE', "%{$search}%")
+                            ->orWhere('apellido_materno', 'LIKE', "%{$search}%")
+                            ->orWhereRaw("nombre || ' ' || apellido_paterno LIKE ?", ["%{$search}%"]);
+                            // En MYSQL ->orWhereRaw("CONCAT(nombre, ' ', apellido_paterno) LIKE ?", ["%{$search}%"]);
+                    });
+            });
+        }
+
+        $users = $query
+            ->paginate($perPage)
             ->through(function ($user) {
                 return [
                     'id' => $user->id,
@@ -66,7 +88,11 @@ class UserController extends Controller
 
         return Inertia::render('Admin/Users/index', [
             'users' => $users,
-            'stats' => $stats
+            'stats' => $stats,
+            'filters' => [
+                'search' => $search,
+                'per_page' => $perPage
+            ]
         ]);
     }
 
