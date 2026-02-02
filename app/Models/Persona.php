@@ -29,9 +29,16 @@ class Persona extends Model
         return $this->hasOne(User::class);
     }
 
+    // Relación con el tutor (persona que es tutor de este estudiante)
     public function tutor()
     {
         return $this->belongsTo(Persona::class, 'tutor_id');
+    }
+
+    // Relación inversa: estudiantes de los que soy tutor
+    public function estudiantes()
+    {
+        return $this->hasMany(Persona::class, 'tutor_id');
     }
 
     public function getNombreCompletoAttribute()

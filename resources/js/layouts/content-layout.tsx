@@ -14,7 +14,7 @@ export default function ContentLayout({
   title?: string,
   subtitle?: string,
   actions?: React.ReactNode,
-  children: React.ReactNode
+  children?: React.ReactNode
 }) {
   return (
     <AppLayout breadcrumbs={breadcrumbs}>

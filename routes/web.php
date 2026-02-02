@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\Student\StudentController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use Laravel\Fortify\Features;
@@ -45,9 +46,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Inertia::render('Professor/dashboard')
     )->middleware('role:Profesor')->name('profesor.dashboard');
 
-    Route::get('/estudiante', fn () =>
-        Inertia::render('dashboard')
-    )->middleware('role:Estudiante')->name('estudiante.dashboard');
+    // Route::get('/estudiante', fn () =>
+    //     Inertia::render('dashboard')
+    // )->middleware('role:Estudiante')->name('estudiante.dashboard');
 });
 
 // Rutas para el administrador
@@ -59,6 +60,13 @@ Route::middleware(['auth', 'verified', 'role:Admin'])->prefix('admin')->name('ad
     Route::get('/users/{user}/edit', [UserController::class, 'edit'])->name('users.edit');
     Route::put('/users/{user}', [UserController::class, 'update'])->name('users.update');
     Route::delete('/users/{user}', [UserController::class, 'destroy'])->name('users.destroy');
+    Route::get('/students/search', [UserController::class, 'search']);
+});
+
+// Rutas para el estudiante
+Route::middleware(['auth', 'verified', 'role:Estudiante,Admin'])->prefix('estudiante')->name('estudiante.')->group(function () {
+    // Route::get('/', fn () => Inertia::render('dashboard'))->name('dashboard');
+    Route::get('/', [StudentController::class, 'index'])->name('dashboard');
 });
 
 

@@ -44,7 +44,31 @@ class UserSeeder extends Seeder
             ]
         );
 
-        // 3. Crear TUTOR (Padre) - Lo creamos antes para vincularlo al hijo
+        // 3. Crear ESTUDIANTE (Con tutor)
+        $personaEst = Persona::firstOrCreate(
+            ['ci' => '4000004'],
+            [
+                'nombre' => 'Juanito',
+                'apellido_paterno' => 'Gomez',
+                'genero' => 'masculino',
+                'ciudad' => 'El Alto',
+            ]
+            // 'parentesco_tutor' => 'hijo',
+            // 'tutor_id' => $personaTutor->id, // Relación Eloquent
+        );
+
+        User::firstOrCreate(
+            ['email' => 'estudiante@instituto.com'],
+            [
+                'persona_id' => $personaEst->id,
+                'rol_id' => $rolEstudiante->id,
+                'name' => 'juanito.gomez',
+                'password' => Hash::make('password'),
+                'estado' => 'activo',
+            ]
+        );
+
+        // 4. Crear TUTOR (Padre) - Lo creamos para vincularlo al hijo
         $personaTutor = Persona::firstOrCreate(
             ['ci' => '3000003'],
             [
@@ -52,6 +76,8 @@ class UserSeeder extends Seeder
                 'apellido_paterno' => 'Gomez',
                 'genero' => 'femenino',
                 'ciudad' => 'El Alto',
+                'tutor_id' => $personaEst->id, // Relación Eloquent
+                'parentesco_tutor' => 'madre',
             ]
         );
 
@@ -61,30 +87,6 @@ class UserSeeder extends Seeder
                 'persona_id' => $personaTutor->id,
                 'rol_id' => $rolTutor->id,
                 'name' => 'maria.gomez',
-                'password' => Hash::make('password'),
-                'estado' => 'activo',
-            ]
-        );
-
-        // 4. Crear ESTUDIANTE (Con tutor)
-        $personaEst = Persona::firstOrCreate(
-            ['ci' => '4000004'],
-            [
-                'nombre' => 'Juanito',
-                'apellido_paterno' => 'Gomez',
-                'genero' => 'masculino',
-                'ciudad' => 'El Alto',
-                'tutor_id' => $personaTutor->id, // Relación Eloquent
-                'parentesco_tutor' => 'madre',
-            ]
-        );
-
-        User::firstOrCreate(
-            ['email' => 'estudiante@instituto.com'],
-            [
-                'persona_id' => $personaEst->id,
-                'rol_id' => $rolEstudiante->id,
-                'name' => 'juanito.gomez',
                 'password' => Hash::make('password'),
                 'estado' => 'activo',
             ]

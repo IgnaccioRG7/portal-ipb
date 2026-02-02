@@ -9,6 +9,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import ContentLayout from '@/layouts/content-layout';
+import StudentAutocomplete from '@/components/ui/auto-complete';
+import { useMemo } from 'react';
 
 
 interface Rol {
@@ -28,7 +30,7 @@ const breadcrumbs: BreadcrumbItem[] = [
 ];
 
 export default function Create({ roles }: { roles: Rol[] }) {
-  const { data, setData, post, processing, errors } = useForm({
+  const { data, setData, post, processing, errors, get } = useForm({
     // Datos de Persona
     ci: '',
     nombre: '',
@@ -39,6 +41,8 @@ export default function Create({ roles }: { roles: Rol[] }) {
     celular: '',
     direccion: '',
     ciudad: 'La Paz',
+    estudiante_id: 0,
+    parentesco: '',
 
     // Datos de Usuario
     email: '',
@@ -47,14 +51,27 @@ export default function Create({ roles }: { roles: Rol[] }) {
     rol_id: '',
   });
 
-  const submit = (e: React.FormEvent) => {
+  const isTutor = useMemo(() => {
+    const selectedRole = roles.find(r => r.id.toString() === data.rol_id.toString());
+    return selectedRole?.nombre === 'Tutor';
+  }, [data.rol_id, roles]);
+
+  const submit = (e: React.SubmitEvent) => {
     e.preventDefault();
+
+    if (!isTutor) {
+      data.estudiante_id = 0
+      data.parentesco = ''
+    }
+
     post(admin.users.store().url, {
       onSuccess: () => {
         // Opcional: mensaje de éxito
       }
     });
   };
+
+  // const isSelecteRol = get('rol_id')
 
   return (
     <ContentLayout
@@ -203,7 +220,7 @@ export default function Create({ roles }: { roles: Rol[] }) {
                     <InputError message={errors.email} />
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">                    
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="grid gap-2">
                       <Label htmlFor="password">Contraseña *</Label>
                       <Input
@@ -213,7 +230,7 @@ export default function Create({ roles }: { roles: Rol[] }) {
                         onChange={e => setData('password', e.target.value)}
                         required
                         placeholder="Mínimo 8 caracteres"
-                      />                      
+                      />
                     </div>
 
                     <div className="grid gap-2">
@@ -253,7 +270,47 @@ export default function Create({ roles }: { roles: Rol[] }) {
                   </select>
                   <InputError message={errors.rol_id} />
                 </div>
+
+                {/* OPCIONAL SELECCION DEL HIJO */}
+                {
+                  data.rol_id === '4' && (
+                    <div className="border-2 border-blue-200 dark:border-blue-800 rounded-lg p-4 bg-blue-50 dark:bg-blue-900/20 grid gap-2 mt-4 grid-cols-1 xl:grid-cols-2 md:gap-4">
+                      <div>
+                        <StudentAutocomplete
+                          onSelect={(studentId, studentName) => {
+                            setData('estudiante_id', studentId);  // Cambiar a estudiante_id
+                          }}
+                          error={errors.estudiante_id}  // Cambiar el nombre del error
+                          initialValue=""  // Remover la referencia a user.tutor
+                          required={true}
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="rol_id">Parentesco *</Label>
+                        <select
+                          id="parentesco"
+                          value={data.parentesco}
+                          onChange={e => setData('parentesco', e.target.value)}
+                          className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                          required
+                        >
+                          <option value="" disabled>Seleccione un parentesco</option>
+                          <option value="padre">Padre</option>
+                          <option value="madre">Madre</option>
+                          <option value="tio">Tio</option>
+                          <option value="tia">Tia</option>
+                          <option value="abuelo">Abuelo</option>
+                          <option value="abuela">Abuela</option>
+                          <option value="otro">Otro</option>
+                        </select>
+                        <InputError message={errors.ci} />
+                      </div>
+                    </div>
+                  )
+                }
+
               </div>
+
             </div>
 
             {/* BOTONES */}

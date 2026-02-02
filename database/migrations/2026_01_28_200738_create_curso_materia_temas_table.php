@@ -24,13 +24,18 @@ return new class extends Migration
                   ->constrained('temas')
                   ->onDelete('cascade');
 
+            // Relación con la matricula en específico
+            $table->foreignId('mat_id')
+                  ->constrained('matriculas')
+                  ->onDelete('cascade');
+
             $table->integer('orden')->default(1); // Para ordenar el temario
             $table->enum('estado', ['activo', 'inactivo'])->default('activo');
             
             $table->timestamps();
             
             // Evitar duplicar el mismo tema en la misma asignación de curso
-            $table->unique(['curso_materia_id', 'tema_id']); 
+            $table->unique(['curso_materia_id', 'tema_id', 'mat_id']); 
         });
     }
 

@@ -6,175 +6,246 @@ use App\Models\Curso;
 use App\Models\CursoMateria;
 use App\Models\CursoMateriaTema;
 use App\Models\Materia;
+use App\Models\Matricula;
 use App\Models\Tema;
 use App\Models\User;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 class AcademicSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run(): void
     {
-        // Obtener usuario admin
-        $adminUser = User::where('email', 'admin@instituto.com')->first();
-        $adminId = $adminUser ? $adminUser->id : 1; 
+        // =====================================================
+        // ADMIN
+        // =====================================================
+        $admin = User::where('email', 'admin@instituto.com')->firstOrFail();
 
-        // ---------------------------------------------------------
-        // 1. CREAR CURSOS
-        // ---------------------------------------------------------
-        $cursoInstitutos = Curso::firstOrCreate(
-            ['codigo_curso' => 'CUR-INST-01'],
+        // =====================================================
+        // CURSOS
+        // =====================================================
+        $cursoESFM = Curso::firstOrCreate(
+            ['codigo_curso' => 'ESFM-UAS'],
             [
-                'nombre' => 'Institutos',
-                'descripcion' => 'Preparación para institutos técnicos',
-                'nivel' => 'básico',
-                'precio' => 150.00,
+                'nombre' => 'ESFM - UAS',
+                'descripcion' => 'Curso de formación superior para profesores y maestros',
+                'nivel' => 'intermedio',
+                'precio' => 200,
             ]
         );
 
-        $cursoUniversidades = Curso::firstOrCreate(
-            ['codigo_curso' => 'CUR-UNI-01'],
+        $cursoUni = Curso::firstOrCreate(
+            ['codigo_curso' => 'UNI-GRAL'],
             [
                 'nombre' => 'Universidades',
-                'descripcion' => 'Preparación para examen de ingreso universitario',
+                'descripcion' => 'Ingreso a universidades publicas y privadas',
                 'nivel' => 'avanzado',
-                'precio' => 250.00,
+                'precio' => 300,
             ]
         );
 
-        // ---------------------------------------------------------
-        // 2. CREAR MATERIAS
-        // ---------------------------------------------------------
-        $matRazonamiento = Materia::firstOrCreate(
-            ['codigo_materia' => 'MAT-RL'],
-            ['nombre' => 'Razonamiento Lógico', 'area' => 'general']
+        // =====================================================
+        // MATERIAS
+        // =====================================================
+        $matComprension = Materia::firstOrCreate(
+            ['codigo_materia' => 'COMP-LECT'],
+            ['nombre' => 'Comprensión Lectora', 'area' => 'lenguaje']
         );
 
         $matConocimientos = Materia::firstOrCreate(
-            ['codigo_materia' => 'MAT-CG'],
+            ['codigo_materia' => 'CONOC-GEN'],
             ['nombre' => 'Conocimientos Generales', 'area' => 'general']
         );
 
-        // ---------------------------------------------------------
-        // 3. CREAR TEMAS
-        // ---------------------------------------------------------
-        $jsonMate = json_encode(["questions" => [["id" => "m1", "text" => "¿2+2?", "options" => ["3","4","5"], "correctAnswer" => 1]]]);
-        $jsonLeng = json_encode(["questions" => [["id" => "l1", "text" => "¿Sinónimo de feliz?", "options" => ["Triste","Alegre"], "correctAnswer" => 1]]]);
+        // =====================================================
+        // TEMAS (JSON REAL)
+        // =====================================================
 
-        $temaRazLogico = Tema::firstOrCreate(
-            ['codigo_tema' => 'TEMA-RL-01'],
+        // --- Comprensión lectora
+        $temaLectura = Tema::firstOrCreate(
+            ['codigo_tema' => 'CL-DEF-01'],
             [
-                'materia_id' => $matRazonamiento->id,
-                'nombre' => 'Series y Lógica',
-                'contenido_json' => $jsonMate,
+                'materia_id' => $matComprension->id,
+                'nombre' => 'Deforestación y cambio climático',
+                'descripcion' => 'Lectura analítica',
+                'contenido_json' => json_encode([
+                    "text" => "La región andina de Bolivia ha experimentado una transformación profunda...",
+                    "questions" => [
+                        [
+                            "id" => "cl1_1",
+                            "text" => "¿Cuál fue la reducción porcentual?",
+                            "options" => [
+                                "85 %",
+                                "15 %",
+                                "20 %",
+                                "2 %"
+                            ],
+                            "correctAnswer" => 1
+                        ],
+                        [
+                            "id" => "cl1_2",
+                            "text" => "Consecuencias de la deforestación",
+                            "options" => [
+                                "Disminución de temperatura",
+                                "Aumento de 60 °C",
+                                "Aumento de 16 °C",
+                                "Aumento de 0,6 °C"
+                            ],
+                            "correctAnswer" => 3
+                        ],
+                        [
+                            "id" => "cl1_3",
+                            "text" => "Primer factor técnico",
+                            "options" => [
+                                "Reducción del albedo",
+                                "Aumento del albedo",
+                                "Disminución térmica",
+                                "Evaporación"
+                            ],
+                            "correctAnswer" => 1
+                        ]
+                    ]
+                ]),
                 'estado' => 'activo',
-                'created_by' => $adminId
+                'created_by' => $admin->id
             ]
         );
 
+        // --- Matemática
         $temaMatematica = Tema::firstOrCreate(
-            ['codigo_tema' => 'TEMA-CG-MAT'],
+            ['codigo_tema' => 'MAT-01'],
             [
                 'materia_id' => $matConocimientos->id,
-                'nombre' => 'Matemática General',
-                'contenido_json' => $jsonMate,
+                'nombre' => 'Matemática',
+                'contenido_json' => json_encode([
+                    "name" => "Matemática",
+                    "questions" => [
+                        [
+                            "id" => "mat_1",
+                            "text" => "Si 3x - 7 = 11",
+                            "options" => ["4", "6", "5", "3"],
+                            "correctAnswer" => 0
+                        ],
+                        [
+                            "id" => "mat_2",
+                            "text" => "¿2^5?",
+                            "options" => ["10", "16", "32", "64"],
+                            "correctAnswer" => 2
+                        ],
+                        [
+                            "id" => "mat_3",
+                            "text" => "Divisible entre 9",
+                            "options" => [
+                                "Termina en 0",
+                                "Suma múltiplo de 9",
+                                "Solo múltiplo de 3",
+                                "Debe ser par"
+                            ],
+                            "correctAnswer" => 1
+                        ]
+                    ]
+                ]),
                 'estado' => 'activo',
-                'created_by' => $adminId
+                'created_by' => $admin->id
             ]
         );
 
-        $temaLenguaje = Tema::firstOrCreate(
-            ['codigo_tema' => 'TEMA-CG-LEN'],
+        // --- Física
+        $temaFisica = Tema::firstOrCreate(
+            ['codigo_tema' => 'FIS-01'],
             [
                 'materia_id' => $matConocimientos->id,
-                'nombre' => 'Lenguaje',
-                'contenido_json' => $jsonLeng,
+                'nombre' => 'Física',
+                'contenido_json' => json_encode([
+                    "name" => "Física",
+                    "questions" => [
+                        [
+                            "id" => "fis_1",
+                            "text" => "Unidad de fuerza",
+                            "options" => ["Watt", "Newton", "Joule", "Pascal"],
+                            "correctAnswer" => 1
+                        ],
+                        [
+                            "id" => "fis_2",
+                            "text" => "Velocidad constante",
+                            "options" => ["Positiva", "Negativa", "Cero", "Infinita"],
+                            "correctAnswer" => 2
+                        ],
+                        [
+                            "id" => "fis_3",
+                            "text" => "Velocidad promedio",
+                            "options" => ["v=d/t", "v=m/a", "v=F·d", "v=t/d"],
+                            "correctAnswer" => 0
+                        ]
+                    ]
+                ]),
                 'estado' => 'activo',
-                'created_by' => $adminId
+                'created_by' => $admin->id
             ]
         );
 
-        // ---------------------------------------------------------
-        // 4. VINCULACIÓN (Usando firstOrCreate para asegurar el ID)
-        // ---------------------------------------------------------
-
-        // === CASO 1: Institutos -> Conocimientos Generales (Solo ve Matemática) ===
-        $cmInstitutosCG = CursoMateria::firstOrCreate(
-            [
-                'curso_id' => $cursoInstitutos->id,
-                'materia_id' => $matConocimientos->id
-            ],
-            [
-                'horas_semanales' => 4,
-                'estado' => 'activa'
-            ]
+        // =====================================================
+        // CURSO → MATERIAS
+        // =====================================================
+        // Comprencion lectora
+        $cmCL = CursoMateria::firstOrCreate(
+            ['curso_id' => $cursoESFM->id, 'materia_id' => $matComprension->id],
+            ['horas_semanales' => 4, 'estado' => 'activa']
         );
 
-        CursoMateriaTema::firstOrCreate(
-            [
-                'curso_materia_id' => $cmInstitutosCG->id, // Ahora sí tendrá ID seguro
-                'tema_id' => $temaMatematica->id
-            ],
-            [
-                'orden' => 1,
-                'estado' => 'activo'
-            ]
+        // Conocimientos generales
+        $cmCG = CursoMateria::firstOrCreate(
+            ['curso_id' => $cursoUni->id, 'materia_id' => $matConocimientos->id],
+            ['horas_semanales' => 4, 'estado' => 'activa']
         );
 
-        // === CASO 2: Universidades -> Conocimientos Generales (Solo ve Lenguaje) ===
-        $cmUniCG = CursoMateria::firstOrCreate(
-            [
-                'curso_id' => $cursoUniversidades->id,
-                'materia_id' => $matConocimientos->id
-            ],
-            [
-                'horas_semanales' => 4,
-                'estado' => 'activa'
-            ]
-        );
+        // =====================================================
+        // MATRÍCULA DEL ESTUDIANTE
+        // =====================================================
+        $estudiante = User::where('email', 'estudiante@instituto.com')->firstOrFail();
 
-        CursoMateriaTema::firstOrCreate(
-            [
-                'curso_materia_id' => $cmUniCG->id,
-                'tema_id' => $temaLenguaje->id
-            ],
-            [
-                'orden' => 1,
-                'estado' => 'activo'
-            ]
-        );
-
-        // === CASO 3: Ambos ven Razonamiento Lógico ===
+        // Matriculado al curso de UNIVERSIDADES
+        $matricula = Matricula::firstOrCreate(
+            ['estudiante_id' => $estudiante->id, 'curso_id' => $cursoUni->id],
+            ['codigo_matricula' => 'MAT-001']
+            );
         
-        // Institutos
-        $cmInstitutosRL = CursoMateria::firstOrCreate(
+        // Matriculado al curso de ESFM
+        $matricula2 = Matricula::firstOrCreate(
+            ['estudiante_id' => $estudiante->id, 'curso_id' => $cursoESFM->id],
+            ['codigo_matricula' => 'MAT-002']
+            );
+
+        // =====================================================
+        // ACCESO A TEMAS (curso_materia_temas)
+        // =====================================================
+        // Dandole acceso a la lectura1 de comprension lectora ~~~~~~~~~~~~~~~~~~~~~PERO PARA ESTO DEBERIA MATRICULARSE EN EL CURSO DE ESFM
+        CursoMateriaTema::firstOrCreate(
             [
-                'curso_id' => $cursoInstitutos->id,
-                'materia_id' => $matRazonamiento->id
+                'curso_materia_id' => $cmCL->id,
+                'tema_id' => $temaLectura->id,
+                'mat_id' => $matricula2->id
             ],
-            ['horas_semanales' => 3, 'estado' => 'activa']
+            ['orden' => 2, 'estado' => 'activo']
         );
 
+        // Dandole acceso al tema matematica
         CursoMateriaTema::firstOrCreate(
-            ['curso_materia_id' => $cmInstitutosRL->id, 'tema_id' => $temaRazLogico->id],
+            [
+                'curso_materia_id' => $cmCG->id,
+                'tema_id' => $temaMatematica->id,
+                'mat_id' => $matricula->id
+            ],
             ['orden' => 1, 'estado' => 'activo']
         );
 
-        // Universidades
-        $cmUniRL = CursoMateria::firstOrCreate(
-            [
-                'curso_id' => $cursoUniversidades->id,
-                'materia_id' => $matRazonamiento->id
-            ],
-            ['horas_semanales' => 3, 'estado' => 'activa']
-        );
-
+        // Dandole acceso al tema fisica
         CursoMateriaTema::firstOrCreate(
-            ['curso_materia_id' => $cmUniRL->id, 'tema_id' => $temaRazLogico->id],
-            ['orden' => 1, 'estado' => 'activo']
+            [
+                'curso_materia_id' => $cmCG->id,
+                'tema_id' => $temaFisica->id,
+                'mat_id' => $matricula->id
+            ],
+            ['orden' => 2, 'estado' => 'activo']
         );
     }
 }

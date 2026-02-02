@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('codigo_materia', 20)->unique();
             $table->string('nombre', 150);
-            $table->enum('area', ['ciencias', 'letras', 'general', 'especifica'])->default('general');
+            $table->enum('area', ['ciencias', 'lenguaje', 'general', 'especifica'])->default('general');
             $table->string('color', 7)->default('#1e88e5');
             $table->text('objetivos_generales')->nullable();
             $table->timestamps();

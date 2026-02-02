@@ -23,7 +23,7 @@ return new class extends Migration
             $table->text('direccion')->nullable();
             $table->string('ciudad', 100)->default('La Paz');
             $table->foreignId('tutor_id')->nullable()->constrained('personas');
-            $table->enum('parentesco_tutor', ['padre', 'madre', 'tio', 'tia', 'abuelo', 'abuela'])->default('padre');
+            $table->enum('parentesco_tutor', ['padre', 'madre', 'tio', 'tia', 'abuelo', 'abuela', 'otro'])->nullable();
             $table->timestamps();
 
             $table->index(['nombre', 'apellido_paterno']);

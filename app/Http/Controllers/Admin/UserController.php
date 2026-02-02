@@ -61,8 +61,9 @@ class UserController extends Controller
                             ->orWhere('nombre', 'LIKE', "%{$search}%")
                             ->orWhere('apellido_paterno', 'LIKE', "%{$search}%")
                             ->orWhere('apellido_materno', 'LIKE', "%{$search}%")
-                            ->orWhereRaw("nombre || ' ' || apellido_paterno LIKE ?", ["%{$search}%"]);
-                            // En MYSQL ->orWhereRaw("CONCAT(nombre, ' ', apellido_paterno) LIKE ?", ["%{$search}%"]);
+                            ->orWhereRaw("nombre || ' ' || apellido_paterno LIKE ?", ["%{$search}%"])
+                            ->orWhereRaw("nombre || ' ' || apellido_paterno || ' ' || apellido_materno LIKE ?", ["%{$search}%"]);
+                        // En MYSQL ->orWhereRaw("CONCAT(nombre, ' ', apellido_paterno) LIKE ?", ["%{$search}%"]);
                     });
             });
         }
@@ -152,7 +153,15 @@ class UserController extends Controller
             // Rol
             'rol_id.required' => 'El rol es obligatorio.',
             'rol_id.exists' => 'El rol seleccionado no es válido.',
+
+            // Si tiene parentesco validar el estudiante
+            'estudiante_id.required_if' => 'Debe seleccionar un estudiante.',
+            'estudiante_id.exists' => 'El estudiante seleccionado no existe.',
+            'parentesco.required_if' => 'El parentesco es obligatorio para tutores.',
         ];
+
+        $rol = Rol::find($request->rol_id);
+        $isTutor = $rol && $rol->nombre === 'Tutor';
 
         $validated = $request->validate([
             // Datos de Persona
@@ -170,7 +179,19 @@ class UserController extends Controller
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:8|confirmed',
             'rol_id' => 'required|exists:roles,id',
+
+            'estudiante_id' => $isTutor ? 'required|exists:users,id' : 'nullable',
+            'parentesco' => $isTutor ? 'required|string|in:padre,madre,tio,tia,abuelo,abuela,otro' : 'nullable',
         ], $messages);
+
+
+        $tutorId = null;
+        if ($isTutor && !empty($validated['estudiante_id'])) {
+            $estudianteUser = User::find($validated['estudiante_id']);
+            if ($estudianteUser) {
+                $tutorId = $estudianteUser->persona_id;
+            }
+        }
 
         // 1. Crear la persona
         $persona = Persona::create([
@@ -183,6 +204,9 @@ class UserController extends Controller
             'celular' => $validated['celular'],
             'direccion' => $validated['direccion'],
             'ciudad' => $validated['ciudad'],
+
+            'tutor_id' => $tutorId,
+            'parentesco_tutor' => $isTutor ? $validated['parentesco'] : null,
         ]);
 
         // 2. Crear el usuario
@@ -211,24 +235,43 @@ class UserController extends Controller
             ? $user->persona->fecha_nacimiento->format('Y-m-d')
             : '';
 
+        $userData = [
+            'id' => $user->id,
+            'email' => $user->email,
+            'rol_id' => $user->rol_id,
+            'estado' => $user->estado,
+            'persona' => [
+                'ci' => $user->persona->ci,
+                'nombre' => $user->persona->nombre,
+                'apellido_paterno' => $user->persona->apellido_paterno,
+                'apellido_materno' => $user->persona->apellido_materno,
+                'fecha_nacimiento' => $fechaNacimiento,
+                'genero' => $user->persona->genero,
+                'celular' => $user->persona->celular,
+                'direccion' => $user->persona->direccion,
+                'ciudad' => $user->persona->ciudad,
+            ]
+        ];
+
+        // Agregar datos de tutor si existe
+        if ($user->persona->tutor_id) {
+            // Buscar el usuario que corresponde a este tutor_id
+            $estudiantePersona = Persona::find($user->persona->tutor_id);
+            if ($estudiantePersona) {
+                $estudianteUser = User::where('persona_id', $estudiantePersona->id)->first();
+
+                $userData['tutor'] = [
+                    'estudiante_id' => $estudianteUser ? $estudianteUser->id : 0,
+                    'parentesco' => $user->persona->parentesco_tutor,
+                    'estudiante' => [
+                        'nombre_completo' => $estudiantePersona->nombre_completo ?? '',
+                    ],
+                ];
+            }
+        }
+
         return Inertia::render('Admin/Users/edit', [
-            'user' => [
-                'id' => $user->id,
-                'email' => $user->email,
-                'rol_id' => $user->rol_id,
-                'estado' => $user->estado,
-                'persona' => [
-                    'ci' => $user->persona->ci,
-                    'nombre' => $user->persona->nombre,
-                    'apellido_paterno' => $user->persona->apellido_paterno,
-                    'apellido_materno' => $user->persona->apellido_materno,
-                    'fecha_nacimiento' => $fechaNacimiento, // Ya formateada
-                    'genero' => $user->persona->genero,
-                    'celular' => $user->persona->celular,
-                    'direccion' => $user->persona->direccion,
-                    'ciudad' => $user->persona->ciudad,
-                ]
-            ],
+            'user' => $userData,
             'roles' => $roles,
         ]);
     }
@@ -279,7 +322,16 @@ class UserController extends Controller
             // Rol
             'rol_id.required' => 'El rol es obligatorio.',
             'rol_id.exists' => 'El rol seleccionado no es válido.',
+
+            // Si tiene parentesco validar el estudiante
+            'estudiante_id.required_if' => 'Debe seleccionar un estudiante.',
+            'estudiante_id.exists' => 'El estudiante seleccionado no existe.',
+            'parentesco.required_if' => 'El parentesco es obligatorio para tutores.',
         ];
+
+        // Obtener el rol seleccionado
+        $rol = Rol::find($request->rol_id);
+        $isTutor = $rol && $rol->nombre === 'Tutor';
 
         $validated = $request->validate([
             // Datos de Persona
@@ -297,7 +349,19 @@ class UserController extends Controller
             'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
             'password' => 'nullable|string|min:8|confirmed',
             'rol_id' => 'required|exists:roles,id',
+
+            'estudiante_id' => $isTutor ? 'required|exists:users,id' : 'nullable',
+            'parentesco' => $isTutor ? 'required|string|in:padre,madre,tio,tia,abuelo,abuela,otro' : 'nullable',
         ], $messages);
+
+        // Si es Tutor, obtener el persona_id del estudiante
+        $tutorId = null;
+        if ($isTutor && !empty($validated['estudiante_id'])) {
+            $estudianteUser = User::find($validated['estudiante_id']);
+            if ($estudianteUser) {
+                $tutorId = $estudianteUser->persona_id;
+            }
+        }
 
         // 1. Actualizar la persona
         $personaData = [
@@ -346,5 +410,43 @@ class UserController extends Controller
 
         return redirect()->route('admin.users.index')
             ->with('success', 'Usuario eliminado exitosamente');
+    }
+
+
+    public function search(Request $request)
+    {
+        $query = $request->input('q', '');
+
+        // Si no hay búsqueda, retornar vacío
+        if (strlen($query) < 1) {
+            return response()->json([]);
+        }
+
+        // Buscar usuarios con rol "Estudiante"
+        $students = User::with('persona')
+            ->whereHas('rol', function ($q) {
+                $q->where('nombre', 'Estudiante');
+            })
+            ->whereHas('persona', function ($q) use ($query) {
+                $q->where('nombre', 'LIKE', "%{$query}%")
+                    ->orWhere('apellido_paterno', 'LIKE', "%{$query}%")
+                    ->orWhere('apellido_materno', 'LIKE', "%{$query}%")
+                    ->orWhere('ci', 'LIKE', "%{$query}%")
+                    ->orWhereRaw("nombre || ' ' || apellido_paterno LIKE ?", ["%{$query}%"])
+                    ->orWhereRaw("nombre || ' ' || apellido_paterno || ' ' || apellido_materno LIKE ?", ["%{$query}%"]);
+                // Para MySQL usa: CONCAT(nombre, ' ', apellido_paterno)
+            })
+            ->limit(10)
+            ->get()
+            ->map(function ($user) {
+                return [
+                    'id' => $user->id,
+                    'nombre_completo' => $user->persona->nombre_completo,
+                    'ci' => $user->persona->ci,
+                    'email' => $user->email,
+                ];
+            });
+
+        return response()->json($students);
     }
 }

@@ -8,6 +8,16 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import ContentLayout from '@/layouts/content-layout';
+import { useMemo } from 'react';
+import StudentAutocomplete from '@/components/ui/auto-complete';
+
+interface Tutor {
+  estudiante_id: number;
+  parentesco: string;
+  estudiante?: {
+    nombre_completo: string;
+  };
+}
 
 interface Rol {
   id: number;
@@ -29,7 +39,9 @@ interface User {
     celular: string;
     direccion: string;
     ciudad: string;
-  }
+  };
+  tutor?: Tutor;
+
 }
 
 // Define los breadcrumbs sin usar :id en la URL
@@ -62,10 +74,25 @@ export default function Edit({ user, roles }: { user: User, roles: Rol[] }) {
     password: '',
     password_confirmation: '',
     rol_id: user.rol_id,
+
+    // Datos de Tutor (si aplica)
+    estudiante_id: user.tutor?.estudiante_id || 0,
+    parentesco: user.tutor?.parentesco || '',
   });
+
+  // Verificar si el rol seleccionado es "Tutor"
+  const isTutor = useMemo(() => {
+    const selectedRole = roles.find(r => r.id.toString() === data.rol_id.toString());
+    return selectedRole?.nombre === 'Tutor';
+  }, [data.rol_id, roles]);
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!isTutor) {
+      data.estudiante_id = 0;
+      data.parentesco = '';
+    }
 
     // Wayfinder: Pasar la URL como string directamente
     put(admin.users.update(user.id).url, {
@@ -232,7 +259,7 @@ export default function Edit({ user, roles }: { user: User, roles: Rol[] }) {
                         value={data.password}
                         onChange={e => setData('password', e.target.value)}
                         placeholder="Mínimo 8 caracteres"
-                      />                      
+                      />
                     </div>
 
                     <div className="grid gap-2">
@@ -250,10 +277,10 @@ export default function Edit({ user, roles }: { user: User, roles: Rol[] }) {
               </div>
 
               {/* SECCIÓN 3: ROL */}
-              <div className="">
-                <h3 className="text-lg font-semibold border-b">3. Rol del Usuario</h3>
+              <div>
+                <h3 className="text-lg font-semibold border-b pb-2">3. Rol del Usuario</h3>
 
-                <div className="grid gap-2 mt-2">
+                <div className="grid gap-2 mt-4">
                   <Label htmlFor="rol_id">Rol *</Label>
                   <select
                     id="rol_id"
@@ -272,6 +299,44 @@ export default function Edit({ user, roles }: { user: User, roles: Rol[] }) {
                   <InputError message={errors.rol_id} />
                 </div>
               </div>
+
+              {/* SECCIÓN 4: DATOS DE TUTOR (CONDICIONAL) */}
+              {isTutor && (
+                <div className="border-2 border-blue-200 dark:border-blue-800 rounded-lg p-4 bg-blue-50 dark:bg-blue-900/20">                  
+
+                  <div className="grid gap-4 grid-cols-1 xl:grid-cols-2">
+                    <StudentAutocomplete
+                      onSelect={(studentId, studentName) => {
+                        setData('estudiante_id', studentId);
+                      }}
+                      error={errors.estudiante_id}
+                      initialValue={user.tutor?.estudiante?.nombre_completo || ''}
+                      required={true}
+                    />
+
+                    <div className="grid gap-2">
+                      <Label htmlFor="parentesco">Parentesco *</Label>
+                      <select
+                        id="parentesco"
+                        value={data.parentesco}
+                        onChange={e => setData('parentesco', e.target.value)}
+                        className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                        required
+                      >
+                        <option value="">Seleccione el parentesco</option>
+                        <option value="padre">Padre</option>
+                        <option value="madre">Madre</option>
+                        <option value="abuelo">Abuelo/a</option>
+                        <option value="tio">Tío/a</option>
+                        <option value="hermano">Hermano/a</option>
+                        <option value="tutor_legal">Tutor Legal</option>
+                        <option value="otro">Otro</option>
+                      </select>
+                      <InputError message={errors.parentesco} />
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* BOTONES */}

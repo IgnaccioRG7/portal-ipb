@@ -9,6 +9,14 @@ class Materia extends Model
     protected $table = 'materias';
 
     protected $fillable = [
-        'codigo_materia', 'nombre', 'area', 'color'
+        'codigo_materia',
+        'nombre',
+        'area',
+        'color'
     ];
+
+    public function temas()
+    {
+        return $this->hasMany(Tema::class);
+    }
 }

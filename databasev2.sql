@@ -227,13 +227,13 @@ CREATE TABLE `examenes_realizados`(
         'expirado'
     ) NULL DEFAULT 'en_progreso', `revisado_por` INT NULL, `fecha_revision` DATETIME NULL, `comentario_revisor` TEXT NULL, `ip_address` VARCHAR(45) NULL, `user_agent` TEXT NULL, `created_at` TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP(), `updated_at` TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP());
 ALTER TABLE
-    `examenes_realizados` ADD INDEX `examenes_realizados_examen_id_matricula_id_index`(`examen_id`, `matricula_id`);
-ALTER TABLE
     `examenes_realizados` ADD UNIQUE `examen_id_matricula_id_intento_numero_unique`(
         `examen_id`,
         `matricula_id`,
         `intento_numero`
     );
+ALTER TABLE
+    `examenes_realizados` ADD INDEX `examenes_realizados_examen_id_matricula_id_index`(`examen_id`, `matricula_id`);
 ALTER TABLE
     `examenes_realizados` ADD INDEX `examenes_realizados_fecha_inicio_index`(`fecha_inicio`);
 ALTER TABLE
@@ -287,44 +287,47 @@ ALTER TABLE
     `notificaciones` ADD INDEX `notificaciones_tipo_index`(`tipo`);
 CREATE TABLE `curso_materia_temas`(
     `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    `curso_materia_id` INT NOT NULL,
+    `mat_id` BIGINT NOT NULL,
     `tema_id` INT NOT NULL,
+    `curso_materia_id` INT NOT NULL,
     `orden` INT NOT NULL,
     `estado` ENUM('activo', 'inactivo') NOT NULL DEFAULT 'activo',
     `created_at` TIMESTAMP NOT NULL,
     `updated_at` TIMESTAMP NOT NULL
 );
 ALTER TABLE
+    `curso_materias` ADD CONSTRAINT `curso_materias_curso_id_foreign` FOREIGN KEY(`curso_id`) REFERENCES `cursos`(`id`);
+ALTER TABLE
     `personas` ADD CONSTRAINT `personas_tutor_id_foreign` FOREIGN KEY(`tutor_id`) REFERENCES `personas`(`id`);
+ALTER TABLE
+    `examenes_realizados` ADD CONSTRAINT `examenes_realizados_matricula_id_foreign` FOREIGN KEY(`matricula_id`) REFERENCES `matriculas`(`id`);
+ALTER TABLE
+    `curso_materia_temas` ADD CONSTRAINT `curso_materia_temas_mat_id_foreign` FOREIGN KEY(`mat_id`) REFERENCES `matriculas`(`id`);
+ALTER TABLE
+    `curso_materia_temas` ADD CONSTRAINT `curso_materia_temas_tema_id_foreign` FOREIGN KEY(`tema_id`) REFERENCES `temas`(`id`);
+ALTER TABLE
+    `notificaciones` ADD CONSTRAINT `notificaciones_usuario_id_foreign` FOREIGN KEY(`usuario_id`) REFERENCES `users`(`id`);
+ALTER TABLE
+    `matriculas` ADD CONSTRAINT `matriculas_curso_id_foreign` FOREIGN KEY(`curso_id`) REFERENCES `cursos`(`id`);
+ALTER TABLE
+    `asignaciones_profesores` ADD CONSTRAINT `asignaciones_profesores_profesor_id_foreign` FOREIGN KEY(`profesor_id`) REFERENCES `users`(`id`);
+ALTER TABLE
+    `asignaciones_profesores` ADD CONSTRAINT `asignaciones_profesores_curso_materia_id_foreign` FOREIGN KEY(`curso_materia_id`) REFERENCES `curso_materias`(`id`);
+ALTER TABLE
+    `examenes_realizados` ADD CONSTRAINT `examenes_realizados_examen_id_foreign` FOREIGN KEY(`examen_id`) REFERENCES `examenes`(`id`);
+ALTER TABLE
+    `users` ADD CONSTRAINT `users_rol_id_foreign` FOREIGN KEY(`rol_id`) REFERENCES `roles`(`id`);
+ALTER TABLE
+    `curso_materia_temas` ADD CONSTRAINT `curso_materia_temas_curso_materia_id_foreign` FOREIGN KEY(`curso_materia_id`) REFERENCES `curso_materias`(`id`);
+ALTER TABLE
+    `users` ADD CONSTRAINT `users_persona_id_foreign` FOREIGN KEY(`persona_id`) REFERENCES `personas`(`id`);
+ALTER TABLE
+    `matriculas` ADD CONSTRAINT `matriculas_estudiante_id_foreign` FOREIGN KEY(`estudiante_id`) REFERENCES `users`(`id`);
+ALTER TABLE
+    `recursos_estudio` ADD CONSTRAINT `recursos_estudio_materia_id_foreign` FOREIGN KEY(`materia_id`) REFERENCES `materias`(`id`);
 ALTER TABLE
     `examenes` ADD CONSTRAINT `examenes_curso_materia_id_foreign` FOREIGN KEY(`curso_materia_id`) REFERENCES `curso_materias`(`id`);
 ALTER TABLE
     `curso_materias` ADD CONSTRAINT `curso_materias_materia_id_foreign` FOREIGN KEY(`materia_id`) REFERENCES `materias`(`id`);
 ALTER TABLE
-    `examenes_realizados` ADD CONSTRAINT `examenes_realizados_examen_id_foreign` FOREIGN KEY(`examen_id`) REFERENCES `examenes`(`id`);
-ALTER TABLE
-    `curso_materia_temas` ADD CONSTRAINT `curso_materia_temas_tema_id_foreign` FOREIGN KEY(`tema_id`) REFERENCES `temas`(`id`);
-ALTER TABLE
-    `asignaciones_profesores` ADD CONSTRAINT `asignaciones_profesores_curso_materia_id_foreign` FOREIGN KEY(`curso_materia_id`) REFERENCES `curso_materias`(`id`);
-ALTER TABLE
-    `users` ADD CONSTRAINT `users_persona_id_foreign` FOREIGN KEY(`persona_id`) REFERENCES `personas`(`id`);
-ALTER TABLE
-    `recursos_estudio` ADD CONSTRAINT `recursos_estudio_materia_id_foreign` FOREIGN KEY(`materia_id`) REFERENCES `materias`(`id`);
-ALTER TABLE
-    `curso_materias` ADD CONSTRAINT `curso_materias_curso_id_foreign` FOREIGN KEY(`curso_id`) REFERENCES `cursos`(`id`);
-ALTER TABLE
-    `users` ADD CONSTRAINT `users_rol_id_foreign` FOREIGN KEY(`rol_id`) REFERENCES `roles`(`id`);
-ALTER TABLE
     `temas` ADD CONSTRAINT `temas_materia_id_foreign` FOREIGN KEY(`materia_id`) REFERENCES `materias`(`id`);
-ALTER TABLE
-    `notificaciones` ADD CONSTRAINT `notificaciones_usuario_id_foreign` FOREIGN KEY(`usuario_id`) REFERENCES `users`(`id`);
-ALTER TABLE
-    `matriculas` ADD CONSTRAINT `matriculas_estudiante_id_foreign` FOREIGN KEY(`estudiante_id`) REFERENCES `users`(`id`);
-ALTER TABLE
-    `asignaciones_profesores` ADD CONSTRAINT `asignaciones_profesores_profesor_id_foreign` FOREIGN KEY(`profesor_id`) REFERENCES `users`(`id`);
-ALTER TABLE
-    `matriculas` ADD CONSTRAINT `matriculas_curso_id_foreign` FOREIGN KEY(`curso_id`) REFERENCES `cursos`(`id`);
-ALTER TABLE
-    `curso_materia_temas` ADD CONSTRAINT `curso_materia_temas_curso_materia_id_foreign` FOREIGN KEY(`curso_materia_id`) REFERENCES `curso_materias`(`id`);
-ALTER TABLE
-    `examenes_realizados` ADD CONSTRAINT `examenes_realizados_matricula_id_foreign` FOREIGN KEY(`matricula_id`) REFERENCES `matriculas`(`id`);

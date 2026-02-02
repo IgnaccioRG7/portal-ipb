@@ -276,11 +276,11 @@ export default function Index({
         </div>
         <div className='text-gray-200 flex gap-2 items-center'>
           {/* <ListFilter /> */}
-          <span>Resultados:</span>
+          <span className='text-gray-500 dark:text-gray-400'>Resultados:</span>
           <select
             value={perPage}
             onChange={(e) => handlePerPageChange(Number(e.target.value))}
-            className="bg-gray-600 border-none outline-none cursor-pointer p-2 rounded-md"
+            className="bg-gray-100 text-gray-800 dark:bg-gray-600 border-none outline-none cursor-pointer p-2 rounded-md dark:text-gray-200"
           >
             <option value="4">4</option>
             <option value="10">10</option>
