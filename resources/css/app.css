@@ -174,3 +174,58 @@
     .max-w-9xl { max-width: 96rem; }
     .max-w-10xl { max-width: 104rem; } */
 }
+
+
+/**
+ * ESTILOS DE PROTECCIÓN PARA PDFs
+ */
+
+/* Deshabilitar selección de texto en PDFs */
+.pdf-page-protected {
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+}
+
+/* Deshabilitar arrastrar imágenes/elementos */
+.pdf-page-protected * {
+    -webkit-user-drag: none;
+    -khtml-user-drag: none;
+    -moz-user-drag: none;
+    -o-user-drag: none;
+    user-drag: none;
+}
+
+/* Deshabilitar el cursor de texto */
+.pdf-page-protected canvas {
+    cursor: default !important;
+}
+
+/* Ocultar scrollbars del visor (opcional) */
+.pdf-viewer-container::-webkit-scrollbar {
+    width: 8px;
+}
+
+.pdf-viewer-container::-webkit-scrollbar-track {
+    background: #1f2937;
+}
+
+.pdf-viewer-container::-webkit-scrollbar-thumb {
+    background: #4b5563;
+    border-radius: 4px;
+}
+
+.pdf-viewer-container::-webkit-scrollbar-thumb:hover {
+    background: #6b7280;
+}
+
+/* Animación de carga */
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+
+.loading-pulse {
+    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}

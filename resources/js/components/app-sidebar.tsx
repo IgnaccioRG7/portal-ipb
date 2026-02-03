@@ -1,5 +1,5 @@
 import { Link, usePage } from '@inertiajs/react';
-import { BookOpen, Folder, LayoutGrid, Users } from 'lucide-react';
+import { BookOpen, File, Folder, LayoutGrid, Users } from 'lucide-react';
 // import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
@@ -70,6 +70,11 @@ export function AppSidebar() {
                 title: 'Usuarios',
                 href: admin.users.index(),
                 icon: Users,
+            });
+            items.push({
+                title: 'Recursos',
+                href: admin.recursos.index(),
+                icon: File,
             });
         }
 

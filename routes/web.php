@@ -1,6 +1,8 @@
 <?php
 
+use App\Http\Controllers\Admin\RecursoController as AdminRecursoController;
 use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\RecursoController;
 use App\Http\Controllers\Student\StudentController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -11,6 +13,9 @@ Route::get('/', function () {
         'canRegister' => Features::enabled(Features::registration()),
     ]);
 })->name('home');
+Route::get('/recursos', [RecursoController::class, 'index'])->name('recursos.index');
+Route::get('/recursos/{recurso}', [RecursoController::class, 'show'])->name('recursos.show');
+
 
 // Route::get('dashboard', function () {
 //     $user = request()->user()->loadMissing('rol');
@@ -42,7 +47,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     //     Inertia::render('Admin/dashboard')
     // )->middleware('role:Admin')->name('admin.dashboard');
 
-    Route::get('/profesor', fn () =>
+    Route::get(
+        '/profesor',
+        fn() =>
         Inertia::render('Professor/dashboard')
     )->middleware('role:Profesor')->name('profesor.dashboard');
 
@@ -53,7 +60,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
 // Rutas para el administrador
 Route::middleware(['auth', 'verified', 'role:Admin'])->prefix('admin')->name('admin.')->group(function () {
-    Route::get('/', fn () => Inertia::render('Admin/dashboard'))->name('dashboard');
+    Route::get('/', fn() => Inertia::render('Admin/dashboard'))->name('dashboard');
     Route::get('/users', [UserController::class, 'index'])->name('users.index');
     Route::get('/users/create', [UserController::class, 'create'])->name('users.create');
     Route::post('/users', [UserController::class, 'store'])->name('users.store');
@@ -61,6 +68,16 @@ Route::middleware(['auth', 'verified', 'role:Admin'])->prefix('admin')->name('ad
     Route::put('/users/{user}', [UserController::class, 'update'])->name('users.update');
     Route::delete('/users/{user}', [UserController::class, 'destroy'])->name('users.destroy');
     Route::get('/students/search', [UserController::class, 'search']);
+
+
+    // 🆕 Gestión de recursos
+    Route::get('/recursos', [AdminRecursoController::class, 'index'])->name('recursos.index');
+    Route::get('/recursos/create', [AdminRecursoController::class, 'create'])->name('recursos.create');
+    Route::post('/recursos', [AdminRecursoController::class, 'store'])->name('recursos.store');
+    Route::get('/recursos/{recurso}/edit', [AdminRecursoController::class, 'edit'])->name('recursos.edit');
+    Route::put('/recursos/{recurso}', [AdminRecursoController::class, 'update'])->name('recursos.update');
+    Route::delete('/recursos/{recurso}', [AdminRecursoController::class, 'destroy'])->name('recursos.destroy');
+    Route::patch('/recursos/{recurso}/toggle', [AdminRecursoController::class, 'toggleVisibility'])->name('recursos.toggle');
 });
 
 // Rutas para el estudiante
