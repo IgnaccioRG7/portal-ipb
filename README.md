@@ -110,3 +110,4 @@ Exportación de reportes (PDF, Excel)
 
 
 php artisan wayfinder:generate
+php artisan storage:link
