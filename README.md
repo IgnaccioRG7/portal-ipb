@@ -107,3 +107,6 @@ Gráficos de distribución de puntajes
 Análisis por pregunta (porcentaje de aciertos)
 Exportación de reportes (PDF, Excel)
 
+
+
+php artisan wayfinder:generate

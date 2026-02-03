@@ -56,11 +56,16 @@ class AcademicSeeder extends Seeder
             ['nombre' => 'Conocimientos Generales', 'area' => 'general']
         );
 
+        $matSocioEmocionales = Materia::firstOrCreate(
+            ['codigo_materia' => 'SOCIO-EMO'],
+            ['nombre' => 'Socio Emocionales', 'area' => 'general']
+        );
+
         // =====================================================
         // TEMAS (JSON REAL)
         // =====================================================
 
-        // --- Comprensión lectora
+        // --- Comprensión lectora - LECTURA 1 
         $temaLectura = Tema::firstOrCreate(
             ['codigo_tema' => 'CL-DEF-01'],
             [

@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class CursoMateriaTema extends Model
 {
     protected $table = 'curso_materia_temas';
-    protected $fillable = ['curso_materia_id', 'tema_id', 'orden', 'estado'];
+    protected $fillable = ['curso_materia_id', 'curso_materia_id','tema_id', 'mat_id', 'orden', 'estado'];
 
     public function tema()
     {

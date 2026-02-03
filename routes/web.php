@@ -67,7 +67,12 @@ Route::middleware(['auth', 'verified', 'role:Admin'])->prefix('admin')->name('ad
 Route::middleware(['auth', 'verified', 'role:Estudiante,Admin'])->prefix('estudiante')->name('estudiante.')->group(function () {
     // Route::get('/', fn () => Inertia::render('dashboard'))->name('dashboard');
     Route::get('/', [StudentController::class, 'index'])->name('dashboard');
+    Route::get('/curso/{course}', [StudentController::class, 'subjects'])->name('subjects');
 });
+
+
+
+
 
 
 require __DIR__ . '/settings.php';

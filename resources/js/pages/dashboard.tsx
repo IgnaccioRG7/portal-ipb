@@ -1,10 +1,11 @@
-import { Head } from '@inertiajs/react';
+import { Head, router } from '@inertiajs/react';
 import { PlaceholderPattern } from '@/components/ui/placeholder-pattern';
 import AppLayout from '@/layouts/app-layout';
 import { dashboard } from '@/routes';
 import type { BreadcrumbItem } from '@/types';
 import ContentLayout from '@/layouts/content-layout';
-import { PlayCircle } from 'lucide-react';
+import { BookOpen, PlayCircle } from 'lucide-react';
+import estudiante from "@/routes/estudiante"
 
 export interface Tema {
     id: number;
@@ -16,6 +17,7 @@ export interface Materia {
     nombre: string;
     temas: Tema[];
 }
+
 
 export interface Curso {
     id: number;
@@ -40,9 +42,18 @@ const breadcrumbs: BreadcrumbItem[] = [
 
 
 function CourseCard({ data }: { data: MatriculaCurso }) {
+    const goToSubjects = () => {
+        console.log(data);
+        router.visit(
+            // estudiante.subjects(materia.id).url
+            estudiante.subjects({
+                course: data.curso.id
+            })
+        );
+    }
     return (
-        <div className="relative rounded-xl border bg-white p-4 shadow-sm">
-            <h2 className="absolute -top-3 left-4 bg-white px-3 text-lg font-bold text-gray-800">
+        <div className="relative rounded-xl border bg-white px-4 pb-4 shadow-sm">
+            <h2 className="absolute -top-3 left-4 bg-white px-3 text-xl font-bold text-gray-800 cursor-pointer">
                 {data.curso.nombre}
             </h2>
 
@@ -51,21 +62,28 @@ function CourseCard({ data }: { data: MatriculaCurso }) {
                     <MateriaCard key={materia.id} materia={materia} />
                 ))}
             </div>
+            <div className='flex justify-end'>
+                <button className="mt-4 flex w-full max-w-full md:max-w-1/2 px-6 items-center justify-center gap-2 rounded-xl bg-blue-600 py-2 font-bold text-white transition hover:bg-blue-600/80 cursor-pointer" onClick={goToSubjects}>
+                    Continuar aprendizaje
+                    <PlayCircle />
+                </button>
+            </div>
         </div>
     );
 }
 
 
 function MateriaCard({ materia }: { materia: any }) {
+
     return (
-        <article className="overflow-hidden rounded-xl border shadow-sm transition hover:shadow-md">
+        <article className="overflow-hidden rounded-xl border shadow-sm transition hover:shadow-md pb-4">
             <img
                 src="/hero.jpg"
                 alt="Imagen del curso"
                 className="aspect-video w-full object-cover"
             />
 
-            <div className="p-4">
+            <div className="pt-4 px-4">
                 <header className="mb-3 flex items-center justify-between">
                     <h3 className="text-lg font-bold text-gray-800">
                         {materia.nombre}
@@ -76,101 +94,55 @@ function MateriaCard({ materia }: { materia: any }) {
                     </span>
                 </header>
 
-                <ul className="space-y-2">
-                    {materia.temas.map((tema: any) => (
-                        <li
-                            key={tema.id}
-                            className="flex items-center justify-between rounded-md border px-3 py-2 text-sm"
-                        >
-                            <span className="font-medium text-gray-700">
-                                {tema.nombre}
-                            </span>
-
-                            <button className="flex items-center gap-1 text-sm font-semibold text-blue-600 hover:underline">
-                                <PlayCircle size={16} />
-                                Entrar
-                            </button>
-                        </li>
-                    ))}
-                </ul>
+                <div className="flex items-center gap-2 rounded-lg bg-blue-50 px-3 py-2">
+                    <BookOpen className="h-4 w-4 text-blue-600" />
+                    <div className="text-sm flex items-center gap-2">
+                        <p className="font-bold text-lg text-gray-900">{materia.temas.length}</p>
+                        <p className="text-xs text-gray-600">Tema(s) disponibles</p>
+                    </div>
+                </div>
             </div>
-
-            <footer className="px-4 pb-4">
-                <button className="mt-4 flex w-full items-center justify-center gap-2 rounded-full bg-blue-600 py-2 font-bold text-white transition hover:bg-blue-600/80">
-                    Continuar aprendizaje
-                    <PlayCircle />
-                </button>
-            </footer>
         </article>
     );
 }
 
 
 export default function Dashboard({ matriculas }: Props) {
-
     console.log(matriculas);
-
 
     return (
         <ContentLayout
             breadcrumbs={breadcrumbs}
             title='Bienvenido Juan!'
-            subtitle='Estas inscrito en 1 curso con 2 materias en progreso'
+            subtitle={`Estas inscrito en ${matriculas?.length} curso(s) actualmente.`}
         >
-            {/* <section className="json">
-                { JSON.stringify(matriculas, null , 2) }
-            </section> */}
-            {/* <section className="courses-section">
-                <div className="course-card border px-4 py-6 rounded-md relative">
-                    <h2 className='font-bold text-normal text-gray-800 absolute top-0 -translate-y-1/2 bg-white px-2'>ESFM - UAS</h2>
-                    <div className="topic-section grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
-                        <article className="topic-card math rounded-md overflow-hidden shadow-xs border border-gray-300">
-                            <img src="/hero.jpg" alt="Imagen del curso" className='w-full h-auto object-cover aspect-video' />
-                            <div className="content px-4 py-2">
-                                <header className='flex flex-row gap-2 items-center justify-between'>
-                                    <h2 className='text-xl font-bold'>Compresion Lectora</h2>
-                                    <div className="badge text-xs text-white font-bold bg-green-600 px-2 py-1 rounded-full">
-                                        Activo
-                                    </div>
-                                </header>
-                            </div>
-                            <footer className='px-4 mb-4'>
-                                <button className='w-full bg-[#0099ff] text-white text-normal font-black p-2 rounded-full cursor-pointer flex flex-row justify-center items-center gap-2 hover:bg-[#0099ff]/80 transition-colors duration-300'>
-                                    Continuar aprendiendo
-                                    <PlayCircle />
-                                </button>
-                            </footer>
-                        </article>
-                        <article className="topic-card math rounded-md overflow-hidden shadow-xs border border-gray-300">
-                            <img src="/hero.jpg" alt="Imagen del curso" className='w-full h-auto object-cover aspect-video' />
-                            <div className="content px-4 py-2">
-                                <header className='flex flex-row gap-2 items-center justify-between'>
-                                    <h2 className='text-xl font-bold'>Razonamiento</h2>
-                                    <div className="badge text-xs text-white font-bold bg-green-600 px-2 py-1 rounded-full">
-                                        Activo
-                                    </div>
-                                </header>
-                            </div>
-                            <footer className='px-4 mb-4'>
-                                <button className='w-full bg-[#0099ff] text-white text-normal font-black p-2 rounded-full cursor-pointer flex flex-row justify-center items-center gap-2 hover:bg-[#0099ff]/80 transition-colors duration-300'>
-                                    Continuar aprendiendo
-                                    <PlayCircle />
-                                </button>
-                            </footer>
-                        </article>
-                    </div>
-                </div>
-            </section> */}
 
-            <div className="container grid grid-cols-[1fr,500px] gap-4">
-                <section className="space-y-5">
-                    {matriculas.map((item) => (
+            <div className="w-full grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+                <section className="lg:col-span-9 space-y-6">
+                    {matriculas?.map((item) => (
                         <CourseCard key={item.curso.id} data={item} />
                     ))}
                 </section>
-                <aside>
-                    <h2>Novedades</h2>
+
+                <aside className="lg:col-span-3 bg-gray-50 p-4 rounded-xl h-fit">
+                    <h2 className="font-bold text-xl mb-4">Novedades</h2>
+                    <ul className="text-sm text-gray-600 grid gap-2">
+                        <li className='flex gap-4 items-center'>
+                            <span className='font-black p-2 flex justify-center items-center bg-amber-200 rounded-md size-14'>HOY</span>
+                            <p><span className='text-black font-black'>Examen Fisica</span>  <br />
+                            Hasta las 12:00 PM</p>
+                        </li>
+                        <li className='flex gap-4 items-center'>
+                            <span className='font-black p-2 bg-blue-200 rounded-md text-center size-14'>
+                                <span className='text-xs'>FEB</span>
+                                <br /> 23</span>
+                            <p><span className='text-black font-black'>Examen Fisica</span>  <br />
+                            Hasta las 12:00 PM</p>
+                        </li>
+                    </ul>
                 </aside>
+
             </div>
 
         </ContentLayout>
