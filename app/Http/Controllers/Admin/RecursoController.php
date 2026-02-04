@@ -59,10 +59,13 @@ class RecursoController extends Controller
             'descripcion' => 'nullable|string|max:1000',
             'archivo' => 'required|file|mimes:pdf|max:10240', // Máximo 10MB
             'visible' => 'boolean',
+            'categoria' => 'required|string|in:otro,policias,militares,medicina,ingenieria',
         ], [
             'archivo.required' => 'Debe seleccionar un archivo PDF',
             'archivo.mimes' => 'El archivo debe ser un PDF',
             'archivo.max' => 'El archivo no puede superar los 10MB',
+            'categoria.required' => 'La categoría es obligatoria',
+            'categoria.in' => 'La categoría seleccionada no es válida',
         ]);
 
         try {
@@ -80,6 +83,7 @@ class RecursoController extends Controller
                 'tamano' => $archivo->getSize(),
                 'user_id' => auth()->guard()->id(),
                 'visible' => $validated['visible'] ?? true,
+                'categoria' => $validated['categoria'],
             ]);
 
             return redirect()
@@ -111,6 +115,7 @@ class RecursoController extends Controller
                 'visible' => $recurso->visible,
                 'nombre_original' => $recurso->nombre_original,
                 'url' => $recurso->url,
+                'categoria' => $recurso->categoria,
             ],
         ]);
     }
@@ -125,6 +130,7 @@ class RecursoController extends Controller
             'descripcion' => 'nullable|string|max:1000',
             'archivo' => 'nullable|file|mimes:pdf|max:10240',
             'visible' => 'boolean',
+            'categoria' => 'required|string|in:otro,policias,militares,medicina,ingenieria', 
         ]);
 
         try {
@@ -141,7 +147,7 @@ class RecursoController extends Controller
                 $recurso->update([
                     'archivo' => $ruta,
                     'nombre_original' => $archivo->getClientOriginalName(),
-                    'tamano' => $archivo->getSize(),
+                    'tamano' => $archivo->getSize(),                    
                 ]);
             }
 
@@ -150,6 +156,7 @@ class RecursoController extends Controller
                 'titulo' => $validated['titulo'],
                 'descripcion' => $validated['descripcion'] ?? null,
                 'visible' => $validated['visible'] ?? true,
+                'categoria' => $validated['categoria'],
             ]);
 
             return redirect()

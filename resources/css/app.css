@@ -147,8 +147,8 @@
     }
 
     :root {
-        --font-title: 'Shantell Sans', system-ui, sans-serif;
-        --font-body: 'Raleway', system-ui, sans-serif;
+        --font-title: 'Unbounded', system-ui, sans-serif;
+        --font-body: 'Geist', system-ui, sans-serif;
     }
 
     body {
@@ -229,3 +229,79 @@
 .loading-pulse {
     animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
+
+@keyframes float {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-10px);
+    }
+}
+
+.floating-card {
+    animation: float 3s ease-in-out infinite;
+}
+
+/* Variantes con diferentes delays */
+.floating-card-delay-1 {
+    animation: float 3s ease-in-out infinite;
+    animation-delay: 0.2s;
+}
+
+.floating-card-delay-2 {
+    animation: float 3s ease-in-out infinite;
+    animation-delay: 0.4s;
+}
+
+.floating-card-delay-3 {
+    animation: float 3s ease-in-out infinite;
+    animation-delay: 0.6s;
+}
+
+
+/* @keyframes my-float {
+    0%, 100% {
+        transform: translateY(0) rotate(0deg);
+    }
+    33% {
+        transform: translateY(-10px) rotate(2deg);
+    }
+    66% {
+        transform: translateY(-5px) rotate(-2deg);
+    }
+}
+
+@layer utilities {
+    .animate-float {
+        animation: my-float 3s ease-in-out infinite;
+    }
+    
+    /* Variaciones de la misma animación */
+    /* .animate-float-slow {
+        animation: my-float 5s ease-in-out infinite;
+    }
+    
+    .animate-float-fast {
+        animation: my-float 2s ease-in-out infinite;
+    }
+    
+    .animate-float-delay {
+        animation: my-float 3s ease-in-out infinite;
+        animation-delay: 1s;
+    }
+     */
+    /* Otra animación de flotación diferente */
+    /* @keyframes gentle-float {
+        0%, 100% {
+            transform: translateY(0);
+        }
+        50% {
+            transform: translateY(-15px);
+        }
+    }
+    
+    .animate-gentle-float {
+        animation: gentle-float 4s ease-in-out infinite;
+    } */
+/* } */

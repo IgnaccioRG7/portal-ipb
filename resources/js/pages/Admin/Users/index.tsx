@@ -262,7 +262,7 @@ export default function Index({
               id='search'
               type='search'
               value={search}
-              className='border-none px-0 pr-4 focus:outline-none! focus:border-none! ring-0!'
+              className='border-none px-0 pr-4 focus:outline-none! focus:border-none! ring-0! shadow-none'
               placeholder='Busca un usuario en la plataforma por correo o nombre'
               onChange={handleSearchText}
             />

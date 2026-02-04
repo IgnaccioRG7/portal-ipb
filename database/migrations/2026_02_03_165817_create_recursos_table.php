@@ -19,6 +19,7 @@ return new class extends Migration
             $table->string('nombre_original'); // Nombre original del archivo
             $table->unsignedBigInteger('tamano'); // Tamaño en bytes
             $table->foreignId('user_id')->constrained()->onDelete('cascade'); // Quién lo subió
+            $table->enum('categoria', ['policias', 'militares', 'medicina', 'ingenieria', 'otro'])->default('otro'); // A que categoria pertenece
             $table->boolean('visible')->default(true); // Si está visible públicamente
             $table->timestamps();
         });

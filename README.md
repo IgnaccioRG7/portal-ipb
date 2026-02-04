@@ -111,3 +111,19 @@ Exportación de reportes (PDF, Excel)
 
 php artisan wayfinder:generate
 php artisan storage:link
+
+
+
+// PHP puro vs Laravel Collections
+$array = [1, 2, 3, 4, 5];
+
+// PHP puro
+$filtered = array_filter($array, fn($n) => $n % 2 === 0); // [2, 4]
+$doubled = array_map(fn($n) => $n * 2, $filtered); // [4, 8]
+
+// Laravel Collections
+$collection = collect($array);
+$result = $collection
+    ->filter(fn($n) => $n % 2 === 0)  // [2, 4]
+    ->map(fn($n) => $n * 2)           // [4, 8]
+    ->values();                        // [0 => 4, 1 => 8]

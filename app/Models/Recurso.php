@@ -17,6 +17,7 @@ class Recurso extends Model
         'tamano',
         'user_id',
         'visible',
+        'categoria',
     ];
 
     protected $casts = [

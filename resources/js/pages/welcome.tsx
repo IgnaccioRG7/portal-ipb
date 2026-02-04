@@ -1,7 +1,7 @@
 import { Head, Link, usePage } from '@inertiajs/react';
 import { dashboard, login, register } from '@/routes';
 import type { SharedData } from '@/types';
-import { ArrowDown, CircleArrowDown, Facebook, GraduationCap } from 'lucide-react';
+import { ArrowDown, CircleArrowDown, Facebook, GraduationCap, ChevronDownCircle } from 'lucide-react';
 import Header from '@/components/header';
 
 export default function Welcome({
@@ -14,13 +14,13 @@ export default function Welcome({
     return (
         <>
             <Head title='Inicio'>
-                <link rel="preconnect" href="https://fonts.googleapis.com" />
+                {/* <link rel="preconnect" href="https://fonts.googleapis.com" />
                 <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
                 <link rel="preload" as="image" href="/hero.webp" />
                 <link
                     href="https://fonts.googleapis.com/css2?family=Shantell+Sans:wght@400;600;700&family=Raleway:wght@400;500;600;900&display=swap"
                     rel="stylesheet"
-                />
+                /> */}
             </Head>
             <div className="bg-gray-100 text-[#1b1b18] lg:justify-center dark:bg-gray-900">
                 <Header isLanding />
@@ -28,31 +28,69 @@ export default function Welcome({
                     <section className="hero relative w-full h-screen max-h-250">
                         <div className="hero-image w-full h-full overflow-hidden absolute inset-0">
                             <img src="/hero.webp" alt="Hero Image" className='w-full h-full object-cover' loading="eager" fetchPriority="high" />
-                            <div className='bg-black/50 absolute inset-0'></div>
+                            <div className='bg-black/70 absolute inset-0'></div>
                             {/* Gradiente radial de difuminado en la parte inferior */}
                             <div className='absolute inset-x-0 bottom-0 h-64 bg-linear-to-t from-[#f3f4f6] dark:from-[#101828] via-white/80 dark:via-gray-900/80 to-transparent pointer-events-none'></div>
                         </div>
-                        <div className="content absolute inset-0 grid place-content-center">
-                            <div className="slogan flex flex-col gap-4 text-white dark:text-white text-center -translate-y-5 md:-translate-y-25 px-4">
-                                <p className='bg-[#fffb00] rounded-full w-80 mx-auto text-[#143152] font-black text-sm md:text-lg'>Inscribete ahora</p>
-                                <h1 className='text-3xl md:text-5xl xl:text-7xl font-extrabold font-title'>
-                                    Bienvenido a <span className='text-[#fffb00]'>IPB</span> <br />
-                                    <span className='text-[#ffffff]'>selecciona la meta que quieres</span>
-                                </h1>
-                                <p className='text-sm md:text-2xl text-gray-300'>Preparate con los mejores para ingresar a la institucion de tus sueños</p>
-                                {/* <a
+                        <div className="z-60 relative h-full max-w-7xl mx-auto grid grid-cols-3 gap-4 px-0">
+                            <div className="content grid col-span-3 md:col-span-2 px-4 items-center">
+                                <div className="slogan flex flex-col gap-4 text-white dark:text-white text-start -translate-y-14">
+                                    <p className='bg-[#fde047] rounded-md w-full max-w-137.5 px-4 text-[#143152] font-black text-sm md:text-lg'>Inscribete ahora</p>
+                                    <h1 className='text-3xl md:text-5xl xl:text-6xl font-extrabold font-title'>
+                                        Bienvenido a <span className='text-[#fde047]'>IPB</span> <br />
+                                        <span className='text-[#ffffff] text-2xl md:text-3xl xl:text-4xl'>selecciona la meta que quieres</span>
+                                    </h1>
+                                    <p className='text-sm md:text-xl text-gray-200'>Preparate con los mejores para ingresar a la institucion de tus sueños</p>
+                                    {/* <a
                                     href="#pricing-plans"
                                     className="group relative w-fit mx-auto isolate inline-flex items-center justify-center text-center font-semibold disabled:cursor-not-allowed disabled:opacity-50 transition-all duration-300 ease-[cubic-bezier(0.4,0.36,0,1)] before:transition-all before:duration-300 before:ease-[cubic-bezier(0.4,0.36,0,1)] rounded-lg overflow-hidden shadow-[0_1.5px_2px_0_rgba(0,0,0,0.32),0_0_0_1px_rgba(255,255,255,0.1),0_-1px_0_0_rgba(255,255,255,0.04)] before:absolute before:inset-0 before:-z-10 before:bg-gradient-to-r before:from-blue-400 before:to-blue-600 before:opacity-100 hover:before:opacity-90 after:absolute after:inset-0 after:-z-10 after:bg-gradient-to-t after:from-black/20 after:to-transparent after:opacity-0 hover:after:opacity-100 h-12 px-6 text-base text-white hover:shadow-[0_0_10px_rgba(96,186,255,0.18)]"
                                 >
                                     Sé parte de la Academia
                                 </a> */}
-                                <button className='bg-[#fffb00] w-full md:max-w-1/2 md:mx-auto rounded-md md:px-4 py-2 text-[#143152] font-bold uppercase cursor-pointer hover:bg-[#fffb00]/90 transition-all duration-300 text-sm md:text-xl px-2 max-w-full hover:scale-110 flex justify-center items-center transform-gpu will-change-transform'>
-                                    Se parte de la Academia
-                                </button>
+                                    <button className='bg-[#fde047] w-full md:mx-auto rounded-md md:px-4 py-2 text-[#143152] font-bold uppercase cursor-pointer hover:bg-[#fde047]/90 transition-all duration-300 text-sm md:text-xl px-2 max-w-full hover:scale-103 flex justify-center items-center transform-gpu will-change-transform'>
+                                        Se parte de la Academia
+                                    </button>
+                                </div>
+                            </div>
+                            <div className="relative hidden md:block h-150 my-auto -translate-y-14">
+
+                                <div className="absolute top-0 left-0 bg-white/10 backdrop-blur-lg border border-white/20 rounded-3xl p-8 shadow-2xl floating-card" style={{ animationDelay: "0s" }}>
+                                    <div className="text-6xl font-bold text-white mb-2">1,000</div>
+                                    <p className="text-blue-200 text-sm font-medium">Estudiantes ingresados</p>
+                                    {/* <p className="text-blue-300 text-xs">Ciclo 2025</p> */}
+                                </div>
+
+
+                                <div className="absolute top-32 right-0 bg-white/10 backdrop-blur-lg border border-white/20 rounded-3xl p-6 shadow-2xl" style={{ animationDelay: "0.2s" }}>
+                                    <p className="text-blue-200 text-xs font-bold uppercase tracking-wider mb-4">Universidades</p>
+                                    <div className="flex flex-wrap gap-3">
+                                        <div className="bg-white/20 px-4 py-2 rounded-lg text-white text-xs font-bold">UMSA</div>
+                                        <div className="bg-white/20 px-4 py-2 rounded-lg text-white text-xs font-bold">UPEA</div>
+                                        {/* <div className="bg-white/20 px-4 py-2 rounded-lg text-white text-xs font-bold">UAM</div> */}
+                                    </div>
+                                </div>
+
+
+                                <div className="absolute bottom-32 left-12 bg-white/10 backdrop-blur-lg border border-white/20 rounded-3xl p-8 shadow-2xl " style={{ animationDelay: "0.4s" }}>
+                                    <div className="text-5xl font-bold text-blue-300 mb-2">95%</div>
+                                    <p className="text-blue-200 text-sm font-medium">Tasa de aprobación</p>
+                                </div>
+
+
+                                <div className="absolute bottom-0 right-12 bg-white/10 backdrop-blur-lg border border-white/20 rounded-3xl p-6 shadow-2xl floating-card-delay-3 max-w-xs" style={{ animationDelay: "0.6s" }}>
+                                    <div className="flex items-center gap-3 mb-3">
+                                        <img src="https://img.rocket.new/generatedImages/rocket_gen_img_1c74dab36-1769175876882.png" alt="Student testimonial" className="w-12 h-12 rounded-full object-cover" />
+                                        <div>
+                                            <p className="text-white text-sm font-bold">María Rojas</p>
+                                            <p className="text-blue-300 text-xs">UMSA - Medicina</p>
+                                        </div>
+                                    </div>
+                                    <p className="text-blue-100 text-sm italic">"Ingresé con 100 puntos gracias a IPB"</p>
+                                </div>
                             </div>
                         </div>
                         <div className="icon-down absolute bottom-0 left-0 right-0 flex justify-center">
-                            <CircleArrowDown className='size-10 text-black dark:text-white animate-bounce' />
+                            <ChevronDownCircle className='size-10 text-black/70 dark:text-white animate-bounce' />
                         </div>
                     </section>
                     <section className="courses my-20 flex flex-col gap-10">
@@ -63,7 +101,7 @@ export default function Welcome({
                         <div className="bento text-black dark:text-white max-w-7xl mx-auto w-full px-2 xl:px-4 grid grid-cols-1 md:grid-cols-2 gap-4 grid-rows-[repeat(auto-fill, 200px)] md:grid-rows-[200px_500px_350px]">
                             <div className="universities md:col-span-2 rounded-md shadow-xs overflow-hidden relative">
                                 <img src="/courses/universidades.webp" alt="Universidades imagen" className='w-full h-full object-cover object-bottom' />
-                                <div className="back bg-linear-to-t from-black/80 to-transparent absolute inset-0 z-10"></div>
+                                <div className="back bg-linear-to-t from-black/80 from-25% via-35% to-50% to-transparent absolute inset-0 z-10"></div>
                                 <div className="content absolute left-4 bottom-4 z-20 text-white">
                                     <h2 className='font-black text-xl'>Universidades</h2>
                                     <p className='text-sm text-gray-200'>Formacion para ingresar a universidades</p>
@@ -71,7 +109,7 @@ export default function Welcome({
                             </div>
                             <div className="institutes rounded-md shadow-xs overflow-hidden relative">
                                 <img src="/courses/institutos.webp" alt="Universidades imagen" className='w-full h-full object-cover object-bottom' />
-                                <div className="back bg-linear-to-t from-black/80 to-transparent absolute inset-0 z-10"></div>
+                                <div className="back bg-linear-to-t from-black/80 from-15% via-35% to-50% to-transparent absolute inset-0 z-10"></div>
                                 <div className="content absolute left-4 bottom-4 z-20 text-white">
                                     <h2 className='font-black text-xl'>Institutos</h2>
                                     <p className='text-sm text-gray-200'>Formacion para ingresar a universidades</p>
@@ -79,7 +117,7 @@ export default function Welcome({
                             </div>
                             <div className="schools rounded-md shadow-xs overflow-hidden relative">
                                 <img src="/courses/militarespoliciales.webp" alt="Universidades imagen" className='w-full h-full object-cover object-bottom' />
-                                <div className="back bg-linear-to-t from-black/80 to-transparent absolute inset-0 z-10"></div>
+                                <div className="back bg-linear-to-t from-black/80 from-15% via-35% to-50% to-transparent absolute inset-0 z-10"></div>
                                 <div className="content absolute left-4 bottom-4 z-20 text-white">
                                     <h2 className='font-black text-xl'>Instituciones militares y policiales</h2>
                                     <p className='text-sm text-gray-200'>Formacion para ingresar a universidades</p>
@@ -87,7 +125,7 @@ export default function Welcome({
                             </div>
                             <div className="esfm md:col-span-2 rounded-md shadow-xs overflow-hidden relative">
                                 <img src="/courses/esfm.webp" alt="Universidades imagen" className='w-full h-full object-cover object-cnter' />
-                                <div className="back bg-linear-to-t from-black/80 to-transparent absolute inset-0 z-10"></div>
+                                <div className="back bg-linear-to-t from-black/80 from-15% via-35% to-50% to-transparent absolute inset-0 z-10"></div>
                                 <div className="content absolute left-4 bottom-4 z-20 text-white">
                                     <h2 className='font-black text-xl'>ESFM - UAS</h2>
                                     <p className='text-sm text-gray-200'>Formacion para ingresar a universidades</p>

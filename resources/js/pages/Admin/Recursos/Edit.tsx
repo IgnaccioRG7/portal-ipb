@@ -2,6 +2,8 @@ import ContentLayout from '@/layouts/content-layout';
 import { Head, useForm } from '@inertiajs/react';
 import admin from '@/routes/admin';
 import { BreadcrumbItem } from '@/types';
+import { Label } from '@/components/ui/label';
+import InputError from '@/components/input-error';
 
 const breadcrumbs: BreadcrumbItem[] = [
   {
@@ -20,6 +22,7 @@ export default function RecursoEdit({ auth, recurso }) {
     descripcion: recurso.descripcion || '',
     archivo: null,
     visible: recurso.visible,
+    categoria: recurso.categoria,
     _method: 'PUT',
   });
 
@@ -27,6 +30,9 @@ export default function RecursoEdit({ auth, recurso }) {
     e.preventDefault();
     post(admin.recursos.update(recurso.id));
   };
+
+  console.log(recurso);
+
 
   return (
     <ContentLayout
@@ -68,6 +74,25 @@ export default function RecursoEdit({ auth, recurso }) {
             {errors.descripcion && (
               <p className="mt-1 text-sm text-red-600">{errors.descripcion}</p>
             )}
+          </div>
+
+          {/* Categoría - NUEVO CAMPO */}
+          <div>
+            <Label htmlFor="categoria">Categoria *</Label>
+            <select
+              id="categoria"
+              value={data.categoria}
+              onChange={e => setData('categoria', e.target.value)}
+              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+              required
+            >
+              <option value="otro">Otro</option>
+              <option value="policias">Policias</option>
+              <option value="militares">Militares</option>
+              <option value="medicina">Medicina</option>
+              <option value="ingenieria">Ingenieria</option>
+            </select>
+            <InputError message={errors.categoria} />
           </div>
 
           {/* Archivo actual */}

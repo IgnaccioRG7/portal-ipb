@@ -78,6 +78,23 @@ Route::middleware(['auth', 'verified', 'role:Admin'])->prefix('admin')->name('ad
     Route::put('/recursos/{recurso}', [AdminRecursoController::class, 'update'])->name('recursos.update');
     Route::delete('/recursos/{recurso}', [AdminRecursoController::class, 'destroy'])->name('recursos.destroy');
     Route::patch('/recursos/{recurso}/toggle', [AdminRecursoController::class, 'toggleVisibility'])->name('recursos.toggle');
+
+    // Route::get('/files/recursos/{filename}', function ($filename) {
+    //     $path = storage_path('app/public/recursos/' . $filename);
+
+    //     if (!file_exists($path)) {
+    //         abort(404, 'Archivo no encontrado');
+    //     }
+
+    //     if (pathinfo($path, PATHINFO_EXTENSION) !== 'pdf') {
+    //         abort(403, 'Solo se permiten archivos PDF');
+    //     }
+
+    //     return response()->file($path, [
+    //         'Content-Type' => 'application/pdf',
+    //         'Content-Disposition' => 'inline; filename="' . $filename . '"'
+    //     ]);
+    // })->name('recursos.viewPdf');
 });
 
 // Rutas para el estudiante
@@ -86,9 +103,6 @@ Route::middleware(['auth', 'verified', 'role:Estudiante,Admin'])->prefix('estudi
     Route::get('/', [StudentController::class, 'index'])->name('dashboard');
     Route::get('/curso/{course}', [StudentController::class, 'subjects'])->name('subjects');
 });
-
-
-
 
 
 

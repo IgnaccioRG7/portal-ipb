@@ -6,6 +6,7 @@ import { BreadcrumbItem } from '@/types';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import InputError from '@/components/input-error';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -25,11 +26,13 @@ export default function RecursoCreate({ }) {
         descripcion: string;
         archivo: File | null; // Asegúrate que sea File | null
         visible: boolean;
+        categoria: string;
     }>({
         titulo: '',
         descripcion: '',
         archivo: null,
         visible: true,
+        categoria: 'otro'
     });
 
     const handleSubmit = (e: React.SubmitEvent) => {
@@ -77,6 +80,24 @@ export default function RecursoCreate({ }) {
                         {errors.descripcion && (
                             <p className="mt-1 text-sm text-red-600">{errors.descripcion}</p>
                         )}
+                    </div>
+
+                    <div>
+                        <Label htmlFor="categoria">Categoria *</Label>
+                        <select
+                            id="categoria"
+                            value={data.categoria}
+                            onChange={e => setData('categoria', e.target.value)}
+                            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                            required
+                        >
+                            <option value="otro">Otro</option>
+                            <option value="policias">Policias</option>
+                            <option value="militares">Militares</option>
+                            <option value="medicina">Medicina</option>
+                            <option value="ingenieria">Ingenieria</option>
+                        </select>
+                        <InputError message={errors.categoria} />
                     </div>
 
                     {/* Archivo */}

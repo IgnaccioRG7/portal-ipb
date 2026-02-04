@@ -1,10 +1,36 @@
 import { Head, Link } from '@inertiajs/react';
 import { useState, useEffect } from 'react';
-import PdfViewer from '@/Components/pdf-viewer';
+import PdfViewer from '@/components/pdf-viewer';
 import Header from '@/components/header';
+import { Input } from '@/components/ui/input';
+import { Search } from 'lucide-react';
 
-export default function RecursosIndex({ recursos }) {
-    const [selectedPdf, setSelectedPdf] = useState(null);
+interface Resource {
+    autor: string,
+    descripcion: string,
+    fecha: Date,
+    id: number,
+    nombre_original: string,
+    tamano_formateado: string,
+    titulo: string,
+    url: string
+}
+
+interface Category {
+    categoria: string,
+    nombre: string,
+    recursos: Resource[]
+}
+
+interface Props {
+    recursos: Category[]
+}
+
+export default function RecursosIndex({ recursos }: Props) {
+    const [selectedPdf, setSelectedPdf] = useState<Resource | null>(null);
+
+    console.log(recursos);
+
 
     /**
      * PROTECCIÓN 9: Bloquear teclas a nivel de página
@@ -13,7 +39,7 @@ export default function RecursosIndex({ recursos }) {
     useEffect(() => {
         if (!selectedPdf) return;
 
-        const handleKeyDown = (e) => {
+        const handleKeyDown = (e: any) => {
             // Bloquear Escape para cerrar (opcional, puedes permitirlo)
             if (e.key === 'Escape') {
                 closePdfViewer();
@@ -35,7 +61,7 @@ export default function RecursosIndex({ recursos }) {
     useEffect(() => {
         if (!selectedPdf) return;
 
-        const handleBeforeUnload = (e) => {
+        const handleBeforeUnload = (e: any) => {
             e.preventDefault();
             e.returnValue = ''; // Chrome requiere esto
         };
@@ -48,7 +74,7 @@ export default function RecursosIndex({ recursos }) {
         };
     }, [selectedPdf]);
 
-    const openPdfViewer = (recurso) => {
+    const openPdfViewer = (recurso: Resource) => {
         setSelectedPdf(recurso);
         // Prevenir scroll del body cuando el modal está abierto
         document.body.style.overflow = 'hidden';
@@ -67,11 +93,11 @@ export default function RecursosIndex({ recursos }) {
             <div className="bg-gray-100 text-[#1b1b18] lg:justify-center dark:bg-gray-900">
                 <Header />
 
-                <div className="min-h-screen pb-12 pt-24">
-                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div className="min-h-screen pb-12 pt-20">
+                    <div className="max-w-7xl mx-auto px-4 sm:px-2 lg:px-2 flex flex-col gap-4">
                         {/* Header */}
-                        <div className="mb-8">
-                            <h1 className="text-4xl font-bold text-gray-900 mb-2 dark:text-gray-300">
+                        <div className="">
+                            <h1 className="text-4xl font-bold text-gray-900 mb-2 dark:text-gray-300 font-title">
                                 Recursos Educativos
                             </h1>
                             <p className="text-lg text-gray-600 dark:text-gray-400">
@@ -79,69 +105,102 @@ export default function RecursosIndex({ recursos }) {
                             </p>
                         </div>
 
+                        {/* Buscador y filtrado de recursos */}
+                        <search className='bg-white rounded-md'>
+                            <label htmlFor="search-resource" className='flex flex-row gap-2 items-center px-2 py-1'>
+                                <Search />
+                                <Input
+                                    id='search-resource'
+                                    type='search'
+                                    placeholder='Busca guias, libros o cualquier material de ayuda para ti....'
+                                    className='border-none px-0 pr-4 focus:outline-none! focus:border-none! ring-0! shadow-none'
+                                />
+                            </label>
+                        </search>
+
                         {/* Lista de recursos */}
-                        {recursos.length === 0 ? (
-                            <div className="bg-white rounded-lg shadow p-8 text-center">
-                                <p className="text-gray-500">
-                                    No hay recursos disponibles en este momento
-                                </p>
-                            </div>
-                        ) : (
-                            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                                {recursos.map((recurso) => (
-                                    <div
-                                        key={recurso.id}
-                                        className="bg-white rounded-lg shadow hover:shadow-lg transition-shadow p-6"
-                                    >
-                                        {/* Ícono PDF */}
-                                        <div className="flex items-center mb-4">
-                                            <div className="flex-shrink-0">
-                                                <svg
-                                                    className="h-12 w-12 text-red-600"
-                                                    fill="currentColor"
-                                                    viewBox="0 0 20 20"
-                                                >
-                                                    <path d="M4 18h12V6h-4V2H4v16zm-2 1V0h12l4 4v16H2v-1z" />
-                                                </svg>
-                                            </div>
-                                            <div className="ml-4">
-                                                <h3 className="text-lg font-semibold text-gray-900">
-                                                    {recurso.titulo}
-                                                </h3>
-                                                <p className="text-sm text-gray-500">
-                                                    {recurso.tamano_formateado}
+                        <>
+                            {recursos.length === 0 ? (
+                                <div className="bg-white rounded-lg shadow p-8 text-center">
+                                    <p className="text-gray-500">
+                                        No hay recursos disponibles en este momento
+                                    </p>
+                                </div>
+                            ) : (
+                                recursos.map((grupo: any) => (
+                                    <div key={grupo.categoria} className="mb-10">
+                                        {/* Título de la categoría */}
+                                        <h2 className="text-2xl font-bold text-gray-800 mb-6">
+                                            {grupo.nombre}
+                                        </h2>
+
+                                        {/* Recursos de esta categoría */}
+                                        {grupo.recursos.length === 0 ? (
+                                            <div className="bg-gray-50 rounded-lg p-6 text-center">
+                                                <p className="text-gray-500">
+                                                    No hay recursos en esta categoría
                                                 </p>
                                             </div>
-                                        </div>
+                                        ) : (
+                                            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                                                {grupo.recursos.map((recurso: any) => (
+                                                    <div
+                                                        key={recurso.id}
+                                                        className="bg-white rounded-lg shadow hover:shadow-lg transition-shadow p-6"
+                                                    >
+                                                        {/* Ícono PDF */}
+                                                        <div className="flex items-center mb-4">
+                                                            <div className="shrink-0">
+                                                                <svg
+                                                                    className="h-12 w-12 text-red-600"
+                                                                    fill="currentColor"
+                                                                    viewBox="0 0 20 20"
+                                                                >
+                                                                    <path d="M4 18h12V6h-4V2H4v16zm-2 1V0h12l4 4v16H2v-1z" />
+                                                                </svg>
+                                                            </div>
+                                                            <div className="ml-4">
+                                                                <h3 className="text-lg font-semibold text-gray-900">
+                                                                    {recurso.titulo}
+                                                                </h3>
+                                                                <p className="text-sm text-gray-500">
+                                                                    {recurso.tamano_formateado}
+                                                                </p>
+                                                            </div>
+                                                        </div>
 
-                                        {/* Descripción */}
-                                        {recurso.descripcion && (
-                                            <p className="text-gray-600 text-sm mb-4 line-clamp-3">
-                                                {recurso.descripcion}
-                                            </p>
+                                                        {/* Descripción */}
+                                                        {recurso.descripcion && (
+                                                            <p className="text-gray-600 text-sm mb-4 line-clamp-3">
+                                                                {recurso.descripcion}
+                                                            </p>
+                                                        )}
+
+                                                        {/* Metadata */}
+                                                        <div className="text-xs text-gray-500 mb-4">
+                                                            <p>Publicado por: {recurso.autor}</p>
+                                                            <p>Fecha: {recurso.fecha}</p>
+                                                        </div>
+
+                                                        {/* Botón para ver */}
+                                                        <button
+                                                            onClick={() => openPdfViewer(recurso)}
+                                                            className="w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded text-sm font-medium transition flex items-center justify-center space-x-2"
+                                                        >
+                                                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                                            </svg>
+                                                            <span>Ver Documento</span>
+                                                        </button>
+                                                    </div>
+                                                ))}
+                                            </div>
                                         )}
-
-                                        {/* Metadata */}
-                                        <div className="text-xs text-gray-500 mb-4">
-                                            <p>Publicado por: {recurso.autor}</p>
-                                            <p>Fecha: {recurso.fecha}</p>
-                                        </div>
-
-                                        {/* Botón para ver - SIN botón de descarga */}
-                                        <button
-                                            onClick={() => openPdfViewer(recurso)}
-                                            className="w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded text-sm font-medium transition flex items-center justify-center space-x-2"
-                                        >
-                                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                                            </svg>
-                                            <span>Ver Documento</span>
-                                        </button>
                                     </div>
-                                ))}
-                            </div>
-                        )}
+                                ))
+                            )}
+                        </>
 
                         {/* Link para volver */}
                         <div className="mt-8 text-center">

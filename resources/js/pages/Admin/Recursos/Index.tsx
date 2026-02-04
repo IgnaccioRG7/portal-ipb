@@ -39,34 +39,40 @@ export default function RecursosAdminIndex({ auth, recursos }) {
     {
       key: 'acciones',
       label: 'Acciones',
-      render: (recurso: any) => (
-        <div className="flex gap-2">
-          <a
-            href={recurso.url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-blue-600 hover:text-blue-900 mr-3"
-            title='Ver PDF'
-          >
-            <Eye />
-          </a>
-          <Link
-            // href={route('admin.recursos.edit', recurso.id)}
-            href={admin.recursos.edit(recurso.id)}
-            className="text-indigo-600 hover:text-indigo-900 mr-3"
-            title='Editar'
-          >
-            <Edit />
-          </Link>
-          <button
-            onClick={() => handleDelete(recurso.id)}
-            className="text-red-600 hover:text-red-900 cursor-pointer"
-            title='Eliminar'
-          >
-            <Trash />
-          </button>
-        </div>
-      )
+      render: (recurso: any) => {
+        // console.log('=== DEBUG RECURSO ===');
+        // console.log('Nombre archivo (recurso.archivo):', recurso.archivo);
+        // console.log('URL completa (recurso.url):', recurso.url);
+        // console.log('=====================');
+        return (
+          <div className="flex gap-2">
+            <a
+              href={recurso.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-600 hover:text-blue-900 mr-3"
+              title='Ver PDF'
+            >
+              <Eye />
+            </a>
+            <Link
+              // href={route('admin.recursos.edit', recurso.id)}
+              href={admin.recursos.edit(recurso.id)}
+              className="text-indigo-600 hover:text-indigo-900 mr-3"
+              title='Editar'
+            >
+              <Edit />
+            </Link>
+            <button
+              onClick={() => handleDelete(recurso.id)}
+              className="text-red-600 hover:text-red-900 cursor-pointer"
+              title='Eliminar'
+            >
+              <Trash />
+            </button>
+          </div>
+        )
+      }
     },
     // { key: '', label: '' },
   ]
