@@ -52,12 +52,12 @@ function CourseCard({ data }: { data: MatriculaCurso }) {
         );
     }
     return (
-        <div className="relative rounded-xl border bg-white px-4 pb-4 shadow-sm">
-            <h2 className="absolute -top-3 left-4 bg-white px-3 text-xl font-bold text-gray-800 cursor-pointer">
+        <div className="relative rounded-xl border bg-white px-4 pb-4 shadow-sm dark:bg-gray-800">
+            <h2 className="absolute -top-3 left-4 bg-white px-3 text-2xl font-bold text-gray-800 cursor-pointer dark:bg-gray-800 dark:text-gray-300 rounded-md">
                 {data.curso.nombre}
             </h2>
 
-            <div className="mt-6 grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
+            <div className="mt-8 grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
                 {data.materias.map((materia) => (
                     <MateriaCard key={materia.id} materia={materia} />
                 ))}
@@ -76,16 +76,16 @@ function CourseCard({ data }: { data: MatriculaCurso }) {
 function MateriaCard({ materia }: { materia: any }) {
 
     return (
-        <article className="overflow-hidden rounded-xl border shadow-sm transition hover:shadow-md pb-4">
+        <article className="overflow-hidden rounded-xl border shadow-sm transition hover:shadow-md pb-4 dark:border dark:border-gray-500 flex flex-col">
             <img
                 src="/hero.jpg"
                 alt="Imagen del curso"
                 className="aspect-video w-full object-cover"
             />
 
-            <div className="pt-4 px-4">
-                <header className="mb-3 flex items-center justify-between">
-                    <h3 className="text-lg font-bold text-gray-800">
+            <div className="pt-4 px-4 flex flex-col grow">
+                <header className="mb-3 flex items-center justify-between grow">
+                    <h3 className="text-lg font-bold text-gray-800 dark:text-gray-100">
                         {materia.nombre}
                     </h3>
 
@@ -94,11 +94,11 @@ function MateriaCard({ materia }: { materia: any }) {
                     </span>
                 </header>
 
-                <div className="flex items-center gap-2 rounded-lg bg-blue-50 px-3 py-2">
+                <div className="flex items-center gap-2 rounded-lg bg-blue-50 px-3 py-2 dark:bg-gray-700">
                     <BookOpen className="h-4 w-4 text-blue-600" />
                     <div className="text-sm flex items-center gap-2">
-                        <p className="font-bold text-lg text-gray-900">{materia.temas.length}</p>
-                        <p className="text-xs text-gray-600">Tema(s) disponibles</p>
+                        <p className="font-bold text-lg text-gray-900 dark:text-white">{materia.temas.length}</p>
+                        <p className="text-xs text-gray-600 dark:text-gray-300">Tema(s) disponibles</p>
                     </div>
                 </div>
             </div>
@@ -118,27 +118,26 @@ export default function Dashboard({ matriculas }: Props) {
         >
 
             <div className="w-full grid grid-cols-1 lg:grid-cols-12 gap-6">
-
                 <section className="lg:col-span-9 space-y-6">
                     {matriculas?.map((item) => (
                         <CourseCard key={item.curso.id} data={item} />
                     ))}
                 </section>
 
-                <aside className="lg:col-span-3 bg-gray-50 p-4 rounded-xl h-fit">
+                <aside className="lg:col-span-3 bg-gray-50 p-4 rounded-xl h-fit dark:bg-gray-800">
                     <h2 className="font-bold text-xl mb-4">Novedades</h2>
                     <ul className="text-sm text-gray-600 grid gap-2">
                         <li className='flex gap-4 items-center'>
                             <span className='font-black p-2 flex justify-center items-center bg-amber-200 rounded-md size-14'>HOY</span>
-                            <p><span className='text-black font-black'>Examen Fisica</span>  <br />
-                            Hasta las 12:00 PM</p>
+                            <p className='dark:text-gray-400'><span className='text-black font-black dark:text-gray-100'>Examen Fisica</span>  <br />
+                                Hasta las 12:00 PM</p>
                         </li>
                         <li className='flex gap-4 items-center'>
                             <span className='font-black p-2 bg-blue-200 rounded-md text-center size-14'>
                                 <span className='text-xs'>FEB</span>
                                 <br /> 23</span>
-                            <p><span className='text-black font-black'>Examen Fisica</span>  <br />
-                            Hasta las 12:00 PM</p>
+                            <p className='dark:text-gray-400'><span className='text-black font-black dark:text-gray-100'>Examen Fisica</span>  <br />
+                                Hasta las 12:00 PM</p>
                         </li>
                     </ul>
                 </aside>

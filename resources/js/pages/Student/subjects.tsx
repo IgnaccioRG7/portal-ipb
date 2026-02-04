@@ -1,7 +1,9 @@
 import { Input } from '@/components/ui/input';
 import ContentLayout from '@/layouts/content-layout';
 import { dashboard } from '@/routes';
+import estudiante from '@/routes/estudiante';
 import { BreadcrumbItem } from '@/types';
+import { router } from '@inertiajs/react';
 import {
   Search,
   PlayCircle,
@@ -23,9 +25,15 @@ const breadcrumbs: BreadcrumbItem[] = [
 
 function MateriaCard({ data, cursoId }: { data: any; cursoId: number }) {
   const { materia, temas } = data;
+  console.log(data);
+
 
   const handleIniciarTemas = () => {
     console.log('Iniciar temas');
+    router.visit(estudiante.topics({
+      curso: cursoId,
+      materia: materia.id
+    }));
   };
 
   const handleVerRecursos = () => {
@@ -33,9 +41,9 @@ function MateriaCard({ data, cursoId }: { data: any; cursoId: number }) {
   };
 
   return (
-    <article className="group relative overflow-hidden rounded-xl border bg-white shadow-sm transition-all hover:shadow-lg">
+    <article className="group relative overflow-hidden rounded-xl border bg-white shadow-sm transition-all hover:shadow-lg dark:bg-gray-800 flex flex-col">
       {/* Header con imagen */}
-      <div className="relative">
+      <div className="relative overflow-hidden">
         <img
           src="/hero.jpg"
           alt={materia.nombre}
@@ -50,48 +58,35 @@ function MateriaCard({ data, cursoId }: { data: any; cursoId: number }) {
       </div>
 
       {/* Contenido */}
-      <div className="p-5">
-        {/* Estadísticas */}
-        {/* <div className="mb-4 grid grid-cols-1 gap-3">
-          <div className="flex items-center gap-2 rounded-lg bg-blue-50 px-3 py-2">
-            <BookOpen className="h-4 w-4 text-blue-600" />
-            <div className="text-sm">
-              <p className="font-bold text-gray-900">{temas.length}</p>
-              <p className="text-xs text-gray-600">Temas disponibles</p>
-            </div>
-          </div>
-        </div> */}
-
+      <div className="p-5 flex flex-col grow">
         {/* Lista de temas */}
-        <div className="mb-4">
-          <h4 className="mb-2 text-sm font-semibold text-gray-700">
+        <div className="mb-4 grow">
+          <h4 className="mb-2 text-sm font-semibold text-gray-700 dark:text-gray-300">
             Temas:
           </h4>
-          {/* <ul className="space-y-1.5">
-            {temas.map((tema: any) => (
-              <li
-                key={tema.id}
-                className="flex items-center gap-2 text-sm text-gray-600"
-              >
-                <div className="h-1.5 w-1.5 rounded-full bg-blue-500" />
-                <span className="truncate">{tema.nombre}</span>
-              </li>
-            ))}
-          </ul> */}
           <ul className="space-y-2">
             {temas.map((tema: any) => (
+
               <li
                 key={tema.id}
-                className="flex items-center justify-between rounded-md border px-3 py-2 text-sm"
+                className="flex items-center justify-between rounded-md border px-3 py-2 text-sm dark:border-gray-500"
               >
-                <span className="font-medium text-gray-700">
-                  {tema.nombre}
-                </span>
+                {
+                  tema?.tipo !== "directo"
+                    ?
+                    <>
+                      <span className="font-medium text-gray-700 dark:text-gray-300">
+                        {tema.nombre}
+                      </span>
 
-                <button className="flex items-center gap-1 text-sm font-semibold text-blue-600 hover:underline">
-                  <PlayCircle size={16} />
-                  Entrar
-                </button>
+                      <button className="flex items-center gap-1 text-sm font-semibold text-blue-600 hover:underline">
+                        <PlayCircle size={16} />
+                        Entrar
+                      </button>
+                    </>
+                    :
+                    <p>Dale clic a iniciar para resolver el Quiz. Exitos!</p>
+                }
               </li>
             ))}
           </ul>
@@ -120,6 +115,9 @@ function MateriaCard({ data, cursoId }: { data: any; cursoId: number }) {
 }
 
 export default function Index({ curso, materias }: any) {
+  console.log(curso);
+  console.log(materias);
+
   const [searchTerm, setSearchTerm] = useState('');
 
   const materiasFiltradas = materias.filter((item: any) =>
@@ -136,19 +134,19 @@ export default function Index({ curso, materias }: any) {
     >
       {/* Stats */}
       <section className="mb-6 grid grid-cols-1 gap-4 md:grid-cols-2">
-        <div className="flex items-center justify-between rounded-lg bg-white px-5 py-4 shadow-sm">
+        <div className="flex items-center justify-between rounded-lg bg-white px-5 py-4 shadow-sm dark:bg-gray-800">
           <div className="flex flex-row-reverse items-center gap-3">
-            <div className="text-sm text-gray-500">Total Temas</div>
-            <div className="text-2xl font-bold text-gray-900">{totalTemas}</div>
+            <div className="text-sm text-gray-500 dark:text-gray-400">Total Temas</div>
+            <div className="text-2xl font-bold text-gray-900 dark:text-gray-300">{totalTemas}</div>
           </div>
           <div className="rounded-full bg-blue-100 p-3">
             <BookOpen className="h-6 w-6 text-blue-600" />
           </div>
         </div>
 
-        <div className="flex items-center justify-between rounded-lg bg-white px-5 py-4 shadow-sm">
+        <div className="flex items-center justify-between rounded-lg bg-white px-5 py-4 shadow-sm dark:bg-gray-800">
           <div className="flex flex-row-reverse items-center gap-3">
-            <div className="text-sm text-gray-500">Materias</div>
+            <div className="text-sm text-gray-500 dark:text-gray-400">Materias</div>
             <div className="text-2xl font-bold text-purple-600">{materias.length}</div>
           </div>
           <div className="rounded-full bg-purple-100 p-3">

@@ -15,12 +15,13 @@ return new class extends Migration
             $table->id();
             $table->foreignId('materia_id')->constrained('materias');
             $table->string('codigo_tema', 30)->nullable();
-            $table->string('nombre', 150);
+            $table->string('nombre', 150)->nullable();
             $table->text('descripcion')->nullable();
             $table->integer('orden')->nullable();
             $table->json('contenido_json');
             $table->enum('estado', ['activo', 'inactivo', 'borrador'])->default('borrador');
             $table->enum('visibilidad', ['publico', 'estudiantes', 'profesores'])->default('estudiantes');
+            $table->enum('tipo', ['lectura', 'directo', 'normal'])->default('normal');
             $table->date('fecha_publicacion')->nullable();
             $table->foreignId('created_by')->constrained('users');
             $table->timestamps();

@@ -5,7 +5,9 @@ namespace App\Http\Controllers\Student;
 use App\Http\Controllers\Controller;
 use App\Models\Curso;
 use App\Models\CursoMateriaTema;
+use App\Models\Materia;
 use App\Models\Matricula;
+use App\Models\Tema;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
@@ -83,6 +85,17 @@ class StudentController extends Controller
         return Inertia::render('Student/subjects', [
             'curso'    => $course,
             'materias' => $materias,
+        ]);
+    }
+
+    public function topics(Curso $curso, Materia $materia) {
+
+        Log::info($curso);
+        Log::info($materia);
+
+        return Inertia::render('Student/topics', [
+            'curso' => $curso,
+            'materia' => $materia
         ]);
     }
 }

@@ -102,6 +102,7 @@ Route::middleware(['auth', 'verified', 'role:Estudiante,Admin'])->prefix('estudi
     // Route::get('/', fn () => Inertia::render('dashboard'))->name('dashboard');
     Route::get('/', [StudentController::class, 'index'])->name('dashboard');
     Route::get('/curso/{course}', [StudentController::class, 'subjects'])->name('subjects');
+    Route::get('/curso/{curso}/materia/{materia}', [StudentController::class, 'topics'])->name('topics');
 });
 
 

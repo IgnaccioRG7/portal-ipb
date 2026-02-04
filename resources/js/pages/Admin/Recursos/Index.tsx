@@ -34,7 +34,13 @@ export default function RecursosAdminIndex({ auth, recursos }) {
         </span>
       )
     },
-    { key: 'autor', label: 'Autor' },
+    // { key: 'autor', label: 'Autor' },
+    {
+      key: 'categoria', label: 'Categoria',
+      render: (recurso: any) => {
+        return <span className='uppercase'>{recurso.categoria}</span>
+      }
+    },
     { key: 'fecha', label: 'Fecha' },
     {
       key: 'acciones',

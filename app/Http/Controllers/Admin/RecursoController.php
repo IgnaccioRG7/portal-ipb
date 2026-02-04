@@ -29,6 +29,7 @@ class RecursoController extends Controller
                     'nombre_original' => $recurso->nombre_original,
                     'tamano_formateado' => $recurso->tamano_formateado,
                     'visible' => $recurso->visible,
+                    'categoria' => $recurso->categoria,
                     'autor' => $recurso->user->name,
                     'fecha' => $recurso->created_at->format('d/m/Y H:i'),
                     'url' => $recurso->url,

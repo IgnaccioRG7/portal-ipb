@@ -60,7 +60,7 @@ class RecursoController extends Controller
     private function getNombreCategoria(string $categoria): string
     {
         $nombres = [
-            'otro' => 'Otros Recursos',
+            'otro' => 'Otros',
             'policias' => 'Policías',
             'militares' => 'Militares',
             'medicina' => 'Medicina',

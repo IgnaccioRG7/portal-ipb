@@ -102,7 +102,7 @@ export default function RecursoCreate({ }) {
 
                     {/* Archivo */}
                     <div>
-                        <label className="block text-sm font-medium text-gray-700">
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-100">
                             Archivo PDF *
                         </label>
                         <input
@@ -141,7 +141,7 @@ export default function RecursoCreate({ }) {
                             onChange={(e) => setData('visible', e.target.checked)}
                             className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                         />
-                        <label className="ml-2 block text-sm text-gray-900">
+                        <label className="ml-2 block text-sm text-gray-900 dark:text-gray-400">
                             Visible públicamente
                         </label>
                     </div>
@@ -151,7 +151,7 @@ export default function RecursoCreate({ }) {
                         <a
                             // href={route('admin.recursos.index')}
                             href={admin.recursos.index().url}
-                            className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50"
+                            className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:text-gray-800" 
                         >
                             Cancelar
                         </a>

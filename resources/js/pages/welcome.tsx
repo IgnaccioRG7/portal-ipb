@@ -1,7 +1,7 @@
 import { Head, Link, usePage } from '@inertiajs/react';
 import { dashboard, login, register } from '@/routes';
 import type { SharedData } from '@/types';
-import { ArrowDown, CircleArrowDown, Facebook, GraduationCap, ChevronDownCircle } from 'lucide-react';
+import { ArrowDown, CircleArrowDown, Facebook, GraduationCap, ChevronDownCircle, MoveRight } from 'lucide-react';
 import Header from '@/components/header';
 
 export default function Welcome({
@@ -25,7 +25,7 @@ export default function Welcome({
             <div className="bg-gray-100 text-[#1b1b18] lg:justify-center dark:bg-gray-900">
                 <Header isLanding />
                 <main className="w-full font-body pb-1">
-                    <section className="hero relative w-full h-screen max-h-250">
+                    <section className="hero relative w-full h-screen max-h-250 z-40">
                         <div className="hero-image w-full h-full overflow-hidden absolute inset-0">
                             <img src="/hero.webp" alt="Hero Image" className='w-full h-full object-cover' loading="eager" fetchPriority="high" />
                             <div className='bg-black/70 absolute inset-0'></div>
@@ -47,8 +47,9 @@ export default function Welcome({
                                 >
                                     Sé parte de la Academia
                                 </a> */}
-                                    <button className='bg-[#fde047] w-full md:mx-auto rounded-md md:px-4 py-2 text-[#143152] font-bold uppercase cursor-pointer hover:bg-[#fde047]/90 transition-all duration-300 text-sm md:text-xl px-2 max-w-full hover:scale-103 flex justify-center items-center transform-gpu will-change-transform'>
+                                    <button className='bg-[#fde047] w-full md:mx-auto rounded-md md:px-4 py-2 text-[#143152] font-bold uppercase cursor-pointer hover:bg-[#fde047]/90 transition-all duration-300 text-sm md:text-xl px-2 max-w-full hover:scale-103 flex justify-center items-center transform-gpu will-change-transform flex-row gap-2'>
                                         Se parte de la Academia
+                                        <MoveRight />
                                     </button>
                                 </div>
                             </div>
