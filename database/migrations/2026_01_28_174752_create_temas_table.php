@@ -21,7 +21,7 @@ return new class extends Migration
             $table->json('contenido_json');
             $table->enum('estado', ['activo', 'inactivo', 'borrador'])->default('borrador');
             $table->enum('visibilidad', ['publico', 'estudiantes', 'profesores'])->default('estudiantes');
-            $table->enum('tipo', ['lectura', 'directo', 'normal'])->default('normal');
+            $table->enum('tipo', ['lectura', 'opcional', 'configurable'])->default('opcional');
             $table->date('fecha_publicacion')->nullable();
             $table->foreignId('created_by')->constrained('users');
             $table->timestamps();

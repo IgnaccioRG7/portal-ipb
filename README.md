@@ -113,6 +113,10 @@ php artisan wayfinder:generate
 php artisan storage:link
 
 
+Conocimientos Generales	mate, física, química
+Razonamiento Lógico	series, aritmética, geometría, calendario
+Socioemocionales	frustración, actitudes, convivencia, honestidad
+
 
 // PHP puro vs Laravel Collections
 $array = [1, 2, 3, 4, 5];

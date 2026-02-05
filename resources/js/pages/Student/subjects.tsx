@@ -65,30 +65,24 @@ function MateriaCard({ data, cursoId }: { data: any; cursoId: number }) {
             Temas:
           </h4>
           <ul className="space-y-2">
-            {temas.map((tema: any) => (
+            {temas.map((tema: any) => {
+              const text = tema?.nombre || 'Resuelve el Quiz'
+              return (
+                <li
+                  key={tema.id}
+                  className="flex items-center justify-between rounded-md border px-3 py-2 text-sm dark:border-gray-500"
+                >
+                  <span className="font-medium text-gray-700 dark:text-gray-300">
+                    {text}
+                  </span>
 
-              <li
-                key={tema.id}
-                className="flex items-center justify-between rounded-md border px-3 py-2 text-sm dark:border-gray-500"
-              >
-                {
-                  tema?.tipo !== "directo"
-                    ?
-                    <>
-                      <span className="font-medium text-gray-700 dark:text-gray-300">
-                        {tema.nombre}
-                      </span>
-
-                      <button className="flex items-center gap-1 text-sm font-semibold text-blue-600 hover:underline">
-                        <PlayCircle size={16} />
-                        Entrar
-                      </button>
-                    </>
-                    :
-                    <p>Dale clic a iniciar para resolver el Quiz. Exitos!</p>
-                }
-              </li>
-            ))}
+                  <button className="flex items-center gap-1 text-sm font-semibold text-blue-600 hover:underline">
+                    <PlayCircle size={16} />
+                    Entrar
+                  </button>
+                </li>
+              )
+            })}
           </ul>
         </div>
 

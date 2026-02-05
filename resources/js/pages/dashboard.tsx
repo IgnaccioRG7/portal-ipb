@@ -97,7 +97,7 @@ function MateriaCard({ materia }: { materia: any }) {
                 <div className="flex items-center gap-2 rounded-lg bg-blue-50 px-3 py-2 dark:bg-gray-700">
                     <BookOpen className="h-4 w-4 text-blue-600" />
                     <div className="text-sm flex items-center gap-2">
-                        <p className="font-bold text-lg text-gray-900 dark:text-white">{materia.temas.length}</p>
+                        <p className="font-bold text-lg text-gray-900 dark:text-white">{materia.temas}</p>
                         <p className="text-xs text-gray-600 dark:text-gray-300">Tema(s) disponibles</p>
                     </div>
                 </div>

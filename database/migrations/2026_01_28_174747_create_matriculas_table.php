@@ -21,7 +21,7 @@ return new class extends Migration
             $table->string('observaciones')->nullable();
             $table->timestamps();
 
-            $table->unique(['estudiante_id', 'curso_id']);
+            // $table->unique(['estudiante_id', 'curso_id']);
         });
     }
 

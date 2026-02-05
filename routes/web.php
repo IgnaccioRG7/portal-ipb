@@ -103,6 +103,7 @@ Route::middleware(['auth', 'verified', 'role:Estudiante,Admin'])->prefix('estudi
     Route::get('/', [StudentController::class, 'index'])->name('dashboard');
     Route::get('/curso/{course}', [StudentController::class, 'subjects'])->name('subjects');
     Route::get('/curso/{curso}/materia/{materia}', [StudentController::class, 'topics'])->name('topics');
+    Route::get('/curso/{curso}/materia/{materia}/tema/{tema}', [StudentController::class, 'topic'])->name('topic');
 });
 
 
