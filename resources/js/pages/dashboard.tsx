@@ -63,7 +63,7 @@ function CourseCard({ data }: { data: MatriculaCurso }) {
                 ))}
             </div>
             <div className='flex justify-end'>
-                <button className="mt-4 flex w-full max-w-full md:max-w-1/2 px-6 items-center justify-center gap-2 rounded-xl bg-blue-600 py-2 font-bold text-white transition hover:bg-blue-600/80 cursor-pointer" onClick={goToSubjects}>
+                <button className="mt-4 flex w-full max-w-full px-6 items-center justify-center gap-2 rounded-xl bg-blue-600 py-2 font-bold text-white transition hover:bg-blue-600/80 cursor-pointer" onClick={goToSubjects}>
                     Continuar aprendizaje
                     <PlayCircle />
                 </button>

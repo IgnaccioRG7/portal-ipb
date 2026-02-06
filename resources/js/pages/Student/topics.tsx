@@ -2,6 +2,7 @@ import { Quiz } from "@/components/student/quiz";
 import ContentLayout from "@/layouts/content-layout";
 import { dashboard } from "@/routes";
 import estudiante from "@/routes/estudiante";
+import { useQuizStore } from "@/store/quiz";
 import { BreadcrumbItem } from "@/types";
 import { Link, router } from "@inertiajs/react";
 import { useEffect, useState } from "react";
@@ -47,11 +48,7 @@ export default function Topics({
   temas,
   matricula
 }: TopicsProps) {
-
-  const [topic, setTopic] = useState<Tema | null>(null);
-
   console.log(temas);
-
 
   const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Inicio', href: dashboard().url },
@@ -90,24 +87,7 @@ export default function Topics({
         </div>
       </section>
     </ContentLayout>;
-  }
-
-  // Un solo tema → configurable
-  if (temas.length === 1 && temas[0].tipo === 'configurable') {
-    return (
-      <ContentLayout breadcrumbs={breadcrumbs}>
-        <section className="quiz-configurable">
-          <div className="grid grid-cols-2 gap-4">
-            {[10, 20, 30, 40].map(n => (
-              <button key={n} className="btn">
-                {n}
-              </button>
-            ))}
-          </div>
-        </section>
-      </ContentLayout>
-    );
-  }
+  }  
 
   // Varios temas
   return (
@@ -119,6 +99,7 @@ export default function Topics({
         <ul className="grid gap-4 sm:grid-cols-3">
           {temas.map((tema) => (
             <Link
+              key={tema.id}
               href={estudiante.topic({
                 curso: curso.id,
                 materia: materia.id,
@@ -126,7 +107,6 @@ export default function Topics({
               }).url}
             >
               <li
-                key={tema.id}
                 className="p-4 border rounded-lg hover:shadow cursor-pointer"
               >
                 <h3 className="font-medium">
