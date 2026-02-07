@@ -1,5 +1,5 @@
 import { Link, usePage } from '@inertiajs/react';
-import { BookOpen, File, Folder, LayoutGrid, Users } from 'lucide-react';
+import { BookOpen, File, Folder, LayoutGrid, School, Users } from 'lucide-react';
 // import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
@@ -17,6 +17,7 @@ import type { NavItem } from '@/types';
 import AppLogo from './app-logo';
 import admin from '@/routes/admin';
 import type { SharedData } from '@/types';
+import cursos from '@/routes/cursos';
 
 // const mainNavItems: NavItem[] = [
 //     {
@@ -70,6 +71,11 @@ export function AppSidebar() {
                 title: 'Usuarios',
                 href: admin.users.index(),
                 icon: Users,
+            });
+            items.push({
+                title: 'Cursos',
+                href: cursos.index(),
+                icon: School,
             });
             items.push({
                 title: 'Recursos',

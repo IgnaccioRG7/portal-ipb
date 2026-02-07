@@ -138,7 +138,7 @@ export default function Index({
   }, []);
 
   const handleSearch = (newFilters: Filters) => {
-    const params:any = {}
+    const params: any = {}
     Object.keys(newFilters).forEach(key => {
       if (newFilters[key as keyof Filters] !== DEFAULT_VALUE_FILTERS[key as keyof Filters]) {
         params[key] = newFilters[key as keyof Filters]
@@ -207,6 +207,20 @@ export default function Index({
           >
             <ShieldOff className="w-4 h-4" />
           </button>
+
+          {/* 🆕 BOTÓN PARA MATRICULAR (solo estudiantes) */}
+          {user.rol === 'Estudiante' && (
+            <Link
+              // href={route('admin.matriculas.estudiante', user.id)}
+              href={admin.matriculas.estudiante({
+                user: user.id
+              }).url}
+              className="flex items-center gap-1 p-2 bg-green-500 text-white text-sm rounded-md hover:bg-green-600 transition-colors"
+              title="Matricular estudiante"
+            >
+              <UserRoundCheck className="w-4 h-4" />
+            </Link>
+          )}
         </div>
       )
     },

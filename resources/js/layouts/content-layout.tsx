@@ -22,7 +22,7 @@ export default function ContentLayout({
         title && (<Head title={title} />)
       }
 
-      <main className='px-2 sm:px-6 lg:px-8 py-4 max-w-9xl'>
+      <main className='px-2 sm:px-6 lg:px-8 py-4 max-w-9xl h-full'>
         <section className="heading w-full flex justify-between items-center flex-wrap gap-2 mb-4">
           {
             title && (

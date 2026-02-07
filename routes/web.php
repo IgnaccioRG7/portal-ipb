@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\Admin\CursoController;
+use App\Http\Controllers\Admin\MatriculaController;
 use App\Http\Controllers\Admin\RecursoController as AdminRecursoController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\RecursoController;
@@ -79,6 +81,17 @@ Route::middleware(['auth', 'verified', 'role:Admin'])->prefix('admin')->name('ad
     Route::delete('/recursos/{recurso}', [AdminRecursoController::class, 'destroy'])->name('recursos.destroy');
     Route::patch('/recursos/{recurso}/toggle', [AdminRecursoController::class, 'toggleVisibility'])->name('recursos.toggle');
 
+    // Rutas de matriculas
+    Route::prefix('matriculas')->name('matriculas.')->group(function () {
+        Route::get('/estudiante/{user}', [MatriculaController::class, 'estudiante'])->name('estudiante');
+        Route::post('/estudiante/{user}/matricular', [MatriculaController::class, 'matricular'])->name('matricular');
+        Route::get('/estudiante/{user}/curso/{curso}/materias', [MatriculaController::class, 'materias'])->name('materias');
+        Route::post('/estudiante/{user}/curso/{curso}/guardar-temas', [MatriculaController::class, 'guardarTemas'])->name('guardar-temas');
+        Route::get('/{matricula}/editar', [MatriculaController::class, 'edit'])->name('edit');
+        Route::put('/{matricula}', [MatriculaController::class, 'update'])->name('update');
+    });
+
+    // TODO: Validar la ruta directa publica para que no puedan ingresar directamente desde la url
     // Route::get('/files/recursos/{filename}', function ($filename) {
     //     $path = storage_path('app/public/recursos/' . $filename);
 
@@ -104,6 +117,15 @@ Route::middleware(['auth', 'verified', 'role:Estudiante,Admin'])->prefix('estudi
     Route::get('/curso/{course}', [StudentController::class, 'subjects'])->name('subjects');
     Route::get('/curso/{curso}/materia/{materia}', [StudentController::class, 'topics'])->name('topics');
     Route::get('/curso/{curso}/materia/{materia}/tema/{tema}', [StudentController::class, 'topic'])->name('topic');
+});
+
+// Rutas para el profesor con el admin
+Route::middleware(['auth', 'verified', 'role:Profesor,Admin'])->prefix('cursos')->name('cursos.')->group(function () {;
+    Route::get('/cursos', [CursoController::class, 'index'])->name('index');
+    Route::get('/cursos/{curso}/materias', [CursoController::class, 'materias'])->name('materias');
+    Route::get('/cursos/{curso}/materias/{materia}/temas', [CursoController::class, 'temas'])->name('materias.temas');
+    Route::get('/cursos/{curso}/materias/{materia}/temas/{tema}/edit', [CursoController::class, 'editTema'])->name('temas.edit');
+    Route::put('/cursos/{curso}/materias/{materia}/temas/{tema}', [CursoController::class, 'updateTema'])->name('temas.update');
 });
 
 

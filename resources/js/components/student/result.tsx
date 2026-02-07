@@ -88,10 +88,10 @@ export default function ResultView({
                       {isCorrect ? <CircleCheck /> : <CircleX />}
                     </div>
                     <div className="response flex flex-col">
-                      <span className="question text-gray-600 text-sm">Pregunta {index + 1}</span>
+                      <span className="question text-gray-600 text-sm dark:text-gray-300">Pregunta {index + 1}</span>
                       <p className="font-semibold">{question.text}</p>
-                      {!isCorrect && (<span className="incorrect text-sm text-gray-600">Tu respuesta: <span className="font-bold text-base text-red-800">{question.options[answers[question.id]]}</span></span>)}
-                      <span className="correct text-sm text-gray-600">Correcta: <span className="font-bold text-base text-green-800">{question.options[question.correctAnswer]}</span></span>
+                      {!isCorrect && (<span className="incorrect text-sm text-gray-600 dark:text-gray-300">Tu respuesta: <span className="font-bold text-base text-red-800 dark:text-red-200">{question.options[answers[question.id]]}</span></span>)}
+                      <span className="correct text-sm text-gray-600 dark:text-gray-300">Correcta: <span className="font-bold text-base text-green-800 dark:text-green-100">{question.options[question.correctAnswer]}</span></span>
                     </div>
                   </li>
                 )

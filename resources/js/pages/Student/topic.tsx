@@ -67,29 +67,29 @@ export default function Topic({
 
   console.log(tema.tipo);
   
-  if (tema.tipo === 'configurable') {
-    const QUESTION_OPTIONS = [5, 10, 15, 20];
+  // if (tema.tipo === 'configurable') {
+  //   const QUESTION_OPTIONS = [5, 10, 15, 20];
 
-    return (
-      <ContentLayout breadcrumbs={breadcrumbs}>
-        <section className="quiz flex flex-col gap-4">
-          <header className="flex flex-row items-center gap-2 relative">
-            <Link
-              className="absolute left-0 flex flex-row gap-2"
-              href={estudiante.subjects({
-                course: curso.id,
-              })}
-            >
-              <ArrowLeftToLine className="size-6" />
-              <span className="hidden md:block">Salir</span>
-            </Link>
-            <h2 className="text-2xl font-bold w-full text-center">Selecciona la cantidad de preguntas a resolver</h2>
-          </header>
-          <Quiz tema={tema} />
-        </section>
-      </ContentLayout>
-    )
-  }
+  //   return (
+  //     <ContentLayout breadcrumbs={breadcrumbs}>
+  //       <section className="quiz flex flex-col gap-4">
+  //         <header className="flex flex-row items-center gap-2 relative">
+  //           <Link
+  //             className="absolute left-0 flex flex-row gap-2"
+  //             href={estudiante.subjects({
+  //               course: curso.id,
+  //             })}
+  //           >
+  //             <ArrowLeftToLine className="size-6" />
+  //             <span className="hidden md:block">Salir</span>
+  //           </Link>
+  //           <h2 className="text-2xl font-bold w-full text-center">Selecciona la cantidad de preguntas a resolver</h2>
+  //         </header>
+  //         <Quiz tema={tema} />
+  //       </section>
+  //     </ContentLayout>
+  //   )
+  // }
 
   // Para ver los resultados
   if (isCompleteQuiz) {
