@@ -1,12 +1,12 @@
 // resources/js/pages/Admin/Matriculas/materias.tsx
 import ContentLayout from '@/layouts/content-layout';
-import { Head, useForm, Link } from '@inertiajs/react';
+import { Head, useForm, Link, router } from '@inertiajs/react';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import InputError from '@/components/input-error';
 import { BreadcrumbItem } from '@/types';
 import admin from '@/routes/admin';
-import { BookOpen, CheckCircle, ChevronDown, ChevronRight, BookText } from 'lucide-react';
+import { BookOpen, CheckCircle, ChevronDown, ChevronRight, BookText, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 
 interface Estudiante {
@@ -58,7 +58,7 @@ export default function MatriculaMaterias({
   console.log(curso);
   console.log(matricula);
   console.log(materias);
-  
+
 
   const [expandedMaterias, setExpandedMaterias] = useState<number[]>([]);
   const [selectedTemas, setSelectedTemas] = useState<{ curso_materia_id: number; tema_id: number }[]>(
@@ -139,11 +139,56 @@ export default function MatriculaMaterias({
   };
 
   const handleSubmit = (e: React.FormEvent) => {
+    console.log('ENVIANDO FORMULARIO');
+    console.log(selectedTemas);
+
+
     e.preventDefault();
     // post(route('admin.matriculas.guardar-temas', {
     //     user: estudiante.id,
     //     curso: curso.id,
     // }));
+    // post(admin.matriculas.guardarTemas({
+    //   user: estudiante.id,
+    //   curso: curso.id,
+    // }).url,);
+    router.post(
+      admin.matriculas.guardarTemas({
+        user: estudiante.id,
+        curso: curso.id,
+      }).url,
+      {
+        temas: selectedTemas,
+      },
+      {
+        preserveScroll: true,
+        onSuccess: () => {
+          console.log('✅ Temas guardados exitosamente');
+        },
+        onError: (errors) => {
+          console.error('❌ Error:', errors);
+        },
+      }
+    );
+  };
+
+  const handleEliminarMatricula = () => {
+    if (confirm(`🚨 ¿ELIMINAR MATRÍCULA COMPLETA?\n\nEstudiante: ${estudiante.nombre}\nCurso: ${curso.nombre}\nCódigo: ${matricula.codigo_matricula}\n\n⚠️ Esta acción:\n1. Eliminará TODA la matrícula\n2. Eliminará TODOS los temas asignados\n3. NO se puede deshacer\n\n¿Continuar?`)) {
+
+      router.delete(
+        admin.matriculas.destroy(matricula.id).url,
+        {
+          onSuccess: () => {
+            console.log('✅ Matrícula eliminada exitosamente');
+            // Redirige automáticamente a la vista del estudiante
+          },
+          onError: (errors) => {
+            console.error('❌ Error al eliminar matrícula:', errors);
+            alert('Error al eliminar la matrícula. Verifica la consola.');
+          },
+        }
+      );
+    }
   };
 
   const totalTemas = materias.reduce((acc, materia) => acc + materia.temas.length, 0);
@@ -316,6 +361,15 @@ export default function MatriculaMaterias({
               <div className="flex gap-3">
                 <Button
                   type="button"
+                  variant="destructive"
+                  onClick={handleEliminarMatricula}
+                  className="flex items-center gap-2 whitespace-nowrap"
+                >
+                  <Trash2 className="w-4 h-4" />
+                  Eliminar Esta Matrícula
+                </Button>
+                <Button
+                  type="button"
                   variant="outline"
                   onClick={() => setSelectedTemas([])}
                   disabled={selectedTemas.length === 0}
@@ -324,7 +378,8 @@ export default function MatriculaMaterias({
                 </Button>
                 <Button
                   type="submit"
-                  disabled={processing || selectedTemas.length === 0}
+                  // disabled={processing || selectedTemas.length === 0}
+                  disabled={processing}
                   className="bg-green-600 hover:bg-green-700"
                 >
                   {processing ? 'Guardando...' : `Guardar ${selectedTemas.length} temas`}

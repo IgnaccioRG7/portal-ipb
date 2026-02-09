@@ -15,13 +15,15 @@ return new class extends Migration
             $table->id();
             $table->foreignId('estudiante_id')->constrained('users');
             $table->foreignId('curso_id')->constrained('cursos');
-            $table->string('codigo_matricula', 30)->unique()->nullable();
-            $table->enum('estado', ['activo', 'finalizado', 'retirado', 'suspendido'])->default('activo');
+            $table->string('codigo_matricula', 30)->nullable()->unique();
             $table->date('fecha_finalizacion')->nullable();
-            $table->string('observaciones')->nullable();
+            $table->enum('estado', ['activo', 'finalizado', 'retirado', 'suspendido'])->default('activo');
+            $table->text('observaciones')->nullable();
             $table->timestamps();
 
             // $table->unique(['estudiante_id', 'curso_id']);
+            $table->index('estudiante_id');
+            $table->index('curso_id');
         });
     }
 

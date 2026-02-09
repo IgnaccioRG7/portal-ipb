@@ -87,8 +87,31 @@ Route::middleware(['auth', 'verified', 'role:Admin'])->prefix('admin')->name('ad
         Route::post('/estudiante/{user}/matricular', [MatriculaController::class, 'matricular'])->name('matricular');
         Route::get('/estudiante/{user}/curso/{curso}/materias', [MatriculaController::class, 'materias'])->name('materias');
         Route::post('/estudiante/{user}/curso/{curso}/guardar-temas', [MatriculaController::class, 'guardarTemas'])->name('guardar-temas');
+
+        Route::delete('/{matricula}', [MatriculaController::class, 'destroy'])->name('destroy');
+
+
+
         Route::get('/{matricula}/editar', [MatriculaController::class, 'edit'])->name('edit');
         Route::put('/{matricula}', [MatriculaController::class, 'update'])->name('update');
+    });
+
+    // Gestión de Cursos
+    Route::prefix('cursos')->name('cursos.')->group(function () {
+        Route::get('/', [CursoController::class, 'adminIndex'])->name('index');
+        Route::get('/create', [CursoController::class, 'create'])->name('create');
+        Route::post('/', [CursoController::class, 'store'])->name('store');
+        Route::get('/{curso}/edit', [CursoController::class, 'edit'])->name('edit');
+        Route::put('/{curso}', [CursoController::class, 'update'])->name('update');
+        Route::delete('/{curso}', [CursoController::class, 'destroy'])->name('destroy');
+
+        // Eliminación
+        Route::patch('/{curso}/toggle-estado', [CursoController::class, 'toggleEstado'])->name('toggle-estado');
+
+
+        // Asignar materias al curso
+        Route::get('/{curso}/asignar-materias', [CursoController::class, 'asignarMaterias'])->name('asignar-materias');
+        Route::post('/{curso}/guardar-materias', [CursoController::class, 'guardarMaterias'])->name('guardar-materias');
     });
 
     // TODO: Validar la ruta directa publica para que no puedan ingresar directamente desde la url
@@ -121,11 +144,11 @@ Route::middleware(['auth', 'verified', 'role:Estudiante,Admin'])->prefix('estudi
 
 // Rutas para el profesor con el admin
 Route::middleware(['auth', 'verified', 'role:Profesor,Admin'])->prefix('cursos')->name('cursos.')->group(function () {;
-    Route::get('/cursos', [CursoController::class, 'index'])->name('index');
-    Route::get('/cursos/{curso}/materias', [CursoController::class, 'materias'])->name('materias');
-    Route::get('/cursos/{curso}/materias/{materia}/temas', [CursoController::class, 'temas'])->name('materias.temas');
-    Route::get('/cursos/{curso}/materias/{materia}/temas/{tema}/edit', [CursoController::class, 'editTema'])->name('temas.edit');
-    Route::put('/cursos/{curso}/materias/{materia}/temas/{tema}', [CursoController::class, 'updateTema'])->name('temas.update');
+    Route::get('/', [CursoController::class, 'index'])->name('index');
+    Route::get('/{curso}/materias', [CursoController::class, 'materias'])->name('materias');
+    Route::get('/{curso}/materias/{materia}/temas', [CursoController::class, 'temas'])->name('materias.temas');
+    Route::get('/{curso}/materias/{materia}/temas/{tema}/edit', [CursoController::class, 'editTema'])->name('temas.edit');
+    Route::put('/{curso}/materias/{materia}/temas/{tema}', [CursoController::class, 'updateTema'])->name('temas.update');
 });
 
 

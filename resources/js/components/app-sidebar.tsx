@@ -74,7 +74,8 @@ export function AppSidebar() {
             });
             items.push({
                 title: 'Cursos',
-                href: cursos.index(),
+                // href: cursos.index(),
+                href: admin.cursos.index(),
                 icon: School,
             });
             items.push({
@@ -90,6 +91,11 @@ export function AppSidebar() {
                 href: '/profesor',
                 icon: LayoutGrid,
             });
+            items.push({
+                title: 'Cursos',
+                href: cursos.index(),
+                icon: School,
+            });
             // items.push({
             //     title: 'Mis Clases',
             //     href: '/profesor/clases',
@@ -102,7 +108,7 @@ export function AppSidebar() {
                 title: 'Inicio',
                 href: '/estudiante',
                 icon: LayoutGrid,
-            });
+            });            
             // items.push({
             //     title: 'Mis Cursos',
             //     href: '/estudiante/cursos',

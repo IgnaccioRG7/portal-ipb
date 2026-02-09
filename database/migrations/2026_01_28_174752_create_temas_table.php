@@ -13,21 +13,19 @@ return new class extends Migration
     {
         Schema::create('temas', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('materia_id')->constrained('materias');
+            $table->foreignId('modulo_materia_id')->constrained('modulos_materias');
             $table->string('codigo_tema', 30)->nullable();
-            $table->string('nombre', 150)->nullable();
+            $table->string('nombre', 150);
             $table->text('descripcion')->nullable();
-            $table->integer('orden')->nullable();
             $table->json('contenido_json');
             $table->enum('estado', ['activo', 'inactivo', 'borrador'])->default('borrador');
             $table->enum('visibilidad', ['publico', 'estudiantes', 'profesores'])->default('estudiantes');
-            $table->enum('tipo', ['lectura', 'opcional', 'configurable'])->default('opcional');
             $table->date('fecha_publicacion')->nullable();
             $table->foreignId('created_by')->constrained('users');
             $table->timestamps();
 
-            $table->index('materia_id');
-            $table->index('created_by');
+            $table->index(['modulo_materia_id']);
+            $table->index(['created_by']);
         });
     }
 

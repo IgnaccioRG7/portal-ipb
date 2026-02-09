@@ -48,7 +48,8 @@ const breadcrumbs: BreadcrumbItem[] = [
 
 const DEFAULT_VALUE_FILTERS = {
   search: '',
-  per_page: 4
+  per_page: 4,
+  role: ''
 }
 
 export default function Index({

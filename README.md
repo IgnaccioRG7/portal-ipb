@@ -131,3 +131,57 @@ $result = $collection
     ->filter(fn($n) => $n % 2 === 0)  // [2, 4]
     ->map(fn($n) => $n * 2)           // [4, 8]
     ->values();                        // [0 => 4, 1 => 8]
+
+
+============CURSOS============
+c1 | ESFM
+c2 | PREUNIVERSITARIOS
+
+============MODULOS============
+m1 | MODULO 1  - c1
+m2 | MODULO 2  - c1
+m3 | MODULO 1  - c2
+m4 | MODULO 1  - c2
+
+============MATERIAS============
+ma1 | CONOCIMIENTOS GENERALES
+ma2 | LECTURAS DE COMPRENSION
+ma3 | MATEMATICA
+ma4 | FISICA
+ma5 | QUIMICA
+
+============MODULOS_MATERIAS============
+      modulo materia
+modma1 | m1 | ma1
+modma2 | m2 | ma2
+modma3 | m3 | ma3
+modma4 | m4 | ma4
+
+============TEMAS============
+                  modulomateria
+t1 | MATEMATICA | modma1
+t2 | QUIMICA | modma1
+t3 | LECTURA 1 | modma2
+t4 | LECTURA 2 | modma2
+t5 | ECUACIONES | modma3
+t7 | MRU | modma4
+t8 | MRUV | modma4
+
+
+
+UNIVERSIDAD (Curso: "Ingeniería Informática")
+  ├── SEMESTRE 1 (Módulo 1)
+  │     ├── MATERIA: Matemática I
+  │     │     ├── TEMA: Límites → Quiz
+  │     │     ├── TEMA: Derivadas → Quiz
+  │     │     └── TEMA: Integrales → Quiz
+  │     └── MATERIA: Programación I
+  │           ├── TEMA: Variables → Quiz
+  │           └── TEMA: Bucles → Quiz
+  │
+  ├── SEMESTRE 2 (Módulo 2)
+  │     ├── MATERIA: Matemática II (misma materia, diferentes temas)
+  │     │     ├── TEMA: Matrices → Quiz
+  │     │     └── TEMA: Vectores → Quiz
+  │     └── MATERIA: Bases de Datos
+  │           └── (Esta materia ES el quiz directo, no tiene temas)

@@ -13,6 +13,7 @@ use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class MatriculaController extends Controller
 {
@@ -117,13 +118,15 @@ class MatriculaController extends Controller
         // Obtener materias del curso
         $materias = CursoMateria::where('curso_id', $curso->id)
             ->where('estado', 'activo')
-            ->with(['materia:id,nombre,codigo_materia', 'temas' => function ($query) {
-                $query->select('id', 'nombre', 'codigo_tema', 'tipo', 'estado')
-                    ->where('estado', 'activo')
-                    ->orderBy('orden');
-            }])
+            ->with(['materia:id,nombre,codigo_materia'])
             ->get()
             ->map(function ($cursoMateria) use ($matricula) {
+                // Obtener temas de la materia (no de CursoMateriaTema)
+                $temas = Tema::where('materia_id', $cursoMateria->materia_id)
+                    ->where('estado', 'activo')
+                    ->orderBy('orden')
+                    ->get();
+
                 // Obtener temas ya seleccionados para esta matrícula
                 $temasSeleccionados = CursoMateriaTema::where('mat_id', $matricula->id)
                     ->where('curso_materia_id', $cursoMateria->id)
@@ -136,7 +139,7 @@ class MatriculaController extends Controller
                     'materia_nombre' => $cursoMateria->materia->nombre,
                     'materia_codigo' => $cursoMateria->materia->codigo_materia,
                     'horas_semanales' => $cursoMateria->horas_semanales,
-                    'temas' => $cursoMateria->temas->map(function ($tema) use ($temasSeleccionados) {
+                    'temas' => $temas->map(function ($tema) use ($temasSeleccionados) {
                         return [
                             'id' => $tema->id,
                             'nombre' => $tema->nombre,
@@ -172,11 +175,25 @@ class MatriculaController extends Controller
      */
     public function guardarTemas(Request $request, User $user, Curso $curso)
     {
-        $request->validate([
-            'temas' => 'required|array',
-            'temas.*.curso_materia_id' => 'required|exists:curso_materias,id',
-            'temas.*.tema_id' => 'required|exists:temas,id',
-        ]);
+        // $request->validate([
+        // 'temas' => 'required|array',
+        // 'temas.*.curso_materia_id' => 'required|exists:curso_materias,id',
+        // 'temas.*.tema_id' => 'required|exists:temas,id',            
+        // ]);
+
+        if (!empty($request->temas)) {
+            // Solo validar si temas no está vacío
+            $request->validate([
+                'temas' => 'required|array',
+                'temas.*.curso_materia_id' => 'required|exists:curso_materias,id',
+                'temas.*.tema_id' => 'required|exists:temas,id',
+            ]);
+        } else {
+            // Si temas está vacío, validar que sea array (puede ser vacío)
+            $request->validate([
+                'temas' => 'array',
+            ]);
+        }
 
         // Obtener matrícula activa
         $matricula = Matricula::where('estudiante_id', $user->id)
@@ -203,6 +220,36 @@ class MatriculaController extends Controller
         return redirect()
             ->route('admin.matriculas.estudiante', $user->id)
             ->with('success', 'Temas asignados exitosamente.');
+    }
+
+    /**
+     * Eliminar una matrícula (desmatricular completamente)
+     */
+    public function destroy(Matricula $matricula)
+    {
+        // Verificar que la matrícula exista
+        if (!$matricula) {
+            return redirect()
+                ->route('admin.matriculas.estudiante', $matricula->estudiante_id)
+                ->with('error', 'La matrícula no existe.');
+        }
+
+        // Guardar ID del estudiante para redirección
+        $estudianteId = $matricula->estudiante_id;
+
+        DB::transaction(function () use ($matricula) {
+            // 1. Primero eliminar todos los temas asociados (si existen)
+            if (class_exists('App\Models\CursoMateriaTema')) {
+                \App\Models\CursoMateriaTema::where('mat_id', $matricula->id)->delete();
+            }
+
+            // 2. Eliminar la matrícula
+            $matricula->delete();
+        });
+
+        return redirect()
+            ->route('admin.matriculas.estudiante', $estudianteId)
+            ->with('success', 'Matrícula eliminada exitosamente.');
     }
 
     /**

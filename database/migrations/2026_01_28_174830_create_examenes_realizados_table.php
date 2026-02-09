@@ -13,41 +13,29 @@ return new class extends Migration
     {
         Schema::create('examenes_realizados', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('examen_id')->constrained('examenes');
+            $table->foreignId('tema_id')->constrained('temas');
             $table->foreignId('matricula_id')->constrained('matriculas');
             $table->integer('intento_numero')->default(1);
-
-            $table->dateTime('fecha_inicio')->useCurrent();
-            $table->dateTime('fecha_fin')->nullable();
-            $table->integer('tiempo_utilizado')->nullable();
-
+            $table->datetime('fecha_inicio')->useCurrent();
+            $table->datetime('fecha_fin')->nullable();
+            $table->integer('tiempo_utilizado')->nullable(); // en segundos
             $table->json('respuestas_json')->nullable();
-
             $table->decimal('puntaje_total', 5, 2)->nullable();
             $table->decimal('porcentaje', 5, 2)->nullable();
-
-            $table->enum('estado', [
-                'en_progreso',
-                'completado',
-                'abandonado',
-                'expirado'
-            ])->default('en_progreso');
-
+            $table->enum('estado', ['en_progreso', 'completado', 'abandonado', 'expirado'])->default('en_progreso');
             $table->foreignId('revisado_por')->nullable()->constrained('users');
-            $table->dateTime('fecha_revision')->nullable();
+            $table->datetime('fecha_revision')->nullable();
             $table->text('comentario_revisor')->nullable();
-
             $table->string('ip_address', 45)->nullable();
             $table->text('user_agent')->nullable();
-
             $table->timestamps();
-
-            $table->unique(['examen_id', 'matricula_id', 'intento_numero']);
-            $table->index('fecha_inicio');
-            $table->index('estado');
+            
+            $table->index(['tema_id', 'matricula_id']);
+            $table->unique(['tema_id', 'matricula_id', 'intento_numero']);
+            $table->index(['fecha_inicio']);
+            $table->index(['estado']);
         });
     }
-
     /**
      * Reverse the migrations.
      */

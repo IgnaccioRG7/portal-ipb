@@ -26,7 +26,7 @@ return new class extends Migration
             $table->enum('parentesco_tutor', ['padre', 'madre', 'tio', 'tia', 'abuelo', 'abuela', 'otro'])->nullable();
             $table->timestamps();
 
-            $table->index(['nombre', 'apellido_paterno']);
+            $table->index(['nombre', 'apellido_paterno', 'apellido_materno']);
         });
     }
 

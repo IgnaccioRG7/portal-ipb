@@ -25,9 +25,7 @@ return new class extends Migration
             $table->date('fecha_inicio')->nullable();
             $table->date('fecha_fin')->nullable();
             $table->string('imagen_url')->nullable();
-            $table->string('requisitos')->nullable();
-            // $table->foreignId('created_by')->constrained('users');
-            $table->timestamps();
+            $table->string('requisitos')->nullable();            $table->timestamps();
         });
     }
 

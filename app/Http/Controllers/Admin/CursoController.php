@@ -5,12 +5,238 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Curso;
 use App\Models\CursoMateria;
+use App\Models\Materia;
 use App\Models\Tema;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
 class CursoController extends Controller
 {
+    /*
+     *****************************************************************
+                    RUTAS PARA EL ADMINISTRADOR
+    *****************************************************************
+    */
+
+    /**
+     * Lista todos los cursos (para admin)
+     */
+    public function adminIndex()
+    {
+        $cursos = Curso::select('id', 'codigo_curso', 'nombre', 'nivel', 'estado', 'precio')
+            ->withCount('materias')
+            ->orderBy('nombre')
+            ->get();
+
+        return Inertia::render('Admin/Cursos/index', [
+            'cursos' => $cursos
+        ]);
+    }
+
+    /**
+     * Formulario para crear curso
+     */
+    public function create()
+    {
+        return Inertia::render('Admin/Cursos/create');
+    }
+
+    /**
+     * Guardar nuevo curso
+     */
+    public function store(Request $request)
+    {
+        $validated = $request->validate([
+            'codigo_curso' => 'required|string|max:20|unique:cursos,codigo_curso',
+            'nombre' => 'required|string|max:200',
+            'descripcion' => 'nullable|string',
+            'nivel' => 'required|in:básico,intermedio,avanzado,especializado',
+            'duracion_semanas' => 'nullable|integer|min:1',
+            'horas_semanales' => 'required|integer|min:1|max:40',
+            'precio' => 'required|numeric|min:0',
+            'capacidad_maxima' => 'required|integer|min:1',
+            'estado' => 'required|in:activo,inactivo,completo,cancelado',
+            'fecha_inicio' => 'nullable|date',
+            'fecha_fin' => 'nullable|date|after_or_equal:fecha_inicio',
+            'requisitos' => 'nullable|string',
+        ], [
+            'codigo_curso.unique' => 'Este código ya está en uso',
+            'nombre.required' => 'El nombre del curso es obligatorio',
+            'fecha_fin.after_or_equal' => 'La fecha de fin debe ser posterior a la fecha de inicio',
+        ]);
+
+        $curso = Curso::create($validated);
+
+        return redirect()
+            ->route('admin.cursos.asignar-materias', $curso)
+            ->with('success', 'Curso creado. Ahora asigna las materias.');
+    }
+
+    /**
+     * Formulario para editar curso
+     */
+    public function edit(Curso $curso)
+    {
+        return Inertia::render('Admin/Cursos/edit', [
+            'curso' => $curso->only([
+                'id',
+                'codigo_curso',
+                'nombre',
+                'descripcion',
+                'nivel',
+                'duracion_semanas',
+                'horas_semanales',
+                'precio',
+                'capacidad_maxima',
+                'estado',
+                'fecha_inicio',
+                'fecha_fin',
+                'requisitos'
+            ])
+        ]);
+    }
+
+    /**
+     * Actualizar curso
+     */
+    public function update(Request $request, Curso $curso)
+    {
+        $validated = $request->validate([
+            'codigo_curso' => 'required|string|max:20|unique:cursos,codigo_curso,' . $curso->id,
+            'nombre' => 'required|string|max:200',
+            'descripcion' => 'nullable|string',
+            'nivel' => 'required|in:básico,intermedio,avanzado,especializado',
+            'duracion_semanas' => 'nullable|integer|min:1',
+            'horas_semanales' => 'required|integer|min:1|max:40',
+            'precio' => 'required|numeric|min:0',
+            'capacidad_maxima' => 'required|integer|min:1',
+            'estado' => 'required|in:activo,inactivo,completo,cancelado',
+            'fecha_inicio' => 'nullable|date',
+            'fecha_fin' => 'nullable|date|after_or_equal:fecha_inicio',
+            'requisitos' => 'nullable|string',
+        ], [
+            'codigo_curso.unique' => 'Este código ya está en uso',
+            'nombre.required' => 'El nombre del curso es obligatorio',
+            'fecha_fin.after_or_equal' => 'La fecha de fin debe ser posterior a la fecha de inicio',
+        ]);
+
+        $curso->update($validated);
+
+        return redirect()
+            ->route('admin.cursos.index')
+            ->with('success', 'Curso actualizado correctamente');
+    }
+
+    /**
+     * Cambiar estado del curso (activo/inactivo)
+     */
+    public function toggleEstado(Curso $curso)
+    {
+        $nuevoEstado = $curso->estado === 'activo' ? 'inactivo' : 'activo';
+
+        $curso->update(['estado' => $nuevoEstado]);
+
+        return back()->with('success', "Curso {$nuevoEstado} correctamente");
+    }
+
+    /**
+     * Eliminar curso
+     */
+    public function destroy(Curso $curso)
+    {
+        // Verificar si tiene estudiantes matriculados
+        if ($curso->matriculas()->count() > 0) {
+            return back()->with('error', 'No se puede eliminar un curso con estudiantes matriculados');
+        }
+
+        $curso->delete();
+
+        return redirect()
+            ->route('admin.cursos.index')
+            ->with('success', 'Curso eliminado correctamente');
+    }
+
+    /**
+     * Formulario para asignar materias a un curso
+     */
+    public function asignarMaterias(Curso $curso)
+    {
+        $todasLasMaterias = Materia::select('id', 'codigo_materia', 'nombre', 'area', 'color')
+            ->orderBy('nombre')
+            ->get();
+
+        $materiasAsignadas = CursoMateria::where('curso_id', $curso->id)
+            ->with('materia:id,nombre,codigo_materia')
+            ->get()
+            ->map(fn($cm) => [
+                'id' => $cm->materia->id,
+                'nombre' => $cm->materia->nombre,
+                'codigo_materia' => $cm->materia->codigo_materia,
+                'horas_semanales' => $cm->horas_semanales,
+                'estado' => $cm->estado,
+            ]);
+
+        // ✅ Obtener todos los temas agrupados por materia
+        $temasPorMateria = Tema::whereIn('materia_id', $todasLasMaterias->pluck('id'))
+            ->select('id', 'materia_id', 'codigo_tema', 'nombre', 'tipo', 'estado')
+            ->orderBy('orden')
+            ->get()
+            ->groupBy('materia_id')
+            ->map(fn($temas) => $temas->map(fn($tema) => [
+                'id' => $tema->id,
+                'codigo_tema' => $tema->codigo_tema,
+                'nombre' => $tema->nombre ?? 'Sin nombre',
+                'tipo' => $tema->tipo,
+                'estado' => $tema->estado,
+            ]));
+
+        return Inertia::render('Admin/Cursos/asignar-materias', [
+            'curso' => $curso->only('id', 'nombre', 'codigo_curso'),
+            'todasLasMaterias' => $todasLasMaterias,
+            'materiasAsignadas' => $materiasAsignadas,
+            'temasPorMateria' => $temasPorMateria, // ✅ Nuevo
+        ]);
+    }
+
+    /**
+     * Guardar las materias asignadas
+     */
+    public function guardarMaterias(Request $request, Curso $curso)
+    {
+        $validated = $request->validate([
+            'materias' => 'required|array|min:1',
+            'materias.*.materia_id' => 'required|exists:materias,id',
+            'materias.*.horas_semanales' => 'required|integer|min:1|max:20',
+            'materias.*.estado' => 'required|in:activo,inactivo',
+        ], [
+            'materias.required' => 'Debes seleccionar al menos una materia',
+            'materias.min' => 'Debes seleccionar al menos una materia',
+        ]);
+
+        // Eliminar asignaciones anteriores
+        CursoMateria::where('curso_id', $curso->id)->delete();
+
+        // Crear nuevas asignaciones
+        foreach ($validated['materias'] as $materiaData) {
+            CursoMateria::create([
+                'curso_id' => $curso->id,
+                'materia_id' => $materiaData['materia_id'],
+                'horas_semanales' => $materiaData['horas_semanales'],
+                'estado' => $materiaData['estado'],
+            ]);
+        }
+
+        return redirect()
+            ->route('cursos.materias', $curso)
+            ->with('success', 'Materias asignadas correctamente al curso');
+    }
+
+    /*
+     *****************************************************************
+                    RUTAS PARA EL ADMINISTRADOR
+    *****************************************************************
+    */
+
     /**
      * Lista todos los cursos
      */
@@ -20,7 +246,7 @@ class CursoController extends Controller
             ->orderBy('nombre')
             ->get();
 
-        return Inertia::render('Admin/Cursos/index', [
+        return Inertia::render('Professor/Cursos/index', [
             'cursos' => $cursos
         ]);
     }
@@ -110,12 +336,12 @@ class CursoController extends Controller
     /**
      * Actualiza el quiz/tema
      */
-    public function updateTema(Request $request,Curso $curso, $materiaId, Tema $tema)
+    public function updateTema(Request $request, Curso $curso, $materiaId, Tema $tema)
     {
         if ($tema->materia_id != $materiaId) {
             abort(404, 'El tema no pertenece a esta materia');
         }
-        
+
         $validated = $request->validate([
             'nombre' => 'nullable|string|max:150',
             'descripcion' => 'nullable|string',
@@ -140,7 +366,7 @@ class CursoController extends Controller
 
             'curso_id' => 'nullable|exists:cursos,id',
             'materia_id' => 'required|exists:materias,id',
-            
+
         ], [
             // ✅ Mensajes personalizados
             'contenido.reading.required' => 'El texto de lectura es obligatorio para temas de tipo "lectura"',

@@ -3,44 +3,58 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Matricula extends Model
 {
     protected $table = 'matriculas';
 
-    /**
-     * Campos que se pueden asignar masivamente
-     */
     protected $fillable = [
         'estudiante_id',
         'curso_id',
         'codigo_matricula',
-        'estado',
         'fecha_finalizacion',
-        'observaciones'
+        'estado',
+        'observaciones',
+        'created_by'
     ];
 
-    /**
-     * Campos ocultos en JSON y toArray()
-     */
-    protected $hidden = [];
+    protected $casts = [
+        'fecha_finalizacion' => 'date',
+    ];
 
-    /**
-     * Tipos de datos para casting
-     */
-    // protected $casts = [
-    //     'fecha_finalizacion' => 'date',
-    //     'estado' => 'string'
-    // ];
+    // RELACIONES ACTUALIZADAS
+    public function estudiante(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'estudiante_id');
+    }
 
-    //
-    public function curso()
+    public function curso(): BelongsTo
     {
         return $this->belongsTo(Curso::class);
     }
 
-    public function cursoMateriaTemas()
+    public function accesos(): HasMany
     {
-        return $this->hasMany(CursoMateriaTema::class, 'mat_id');
+        return $this->hasMany(Acceso::class, 'mat_id');
+    }
+
+    public function examenesRealizados(): HasMany
+    {
+        return $this->hasMany(ExamenRealizado::class);
+    }
+
+    // Acceso a módulos a través de accesos
+    public function modulos()
+    {
+        return $this->hasManyThrough(
+            Modulo::class,
+            Acceso::class,
+            'mat_id', // Foreign key on accesos table
+            'id', // Foreign key on modulos table
+            'id', // Local key on matriculas table
+            'modulo_materia_id' // Local key on accesos table
+        )->distinct();
     }
 }

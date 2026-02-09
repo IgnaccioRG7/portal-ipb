@@ -11,18 +11,17 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('curso_materias', function (Blueprint $table) {
+        Schema::create('modulos', function (Blueprint $table) {
             $table->id();
             $table->foreignId('curso_id')->constrained('cursos');
-            $table->foreignId('materia_id')->constrained('materias');
-            // $table->json('temas_seleccionados')->nullable();
-            $table->integer('horas_semanales')->default(3);
-            $table->enum('estado', ['activa', 'inactiva'])->default('activa');
-            $table->date('fecha_inicio')->nullable();
-            $table->date('fecha_fin')->nullable();
+            $table->string('codigo_modulo', 20)->unique();
+            $table->string('nombre', 150);
+            $table->text('descripcion')->nullable();
+            $table->integer('orden')->default(0);
+            $table->date('fecha_inicio');
+            $table->date('fecha_fin');
+            $table->enum('estado', ['activo', 'inactivo', 'completado'])->default('activo');
             $table->timestamps();
-
-            $table->unique(['curso_id', 'materia_id']);
         });
     }
 

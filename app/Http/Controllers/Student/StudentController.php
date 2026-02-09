@@ -29,6 +29,10 @@ class StudentController extends Controller
             ->orderBy('id', 'desc')
             ->get()
             ->unique('curso_id') // Tomar solo una matrícula por curso (la más reciente)
+            ->filter(function ($matricula) {
+                // Solo mantener matrículas donde el curso esté activo
+                return $matricula->curso && $matricula->curso->estado === 'activo';
+            })
             ->values();
 
         Log::info($matriculas);
