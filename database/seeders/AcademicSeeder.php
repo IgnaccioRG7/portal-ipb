@@ -16,22 +16,23 @@ use Illuminate\Support\Facades\DB;
 /**************************************
  * ESTRUCTURA JERARQUICA DEL SEEDER CREADO
 ESFM (Curso 1)
-├── Módulo 1 (m1) - Ene-Jun 2024
+├── Módulo 1 (m1) - Ene-Jun 2026
 │   └── CONOCIMIENTOS GENERALES (Materia)
 │       ├── TEMA: MATEMATICA (Quiz con 3 preguntas)
 │       └── TEMA: QUIMICA (Quiz con 2 preguntas)
+│   └── LECTURAS DE COMPRENSION (Materia)
+│       ├── TEMA: LECTURA 1 (Quiz sobre deforestación)
 │
-└── Módulo 2 (m2) - Jul-Dic 2024
+└── Módulo 2 (m2) - Jul-Dic 2026
     └── LECTURAS DE COMPRENSION (Materia)
-        ├── TEMA: LECTURA 1 (Quiz sobre deforestación)
         └── TEMA: LECTURA 2 (Quiz sobre cambio climático)
 
 PREUNIVERSITARIOS (Curso 2)
-├── Módulo 1 (m3) - Ene-Abr 2024
+├── Módulo 1 (m3) - Ene-Abr 2026
 │   └── MATEMATICA (Materia)
 │       └── TEMA: ECUACIONES (Quiz con 2 preguntas)
 │
-└── Módulo 2 (m4) - May-Ago 2024
+└── Módulo 2 (m4) - May-Ago 2026
     └── FISICA (Materia)
         ├── TEMA: MRU (Movimiento Rectilíneo Uniforme)
         └── TEMA: MRUV (Movimiento Rectilíneo Uniformemente Variado)
@@ -59,29 +60,29 @@ class AcademicSeeder extends Seeder
         // =====================================================
         // LIMPIAR TABLAS - FORMA COMPATIBLE CON SQLITE Y MYSQL
         // =====================================================
-        
+
         // 1. Deshabilitar claves foráneas según el motor de BD
         if (DB::getDriverName() !== 'sqlite') {
             DB::statement('SET FOREIGN_KEY_CHECKS=0;');
         } else {
             DB::statement('PRAGMA foreign_keys = OFF;');
         }
-        
+
         // 2. Eliminar datos en orden inverso (primero los dependientes)
         // Usar delete() en lugar de truncate() para compatibilidad
-        
+
         // Tablas con dependencias (eliminar primero)
         DB::table('examenes_realizados')->delete();
         DB::table('temas')->delete();
         DB::table('accesos')->delete();
         DB::table('modulos_materias')->delete();
-        
+
         // Tablas principales (eliminar después)
         DB::table('matriculas')->delete();
         DB::table('modulos')->delete();
         DB::table('cursos')->delete();
         DB::table('materias')->delete();
-        
+
         // 3. Resetear autoincrementos (si es necesario)
         if (DB::getDriverName() !== 'sqlite') {
             // Para MySQL
@@ -100,7 +101,7 @@ class AcademicSeeder extends Seeder
                 "matriculas", "modulos", "cursos", "materias"
             )');
         }
-        
+
         // 4. Habilitar claves foráneas de nuevo
         if (DB::getDriverName() !== 'sqlite') {
             DB::statement('SET FOREIGN_KEY_CHECKS=1;');
@@ -143,32 +144,32 @@ class AcademicSeeder extends Seeder
             'curso_id' => $cursoESFM->id,
             'codigo_modulo' => 'm1',
             'nombre' => 'Módulo 1',
-            'fecha_inicio' => '2024-01-01',
-            'fecha_fin' => '2024-06-30',
+            'fecha_inicio' => '2026-01-01',
+            'fecha_fin' => '2026-06-30',
         ]);
 
         $moduloESFM2 = Modulo::create([
             'curso_id' => $cursoESFM->id,
             'codigo_modulo' => 'm2',
             'nombre' => 'Módulo 2',
-            'fecha_inicio' => '2024-07-01',
-            'fecha_fin' => '2024-12-31',
+            'fecha_inicio' => '2026-07-01',
+            'fecha_fin' => '2026-12-31',
         ]);
 
         $moduloPreuni1 = Modulo::create([
             'curso_id' => $cursoPreuniversitario->id,
             'codigo_modulo' => 'm3',
             'nombre' => 'Módulo 1',
-            'fecha_inicio' => '2024-01-01',
-            'fecha_fin' => '2024-04-30',
+            'fecha_inicio' => '2026-01-01',
+            'fecha_fin' => '2026-04-30',
         ]);
 
         $moduloPreuni2 = Modulo::create([
             'curso_id' => $cursoPreuniversitario->id,
             'codigo_modulo' => 'm4',
             'nombre' => 'Módulo 2',
-            'fecha_inicio' => '2024-05-01',
-            'fecha_fin' => '2024-08-31',
+            'fecha_inicio' => '2026-05-01',
+            'fecha_fin' => '2026-08-31',
         ]);
 
         // =====================================================
@@ -221,6 +222,14 @@ class AcademicSeeder extends Seeder
         ]);
 
         $modMat2 = ModuloMateria::create([
+            'mod_id' => $moduloESFM1->id,
+            'mat_id' => $materiaLectura->id,
+            'prof_id' => $admin->id,
+            'orden' => 2,
+            'estado' => 'activo',
+        ]);
+
+        $modMat3 = ModuloMateria::create([
             'mod_id' => $moduloESFM2->id,
             'mat_id' => $materiaLectura->id,
             'prof_id' => $admin->id,
@@ -228,7 +237,7 @@ class AcademicSeeder extends Seeder
             'estado' => 'activo',
         ]);
 
-        $modMat3 = ModuloMateria::create([
+        $modMat4 = ModuloMateria::create([
             'mod_id' => $moduloPreuni1->id,
             'mat_id' => $materiaMatematica->id,
             'prof_id' => $admin->id,
@@ -236,7 +245,7 @@ class AcademicSeeder extends Seeder
             'estado' => 'activo',
         ]);
 
-        $modMat4 = ModuloMateria::create([
+        $modMat5 = ModuloMateria::create([
             'mod_id' => $moduloPreuni2->id,
             'mat_id' => $materiaFisica->id,
             'prof_id' => $admin->id,
@@ -286,7 +295,7 @@ class AcademicSeeder extends Seeder
             ]),
             'estado' => 'activo',
             'visibilidad' => 'estudiantes',
-            'fecha_publicacion' => '2024-01-01',
+            'fecha_publicacion' => '2026-01-01',
             'created_by' => $admin->id,
         ]);
 
@@ -321,7 +330,7 @@ class AcademicSeeder extends Seeder
             ]),
             'estado' => 'activo',
             'visibilidad' => 'estudiantes',
-            'fecha_publicacion' => '2024-01-01',
+            'fecha_publicacion' => '2026-01-01',
             'created_by' => $admin->id,
         ]);
 
@@ -357,13 +366,13 @@ class AcademicSeeder extends Seeder
             ]),
             'estado' => 'activo',
             'visibilidad' => 'estudiantes',
-            'fecha_publicacion' => '2024-07-01',
+            'fecha_publicacion' => '2026-07-01',
             'created_by' => $admin->id,
         ]);
 
         // Tema 4: LECTURA 2 para LECTURAS DE COMPRENSION (modMat2)
         $tema4 = Tema::create([
-            'modulo_materia_id' => $modMat2->id,
+            'modulo_materia_id' => $modMat3->id,
             'codigo_tema' => 't4',
             'nombre' => 'LECTURA 2',
             'descripcion' => 'Análisis de texto ambiental',
@@ -388,13 +397,13 @@ class AcademicSeeder extends Seeder
             ]),
             'estado' => 'activo',
             'visibilidad' => 'estudiantes',
-            'fecha_publicacion' => '2024-07-15',
+            'fecha_publicacion' => '2026-07-15',
             'created_by' => $admin->id,
         ]);
 
         // Tema 5: ECUACIONES para MATEMATICA (modMat3)
         $tema5 = Tema::create([
-            'modulo_materia_id' => $modMat3->id,
+            'modulo_materia_id' => $modMat4->id,
             'codigo_tema' => 't5',
             'nombre' => 'ECUACIONES',
             'descripcion' => 'Resolución de ecuaciones lineales y cuadráticas',
@@ -418,13 +427,13 @@ class AcademicSeeder extends Seeder
             ]),
             'estado' => 'activo',
             'visibilidad' => 'estudiantes',
-            'fecha_publicacion' => '2024-01-01',
+            'fecha_publicacion' => '2026-01-01',
             'created_by' => $admin->id,
         ]);
 
         // Tema 7: MRU para FISICA (modMat4)
         $tema7 = Tema::create([
-            'modulo_materia_id' => $modMat4->id,
+            'modulo_materia_id' => $modMat5->id,
             'codigo_tema' => 't7',
             'nombre' => 'MRU',
             'descripcion' => 'Movimiento Rectilíneo Uniforme',
@@ -453,13 +462,13 @@ class AcademicSeeder extends Seeder
             ]),
             'estado' => 'activo',
             'visibilidad' => 'estudiantes',
-            'fecha_publicacion' => '2024-05-01',
+            'fecha_publicacion' => '2026-05-01',
             'created_by' => $admin->id,
         ]);
 
         // Tema 8: MRUV para FISICA (modMat4)
         $tema8 = Tema::create([
-            'modulo_materia_id' => $modMat4->id,
+            'modulo_materia_id' => $modMat5->id,
             'codigo_tema' => 't8',
             'nombre' => 'MRUV',
             'descripcion' => 'Movimiento Rectilíneo Uniformemente Variado',
@@ -493,7 +502,7 @@ class AcademicSeeder extends Seeder
             ]),
             'estado' => 'activo',
             'visibilidad' => 'estudiantes',
-            'fecha_publicacion' => '2024-05-15',
+            'fecha_publicacion' => '2026-05-15',
             'created_by' => $admin->id,
         ]);
 
@@ -536,17 +545,24 @@ class AcademicSeeder extends Seeder
             'estado' => 'activo',
         ]);
 
+        Acceso::create([ 
+            'mat_id' => $matriculaESFM->id,
+            'modulo_materia_id' => $modMat3->id, 
+            'orden' => 3,
+            'estado' => 'activo',
+        ]);
+
         // Accesos para el estudiante en PREUNIVERSITARIOS (módulo 3 y 4)
         Acceso::create([
             'mat_id' => $matriculaPreuni->id,
-            'modulo_materia_id' => $modMat3->id,
+            'modulo_materia_id' => $modMat4->id,
             'orden' => 1,
             'estado' => 'activo',
         ]);
 
         Acceso::create([
             'mat_id' => $matriculaPreuni->id,
-            'modulo_materia_id' => $modMat4->id,
+            'modulo_materia_id' => $modMat5->id,
             'orden' => 2,
             'estado' => 'activo',
         ]);
@@ -559,7 +575,7 @@ class AcademicSeeder extends Seeder
         $this->command->info('- 2 Cursos (ESFM, PREUNIVERSITARIOS)');
         $this->command->info('- 4 Módulos (m1, m2, m3, m4)');
         $this->command->info('- 5 Materias');
-        $this->command->info('- 4 Relaciones Módulo-Materia');
+        $this->command->info('- 5 Relaciones Módulo-Materia');
         $this->command->info('- 8 Temas con contenido JSON real');
         $this->command->info('- 2 Matrículas para el estudiante');
         $this->command->info('- 4 Accesos a módulos-materias');

@@ -9,6 +9,9 @@ import {
   PlayCircle,
   BookOpen,
   FileText,
+  Calendar,
+  ChevronDown,
+  ChevronUp,
 } from 'lucide-react';
 import { useState } from 'react';
 
@@ -23,102 +26,242 @@ const breadcrumbs: BreadcrumbItem[] = [
   }
 ];
 
-function MateriaCard({ data, cursoId }: { data: any; cursoId: number }) {
-  const { materia, temas } = data;
-  console.log(data);
+// Interfaces actualizadas
+interface Tema {
+  id: number;
+  nombre: string;
+  descripcion: string;
+  codigo_tema: string;
+  modulo_materia_id: number;
+  acceso_id?: number;
+}
 
+interface Materia {
+  id: number;
+  nombre: string;
+  descripcion: string;
+}
+
+interface MateriaConTemas {
+  modulo_materia_id: number;
+  materia: Materia;
+  temas: Tema[];
+  total_temas: number;
+}
+
+interface Modulo {
+  id: number;
+  codigo_modulo: string;
+  nombre: string;
+  fecha_inicio: string;
+  fecha_fin: string;
+  materias: MateriaConTemas[];
+  total_materias: number;
+  total_temas: number;
+}
+
+interface Curso {
+  id: number;
+  nombre: string;
+  descripcion: string;
+  total_modulos: number;
+  total_materias: number;
+  total_temas: number;
+}
+
+interface Props {
+  curso: Curso;
+  modulos: Modulo[];
+}
+
+function MateriaCard({ data, modulo, cursoId }: { 
+  data: MateriaConTemas; 
+  modulo: Modulo;
+  cursoId: number;
+}) {
+  const { materia, temas } = data;
+  const [expandida, setExpandida] = useState(false);
 
   const handleIniciarTemas = () => {
-    console.log('Iniciar temas');
     router.visit(estudiante.topics({
       curso: cursoId,
-      materia: materia.id
+      modulo: modulo.id,
+      materia: materia.id,
     }));
   };
 
-  const handleVerRecursos = () => {
-    console.log('Ver recursos');
-  };
-
   return (
-    <article className="group relative overflow-hidden rounded-xl border bg-white shadow-sm transition-all hover:shadow-lg dark:bg-gray-800 flex flex-col">
-      {/* Header con imagen */}
-      <div className="relative overflow-hidden">
-        <img
-          src="/hero.jpg"
-          alt={materia.nombre}
-          className="aspect-video w-full object-cover transition-transform group-hover:scale-105"
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-        <div className="absolute bottom-3 left-4 right-4">
-          <h3 className="text-xl font-bold text-white drop-shadow-lg">
-            {materia.nombre}
-          </h3>
+    <article className="overflow-hidden rounded-xl border bg-white shadow-sm transition-all hover:shadow-md dark:bg-gray-800 flex flex-col mb-4">
+      {/* Header de la materia */}
+      <div 
+        className="p-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors flex items-center justify-between"
+        onClick={() => setExpandida(!expandida)}
+      >
+        <div className="flex items-center gap-3">
+          <div className="rounded-full bg-blue-100 p-2 dark:bg-blue-900">
+            <BookOpen className="h-5 w-5 text-blue-600 dark:text-blue-300" />
+          </div>
+          <div>
+            <h3 className="font-bold text-lg text-gray-800 dark:text-gray-100">
+              {materia.nombre}
+            </h3>
+            <p className="text-sm text-gray-600 dark:text-gray-400">
+              {temas.length} tema{temas.length !== 1 ? 's' : ''}
+            </p>
+          </div>
+        </div>
+        <div className="flex items-center gap-4">
+          <span className="text-sm text-gray-500 dark:text-gray-400">
+            {modulo.nombre}
+          </span>
+          {expandida ? (
+            <ChevronUp className="h-5 w-5 text-gray-500" />
+          ) : (
+            <ChevronDown className="h-5 w-5 text-gray-500" />
+          )}
         </div>
       </div>
 
-      {/* Contenido */}
-      <div className="p-5 flex flex-col grow">
-        {/* Lista de temas */}
-        <div className="mb-4 grow">
-          <h4 className="mb-2 text-sm font-semibold text-gray-700 dark:text-gray-300">
-            Temas:
-          </h4>
-          <ul className="space-y-2">
-            {temas.map((tema: any) => {
-              const text = tema?.nombre || 'Resuelve el Quiz'
-              return (
+      {/* Contenido expandible */}
+      {expandida && (
+        <div className="p-4 border-t dark:border-gray-700">
+          <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
+            {materia.descripcion}
+          </p>
+          
+          {/* Lista de temas */}
+          <div className="mb-4">
+            <h4 className="font-semibold text-gray-700 dark:text-gray-300 mb-2">
+              Temas disponibles:
+            </h4>
+            <ul className="space-y-2">
+              {temas.map((tema) => (
                 <li
                   key={tema.id}
-                  className="flex items-center justify-between rounded-md border px-3 py-2 text-sm dark:border-gray-500"
+                  className="flex items-center justify-between rounded-lg border px-3 py-2 hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-700 transition-colors"
                 >
-                  <span className="font-medium text-gray-700 dark:text-gray-300">
-                    {text}
-                  </span>
-
-                  <button className="flex items-center gap-1 text-sm font-semibold text-blue-600 hover:underline">
+                  <div>
+                    <span className="font-medium text-gray-700 dark:text-gray-300">
+                      {tema.nombre}
+                    </span>
+                    {tema.descripcion && (
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                        {tema.descripcion}
+                      </p>
+                    )}
+                  </div>
+                  <button 
+                    className="flex items-center gap-1 text-sm font-semibold text-blue-600 hover:underline"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      // Aquí iría la acción para entrar al tema
+                    }}
+                  >
                     <PlayCircle size={16} />
                     Entrar
                   </button>
                 </li>
-              )
-            })}
-          </ul>
-        </div>
+              ))}
+            </ul>
+          </div>
 
-        {/* Acciones */}
-        <div className="space-y-2">
+          {/* Botón de acción */}
           <button
-            onClick={handleIniciarTemas}
-            className="flex w-full items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-2.5 font-semibold text-white transition-colors hover:bg-blue-700 cursor-pointer"
+            onClick={(e) => {
+              e.stopPropagation();
+              handleIniciarTemas();
+            }}
+            className="w-full flex items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-2.5 font-semibold text-white transition-colors hover:bg-blue-700 cursor-pointer"
           >
             <PlayCircle className="h-4 w-4" />
-            Iniciar Quiz
+            Iniciar todos los temas
           </button>
-          {/* <button
-            onClick={handleVerRecursos}
-            className="flex w-full items-center justify-center gap-2 rounded-lg border-2 border-gray-300 bg-white px-4 py-2.5 font-semibold text-gray-700 transition-colors hover:border-gray-400 hover:bg-gray-50" disabled
-          >
-            <FileText className="h-4 w-4" />
-            Ver Recursos
-          </button> */}
         </div>
-      </div>
+      )}
     </article>
   );
 }
 
-export default function Index({ curso, materias }: any) {
-  console.log(curso);
-  console.log(materias);
+function ModuloCard({ modulo, cursoId }: { modulo: Modulo; cursoId: number }) {
+  const [expandido, setExpandido] = useState(false);
 
+  const fechaInicio = new Date(modulo.fecha_inicio).toLocaleDateString()
+  const fechaFin = new Date(modulo.fecha_fin).toLocaleDateString()
+
+  return (
+    <div className="rounded-xl border bg-white shadow-sm dark:bg-gray-800 mb-6 overflow-hidden">
+      {/* Header del módulo */}
+      <div 
+        className="p-5 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors border-b dark:border-gray-700"
+        onClick={() => setExpandido(!expandido)}
+      >
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="rounded-full bg-purple-100 p-2 dark:bg-purple-900">
+              <Calendar className="h-5 w-5 text-purple-600 dark:text-purple-300" />
+            </div>
+            <div>
+              <h3 className="font-bold text-xl text-gray-800 dark:text-gray-100">
+                {modulo.nombre}
+              </h3>
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                {fechaInicio} - {fechaFin}
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-4">
+            <div className="text-right">
+              <div className="text-sm text-gray-500 dark:text-gray-400">
+                {modulo.total_materias} materia{modulo.total_materias !== 1 ? 's' : ''}
+              </div>
+              <div className="font-semibold text-gray-700 dark:text-gray-300">
+                {modulo.total_temas} tema{modulo.total_temas !== 1 ? 's' : ''}
+              </div>
+            </div>
+            {expandido ? (
+              <ChevronUp className="h-5 w-5 text-gray-500" />
+            ) : (
+              <ChevronDown className="h-5 w-5 text-gray-500" />
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Contenido del módulo */}
+      {expandido && (
+        <div className="p-5">
+          <div className="grid grid-cols-1 gap-4">
+            {modulo.materias.map((materia) => (
+              <MateriaCard 
+                key={materia.modulo_materia_id} 
+                data={materia} 
+                modulo={modulo}
+                cursoId={cursoId}
+              />
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+export default function Index({ curso, modulos }: Props) {
+  console.log(curso);
+  console.log(modulos);
+  
   const [searchTerm, setSearchTerm] = useState('');
 
-  const materiasFiltradas = materias.filter((item: any) =>
-    item.materia.nombre.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
-  const totalTemas = materias.reduce((acc: number, item: any) => acc + item.temas.length, 0);
+  // Filtrar módulos que contengan materias que coincidan con la búsqueda
+  const modulosFiltrados = modulos
+    .map(modulo => ({
+      ...modulo,
+      materias: modulo.materias.filter(materia => 
+        materia.materia.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        materia.materia.descripcion.toLowerCase().includes(searchTerm.toLowerCase())
+      )
+    }))
+    .filter(modulo => modulo.materias.length > 0);
 
   return (
     <ContentLayout
@@ -126,25 +269,47 @@ export default function Index({ curso, materias }: any) {
       title={curso.nombre}
       subtitle={curso.descripcion}
     >
-      {/* Stats */}
-      <section className="mb-6 grid grid-cols-1 gap-4 md:grid-cols-2">
+      {/* Stats del curso */}
+      <section className="mb-6 grid grid-cols-1 gap-4 md:grid-cols-3">
         <div className="flex items-center justify-between rounded-lg bg-white px-5 py-4 shadow-sm dark:bg-gray-800">
-          <div className="flex flex-row-reverse items-center gap-3">
-            <div className="text-sm text-gray-500 dark:text-gray-400">Total Temas</div>
-            <div className="text-2xl font-bold text-gray-900 dark:text-gray-300">{totalTemas}</div>
-          </div>
-          <div className="rounded-full bg-blue-100 p-3">
-            <BookOpen className="h-6 w-6 text-blue-600" />
+          <div className="flex items-center gap-3">
+            <div className="rounded-full bg-blue-100 p-3">
+              <Calendar className="h-6 w-6 text-blue-600" />
+            </div>
+            <div>
+              <div className="text-sm text-gray-500 dark:text-gray-400">Módulos</div>
+              <div className="text-2xl font-bold text-gray-900 dark:text-gray-300">
+                {curso.total_modulos}
+              </div>
+            </div>
           </div>
         </div>
 
         <div className="flex items-center justify-between rounded-lg bg-white px-5 py-4 shadow-sm dark:bg-gray-800">
-          <div className="flex flex-row-reverse items-center gap-3">
-            <div className="text-sm text-gray-500 dark:text-gray-400">Materias</div>
-            <div className="text-2xl font-bold text-purple-600">{materias.length}</div>
+          <div className="flex items-center gap-3">
+            <div className="rounded-full bg-green-100 p-3">
+              <BookOpen className="h-6 w-6 text-green-600" />
+            </div>
+            <div>
+              <div className="text-sm text-gray-500 dark:text-gray-400">Materias</div>
+              <div className="text-2xl font-bold text-gray-900 dark:text-gray-300">
+                {curso.total_materias}
+              </div>
+            </div>
           </div>
-          <div className="rounded-full bg-purple-100 p-3">
-            <BookOpen className="h-6 w-6 text-purple-600" />
+        </div>
+
+        <div className="flex items-center justify-between rounded-lg bg-white px-5 py-4 shadow-sm dark:bg-gray-800">
+          <div className="flex items-center gap-3">
+            <div className="rounded-full bg-purple-100 p-3">
+              <BookOpen className="h-6 w-6 text-purple-600" />
+            </div>
+            <div>
+              <div className="text-sm text-gray-500 dark:text-gray-400">Total Temas</div>
+              <div className="text-2xl font-bold text-gray-900 dark:text-gray-300">
+                {curso.total_temas}
+              </div>
+            </div>
           </div>
         </div>
       </section>
@@ -155,7 +320,7 @@ export default function Index({ curso, materias }: any) {
           <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
           <Input
             type="text"
-            placeholder="Buscar materia..."
+            placeholder="Buscar materia por nombre o descripción..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="pl-10"
@@ -163,17 +328,31 @@ export default function Index({ curso, materias }: any) {
         </div>
       </section>
 
-      {/* Grid de Materias */}
+      {/* Lista de módulos */}
       <section>
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {materiasFiltradas.map((item: any) => (
-            <MateriaCard
-              key={item.materia.id}
-              data={item}
+        {modulosFiltrados.length > 0 ? (
+          modulosFiltrados.map((modulo) => (
+            <ModuloCard 
+              key={modulo.id} 
+              modulo={modulo} 
               cursoId={curso.id}
             />
-          ))}
-        </div>
+          ))
+        ) : (
+          <div className="text-center py-12">
+            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gray-100 dark:bg-gray-700">
+              <Search className="h-8 w-8 text-gray-400" />
+            </div>
+            <h3 className="mb-2 text-lg font-semibold text-gray-900 dark:text-gray-100">
+              No se encontraron materias
+            </h3>
+            <p className="text-gray-500 dark:text-gray-400">
+              {searchTerm 
+                ? `No hay materias que coincidan con "${searchTerm}"`
+                : 'No hay módulos disponibles en este curso'}
+            </p>
+          </div>
+        )}
       </section>
     </ContentLayout>
   );

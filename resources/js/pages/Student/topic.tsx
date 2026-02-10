@@ -34,6 +34,7 @@ interface Tema {
   contenido_json: string;
   curso_materia_tema_id: number;
   curso_materia_id: number;
+  modulo_id: number;
 }
 
 // Props del componente Topic
@@ -66,7 +67,7 @@ export default function Topic({
   }, [tema.id])
 
   console.log(tema.tipo);
-  
+
   // if (tema.tipo === 'configurable') {
   //   const QUESTION_OPTIONS = [5, 10, 15, 20];
 

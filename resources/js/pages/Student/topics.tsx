@@ -32,6 +32,7 @@ export interface Tema {
   contenido_json: string;
   curso_materia_tema_id: number;
   curso_materia_id: number;
+  modulo_id: number;
 }
 
 // Props del componente Topics
@@ -40,15 +41,21 @@ export interface TopicsProps {
   materia: Materia;
   temas: Tema[];
   matricula: string | null;
+  modulo_actual?: { id: number; nombre: string };
 }
 
 export default function Topics({
   curso,
   materia,
   temas,
-  matricula
+  matricula,
+  modulo_actual
 }: TopicsProps) {
+  console.log(curso);
+  console.log(materia);
   console.log(temas);
+  console.log(matricula);
+  console.log(modulo_actual);
 
   const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Inicio', href: dashboard().url },
@@ -64,6 +71,7 @@ export default function Topics({
       router.visit(
         estudiante.topic({
           curso: curso.id,
+          modulo: temas[0].modulo_id,
           materia: materia.id,
           tema: temas[0].id
         }).url
@@ -73,7 +81,7 @@ export default function Topics({
 
   if (shouldRedirect) {
     return <ContentLayout breadcrumbs={breadcrumbs}>
-      <section className="w-full h-full flex flex-col gap-2">
+      <section className="w-full h-full flex flex-col gap-2 items-center">
         <div className="title w-full max-w-80 h-8 animate-pulse bg-gray-100/10 rounded-md"></div>
         <div className="title w-full h-8 animate-pulse bg-gray-100/10 rounded-md"></div>
         <div className="title w-full max-w-160 h-8 animate-pulse bg-gray-100/10 rounded-md"></div>
@@ -102,6 +110,7 @@ export default function Topics({
               key={tema.id}
               href={estudiante.topic({
                 curso: curso.id,
+                modulo: tema.modulo_id,
                 materia: materia.id,
                 tema: tema.id
               }).url}

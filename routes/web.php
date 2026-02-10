@@ -85,12 +85,15 @@ Route::middleware(['auth', 'verified', 'role:Admin'])->prefix('admin')->name('ad
     Route::prefix('matriculas')->name('matriculas.')->group(function () {
         Route::get('/estudiante/{user}', [MatriculaController::class, 'estudiante'])->name('estudiante');
         Route::post('/estudiante/{user}/matricular', [MatriculaController::class, 'matricular'])->name('matricular');
-        Route::get('/estudiante/{user}/curso/{curso}/materias', [MatriculaController::class, 'materias'])->name('materias');
-        Route::post('/estudiante/{user}/curso/{curso}/guardar-temas', [MatriculaController::class, 'guardarTemas'])->name('guardar-temas');
+
+        Route::get('/estudiante/{user}/curso/{curso}/modulos', [MatriculaController::class, 'modulos'])->name('modulos');
+        Route::post('/estudiante/{user}/curso/{curso}/guardar-modulos', [MatriculaController::class, 'guardarModulos'])->name('guardar-modulos');
+
+
+        // Route::get('/estudiante/{user}/curso/{curso}/materias', [MatriculaController::class, 'materias'])->name('materias');
+        // Route::post('/estudiante/{user}/curso/{curso}/guardar-temas', [MatriculaController::class, 'guardarTemas'])->name('guardar-temas');
 
         Route::delete('/{matricula}', [MatriculaController::class, 'destroy'])->name('destroy');
-
-
 
         Route::get('/{matricula}/editar', [MatriculaController::class, 'edit'])->name('edit');
         Route::put('/{matricula}', [MatriculaController::class, 'update'])->name('update');
@@ -138,8 +141,8 @@ Route::middleware(['auth', 'verified', 'role:Estudiante,Admin'])->prefix('estudi
     // Route::get('/', fn () => Inertia::render('dashboard'))->name('dashboard');
     Route::get('/', [StudentController::class, 'index'])->name('dashboard');
     Route::get('/curso/{course}', [StudentController::class, 'subjects'])->name('subjects');
-    Route::get('/curso/{curso}/materia/{materia}', [StudentController::class, 'topics'])->name('topics');
-    Route::get('/curso/{curso}/materia/{materia}/tema/{tema}', [StudentController::class, 'topic'])->name('topic');
+    Route::get('/curso/{curso}/modulo/{modulo}/materia/{materia}', [StudentController::class, 'topics'])->name('topics');
+    Route::get('/curso/{curso}/modulo/{modulo}/materia/{materia}/tema/{tema}', [StudentController::class, 'topic'])->name('topic');
 });
 
 // Rutas para el profesor con el admin

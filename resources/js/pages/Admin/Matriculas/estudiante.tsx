@@ -1,6 +1,6 @@
 // resources/js/pages/Admin/Matriculas/estudiante.tsx
 import ContentLayout from '@/layouts/content-layout';
-import { Head, useForm, Link } from '@inertiajs/react';
+import { Head, useForm, Link, usePage } from '@inertiajs/react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -34,6 +34,7 @@ interface Matricula {
   fecha_matricula: string;
 }
 
+
 export default function MatriculaEstudiante({
   estudiante,
   cursos,
@@ -44,8 +45,13 @@ export default function MatriculaEstudiante({
   matriculas_actuales: Matricula[];
 }) {
 
-  console.log(matriculas_actuales);
+  const { errors: pageErrors } = usePage().props;
+  console.log(pageErrors);
   
+
+
+  console.log(matriculas_actuales);
+
 
   const { data, setData, post, processing, errors, reset } = useForm<{
     curso_id: string;
@@ -223,7 +229,11 @@ export default function MatriculaEstudiante({
                         //   user: estudiante.id,
                         //   curso: matricula.id // Necesitarías pasar el ID real del curso
                         // })}
-                        href={admin.matriculas.materias({
+                        // href={admin.matriculas.materias({
+                        //   user: estudiante.id,
+                        //   curso: matricula.id_curso,
+                        // }).url}
+                        href={admin.matriculas.modulos({
                           user: estudiante.id,
                           curso: matricula.id_curso,
                         }).url}

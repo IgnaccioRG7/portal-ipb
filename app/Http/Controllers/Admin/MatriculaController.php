@@ -3,12 +3,14 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Acceso;
 use App\Models\User;
 use App\Models\Curso;
 use App\Models\Matricula;
 use App\Models\CursoMateria;
 use App\Models\Tema;
 use App\Models\CursoMateriaTema;
+use App\Models\Modulo;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Illuminate\Support\Str;
@@ -80,9 +82,11 @@ class MatriculaController extends Controller
             ->first();
 
         if ($matriculaExistente) {
-            return redirect()
-                ->back()
-                ->with('error', 'El estudiante ya está matriculado en este curso.');
+            Log::info("Matricula existente");
+            Log::info($matriculaExistente);
+            return back()->withErrors([
+                'curso_id' => 'El estudiante ya está matriculado en este curso.',
+            ]);
         }
 
         // Generar código de matrícula único
@@ -98,16 +102,16 @@ class MatriculaController extends Controller
             'observaciones' => $request->observaciones,
         ]);
 
-        return redirect()->route('admin.matriculas.materias', [
+        return redirect()->route('admin.matriculas.modulos', [
             'user' => $user->id,
             'curso' => $request->curso_id,
         ])->with('success', 'Estudiante matriculado exitosamente. Ahora selecciona las materias y temas.');
     }
 
     /**
-     * Mostrar materias de un curso para seleccionar temas
+     * Mostrar módulos de un curso para seleccionar
      */
-    public function materias(User $user, Curso $curso)
+    public function modulos(User $user, Curso $curso)
     {
         // Obtener matrícula activa
         $matricula = Matricula::where('estudiante_id', $user->id)
@@ -115,43 +119,40 @@ class MatriculaController extends Controller
             ->where('estado', 'activo')
             ->firstOrFail();
 
-        // Obtener materias del curso
-        $materias = CursoMateria::where('curso_id', $curso->id)
+        // Obtener módulos del curso con sus materias
+        $modulos = Modulo::where('curso_id', $curso->id)
             ->where('estado', 'activo')
-            ->with(['materia:id,nombre,codigo_materia'])
+            ->with(['moduloMaterias.materia'])
+            ->orderBy('fecha_inicio')
             ->get()
-            ->map(function ($cursoMateria) use ($matricula) {
-                // Obtener temas de la materia (no de CursoMateriaTema)
-                $temas = Tema::where('materia_id', $cursoMateria->materia_id)
-                    ->where('estado', 'activo')
-                    ->orderBy('orden')
-                    ->get();
-
-                // Obtener temas ya seleccionados para esta matrícula
-                $temasSeleccionados = CursoMateriaTema::where('mat_id', $matricula->id)
-                    ->where('curso_materia_id', $cursoMateria->id)
-                    ->pluck('tema_id')
+            ->map(function ($modulo) use ($matricula) {
+                // Obtener módulos-materias ya seleccionados para esta matrícula
+                $modulosMateriasSeleccionados = Acceso::where('mat_id', $matricula->id)
+                    ->whereHas('moduloMateria', function ($query) use ($modulo) {
+                        $query->where('mod_id', $modulo->id);
+                    })
+                    ->pluck('modulo_materia_id')
                     ->toArray();
 
                 return [
-                    'id' => $cursoMateria->id,
-                    'materia_id' => $cursoMateria->materia_id,
-                    'materia_nombre' => $cursoMateria->materia->nombre,
-                    'materia_codigo' => $cursoMateria->materia->codigo_materia,
-                    'horas_semanales' => $cursoMateria->horas_semanales,
-                    'temas' => $temas->map(function ($tema) use ($temasSeleccionados) {
+                    'id' => $modulo->id,
+                    'nombre' => $modulo->nombre,
+                    'codigo_modulo' => $modulo->codigo_modulo,
+                    'fecha_inicio' => $modulo->fecha_inicio,
+                    'fecha_fin' => $modulo->fecha_fin,
+                    'materias' => $modulo->moduloMaterias->map(function ($moduloMateria) use ($modulosMateriasSeleccionados) {
                         return [
-                            'id' => $tema->id,
-                            'nombre' => $tema->nombre,
-                            'codigo_tema' => $tema->codigo_tema,
-                            'tipo' => $tema->tipo,
-                            'seleccionado' => in_array($tema->id, $temasSeleccionados),
+                            'modulo_materia_id' => $moduloMateria->id,
+                            'materia_id' => $moduloMateria->materia->id,
+                            'materia_nombre' => $moduloMateria->materia->nombre,
+                            'materia_codigo' => $moduloMateria->materia->codigo_materia,
+                            'seleccionada' => in_array($moduloMateria->id, $modulosMateriasSeleccionados),
                         ];
                     }),
                 ];
             });
 
-        return Inertia::render('Admin/Matriculas/materias', [
+        return Inertia::render('Admin/Matriculas/modulos', [
             'estudiante' => [
                 'id' => $user->id,
                 'nombre' => $user->nombre_completo,
@@ -166,34 +167,19 @@ class MatriculaController extends Controller
                 'id' => $matricula->id,
                 'codigo_matricula' => $matricula->codigo_matricula,
             ],
-            'materias' => $materias,
+            'modulos' => $modulos,
         ]);
     }
 
     /**
-     * Guardar temas seleccionados para la matrícula
+     * Guardar módulos y materias seleccionados para la matrícula
      */
-    public function guardarTemas(Request $request, User $user, Curso $curso)
+    public function guardarModulos(Request $request, User $user, Curso $curso)
     {
-        // $request->validate([
-        // 'temas' => 'required|array',
-        // 'temas.*.curso_materia_id' => 'required|exists:curso_materias,id',
-        // 'temas.*.tema_id' => 'required|exists:temas,id',            
-        // ]);
-
-        if (!empty($request->temas)) {
-            // Solo validar si temas no está vacío
-            $request->validate([
-                'temas' => 'required|array',
-                'temas.*.curso_materia_id' => 'required|exists:curso_materias,id',
-                'temas.*.tema_id' => 'required|exists:temas,id',
-            ]);
-        } else {
-            // Si temas está vacío, validar que sea array (puede ser vacío)
-            $request->validate([
-                'temas' => 'array',
-            ]);
-        }
+        $request->validate([
+            'modulos_materias' => 'array',
+            'modulos_materias.*.modulo_materia_id' => 'required|exists:modulos_materias,id',
+        ]);
 
         // Obtener matrícula activa
         $matricula = Matricula::where('estudiante_id', $user->id)
@@ -202,24 +188,24 @@ class MatriculaController extends Controller
             ->firstOrFail();
 
         DB::transaction(function () use ($request, $matricula) {
-            // Eliminar temas anteriores para esta matrícula
-            CursoMateriaTema::where('mat_id', $matricula->id)->delete();
+            // Eliminar accesos anteriores para esta matrícula
+            Acceso::where('mat_id', $matricula->id)->delete();
 
-            // Insertar nuevos temas
-            foreach ($request->temas as $index => $temaData) {
-                CursoMateriaTema::create([
-                    'curso_materia_id' => $temaData['curso_materia_id'],
-                    'tema_id' => $temaData['tema_id'],
+            // Insertar nuevos accesos
+            foreach ($request->modulos_materias as $index => $moduloMateriaData) {
+                Acceso::create([
                     'mat_id' => $matricula->id,
+                    'modulo_materia_id' => $moduloMateriaData['modulo_materia_id'],
                     'orden' => $index + 1,
                     'estado' => 'activo',
+                    'fecha_asignacion' => now(),
                 ]);
             }
         });
 
         return redirect()
             ->route('admin.matriculas.estudiante', $user->id)
-            ->with('success', 'Temas asignados exitosamente.');
+            ->with('success', 'Módulos y materias asignados exitosamente.');
     }
 
     /**
@@ -238,10 +224,8 @@ class MatriculaController extends Controller
         $estudianteId = $matricula->estudiante_id;
 
         DB::transaction(function () use ($matricula) {
-            // 1. Primero eliminar todos los temas asociados (si existen)
-            if (class_exists('App\Models\CursoMateriaTema')) {
-                \App\Models\CursoMateriaTema::where('mat_id', $matricula->id)->delete();
-            }
+            // 1. Primero eliminar todos los accesos asociados
+            Acceso::where('mat_id', $matricula->id)->delete();
 
             // 2. Eliminar la matrícula
             $matricula->delete();
