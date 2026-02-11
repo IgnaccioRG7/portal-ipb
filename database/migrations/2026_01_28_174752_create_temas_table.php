@@ -11,9 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
+        // TODO: arreglar esta foranea ya que si elimina el registro de la tabla modulo_materia entonces eliminara todos los temas asociados a esta. Entonces si un profesor creo temas en esta materia y por x motivo le volvemos a asignar entonces elimina esos temas eso es un ERROR
         Schema::create('temas', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('modulo_materia_id')->constrained('modulos_materias');
+            $table->foreignId('modulo_materia_id')->constrained('modulos_materias')->onDelete('cascade');
             $table->string('codigo_tema', 30)->nullable();
             $table->string('nombre', 150);
             $table->text('descripcion')->nullable();

@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('mod_id')->constrained('modulos');
             $table->foreignId('mat_id')->constrained('materias');
-            $table->foreignId('prof_id')->constrained('users');
+            $table->foreignId('prof_id')->nullable()->constrained('users');
             $table->integer('orden')->default(0);
             $table->enum('estado', ['activo', 'inactivo'])->default('activo');
             $table->timestamps();

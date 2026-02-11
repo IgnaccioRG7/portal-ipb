@@ -72,16 +72,15 @@ export default function CursosIndex({ cursos: cursosData }: { cursos: any[] }) {
     <ContentLayout
       title="Gestión de Cursos"
       subtitle="Administra los cursos de la plataforma"
-    >
-      <Head title="Cursos" />
-
-      <div className="flex justify-end mb-4">
+      actions={<div className="">
         <Link href={admin.cursos.create().url}>
           <Button className="bg-green-600 hover:bg-green-500">
             <Plus size={18} className="mr-2" /> Crear Curso
           </Button>
         </Link>
-      </div>
+      </div>}
+    >
+      <Head title="Cursos" />
 
       <DataTable columns={columns} data={cursosData} />
     </ContentLayout>

@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('modulos', function (Blueprint $table) {
             $table->id();
             $table->foreignId('curso_id')->constrained('cursos');
-            $table->string('codigo_modulo', 20)->unique();
+            $table->string('codigo_modulo', 20);
             $table->string('nombre', 150);
             $table->text('descripcion')->nullable();
             $table->integer('orden')->default(0);

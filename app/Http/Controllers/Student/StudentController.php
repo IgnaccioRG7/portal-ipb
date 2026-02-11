@@ -119,22 +119,22 @@ class StudentController extends Controller
             ->orderBy('created_at', 'desc')
             ->firstOrFail();
 
-        // Obtener los módulos del curso con sus módulos-materias a los que el estudiante tiene acceso
-        // Paso 1: Obtener módulos con acceso
+        // ✅ PASO 1: Obtener módulos con AL MENOS UNA MATERIA ACTIVA
         $modulos = Modulo::where('curso_id', $course->id)
             ->where('estado', 'activo')
-            ->whereHas('moduloMaterias.accesos', function ($query) use ($matricula) {
-                $query->where('mat_id', $matricula->id)
-                    ->where('estado', 'activo');
-            })
+            // ->with(['moduloMaterias' => function ($q) {
+            //     $q->where('estado', 'activo');
+            // }])
             ->orderBy('fecha_inicio')
             ->get();
 
+        Log::info("Los modulos");
         Log::info($modulos);
 
         // Paso 2: Cargar relaciones para esos módulos
         if ($modulos->isNotEmpty()) {
             $modulos->load(['moduloMaterias' => function ($query) use ($matricula) {
+                $query->where('estado', 'activo');
                 $query->whereHas('accesos', function ($q) use ($matricula) {
                     $q->where('mat_id', $matricula->id)
                         ->where('estado', 'activo');
@@ -148,6 +148,9 @@ class StudentController extends Controller
                     ]);
             }]);
         }
+
+        Log::info("Los modulos2222222222");
+        Log::info($modulos);
 
         // Estructurar los datos para la vista
         $modulosData = $modulos->map(function ($modulo) {
@@ -188,7 +191,10 @@ class StudentController extends Controller
                     return $moduloMateria->temas->count();
                 }),
             ];
-        });
+        })->filter(function ($modu) {
+            // Filtrar módulos que tienen al menos una materia con acceso
+            return $modu['total_materias'] > 0;
+        })->values();
 
         // Calcular totales del curso
         $totalModulos = $modulosData->count();

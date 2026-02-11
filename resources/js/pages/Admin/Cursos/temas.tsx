@@ -1,3 +1,5 @@
+// TODOHOY: VER SI BORRAR ESTE ARCHIVO DE UNA VEZ YA QUE SE ESTA CREANDO EN LA RUTA DE PROFESOR
+
 import ContentLayout from '@/layouts/content-layout';
 import { Head, Link } from '@inertiajs/react';
 import { DataTable } from '@/components/data-table';

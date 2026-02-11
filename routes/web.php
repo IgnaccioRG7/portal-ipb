@@ -146,12 +146,36 @@ Route::middleware(['auth', 'verified', 'role:Estudiante,Admin'])->prefix('estudi
 });
 
 // Rutas para el profesor con el admin
-Route::middleware(['auth', 'verified', 'role:Profesor,Admin'])->prefix('cursos')->name('cursos.')->group(function () {;
+// Route::middleware(['auth', 'verified', 'role:Profesor,Admin'])->prefix('cursos')->name('cursos.')->group(function () {;
+//     Route::get('/', [CursoController::class, 'index'])->name('index');
+//     Route::get('/{curso}/materias', [CursoController::class, 'materias'])->name('materias');
+//     Route::get('/{curso}/materias/{materia}/temas', [CursoController::class, 'temas'])->name('materias.temas');
+//     Route::get('/{curso}/materias/{materia}/temas/{tema}/edit', [CursoController::class, 'editTema'])->name('temas.edit');
+//     Route::put('/{curso}/materias/{materia}/temas/{tema}', [CursoController::class, 'updateTema'])->name('temas.update');
+// });
+// Rutas para el profesor - AHORA CON MÓDULOS
+Route::middleware(['auth', 'verified', 'role:Profesor,Admin'])->prefix('cursos')->name('cursos.')->group(function () {
     Route::get('/', [CursoController::class, 'index'])->name('index');
-    Route::get('/{curso}/materias', [CursoController::class, 'materias'])->name('materias');
-    Route::get('/{curso}/materias/{materia}/temas', [CursoController::class, 'temas'])->name('materias.temas');
-    Route::get('/{curso}/materias/{materia}/temas/{tema}/edit', [CursoController::class, 'editTema'])->name('temas.edit');
-    Route::put('/{curso}/materias/{materia}/temas/{tema}', [CursoController::class, 'updateTema'])->name('temas.update');
+
+    // Módulos del curso donde el profesor tiene materias
+    Route::get('/{curso}/modulos', [CursoController::class, 'modulosProfesor'])->name('modulos');
+
+    // Materias del profesor en un módulo específico
+    Route::get('/{curso}/modulo/{modulo}/materias', [CursoController::class, 'materiasProfesor'])->name('materias');
+
+    // Temas de una materia en un módulo específico
+    Route::get('/{curso}/modulo/{modulo}/materia/{materia}/temas', [CursoController::class, 'temasProfesor'])->name('temas');
+
+    // Editar tema con módulo en contexto
+    Route::get('/{curso}/modulo/{modulo}/materia/{materia}/tema/{tema}/edit', [CursoController::class, 'editTema'])->name('temas.edit');
+    Route::put('/{curso}/modulo/{modulo}/materia/{materia}/tema/{tema}', [CursoController::class, 'updateTema'])->name('temas.update');
+
+    // Crear nuevo tema
+    Route::get('/{curso}/modulo/{modulo}/materia/{materia}/temas/create', [CursoController::class, 'createTema'])->name('temas.create');
+    Route::post('/{curso}/modulo/{modulo}/materia/{materia}/temas', [CursoController::class, 'storeTema'])->name('temas.store');
+
+    // ELIMINAR tema
+    Route::delete('/{curso}/modulo/{modulo}/materia/{materia}/tema/{tema}', [CursoController::class, 'destroyTema'])->name('temas.destroy');
 });
 
 

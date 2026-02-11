@@ -113,5 +113,27 @@ class UserSeeder extends Seeder
                 'estado' => 'activo',
             ]
         );
+
+        // 6. Crear PROFESOR 2
+        $personaProf2 = Persona::firstOrCreate(
+            ['ci' => '2000003'],
+            [
+                'nombre' => 'Jose Miguel',
+                'apellido_paterno' => 'Perez',
+                'genero' => 'masculino',
+                'ciudad' => 'La Paz',
+            ]
+        );
+
+        User::firstOrCreate(
+            ['email' => 'profe2@instituto.com'],
+            [
+                'persona_id' => $personaProf2->id,
+                'rol_id' => $rolProfesor->id,
+                'name' => 'josemiguel.perez',
+                'password' => Hash::make('password'),
+                'estado' => 'activo',
+            ]
+        );
     }
 }

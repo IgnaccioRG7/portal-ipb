@@ -9,12 +9,14 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
+
+    // TODO: arreglar esta foranea ya que si elimina el registro de la tabla modulo_materia entonces eliminara todos los accesos asociados a esta. eso es un ERROR
     public function up(): void
     {
         Schema::create('accesos', function (Blueprint $table) {
             $table->id();
             $table->foreignId('mat_id')->constrained('matriculas');
-            $table->foreignId('modulo_materia_id')->constrained('modulos_materias');
+            $table->foreignId('modulo_materia_id')->constrained('modulos_materias')->onDelete('cascade');
             $table->integer('orden')->default(0);
             $table->enum('estado', ['activo', 'inactivo'])->default('activo');
             $table->timestamps();

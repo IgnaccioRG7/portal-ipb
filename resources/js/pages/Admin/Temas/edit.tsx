@@ -1,3 +1,5 @@
+// TODOHOY: VER SI BORRAR ESTE ARCHIVO DE UNA VEZ YA QUE SE ESTA CREANDO EN LA RUTA DE PROFESOR
+
 import ContentLayout from '@/layouts/content-layout';
 import { Head, useForm } from '@inertiajs/react';
 import { Button } from '@/components/ui/button';

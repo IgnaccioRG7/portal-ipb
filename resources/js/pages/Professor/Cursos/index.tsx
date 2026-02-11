@@ -5,6 +5,8 @@ import { Eye } from 'lucide-react';
 import cursos from '@/routes/cursos';
 
 export default function CursosIndex({ cursos : cursosData }: { cursos: any[] }) {
+  console.log(cursosData);
+  
   const columns = [
     { key: 'codigo_curso', label: 'Código' },
     { key: 'nombre', label: 'Nombre del Curso' },
@@ -25,7 +27,9 @@ export default function CursosIndex({ cursos : cursosData }: { cursos: any[] }) 
       render: (curso: any) => (
         <Link
           // href={`/admin/cursos/${curso.id}/materias`}
-          href={cursos.materias(curso.id).url}
+          href={cursos.modulos({
+            curso: curso.id
+          }).url}
           className="text-blue-600 hover:text-blue-900 flex items-center gap-1"
           title="Ver materias"
         >

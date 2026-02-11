@@ -120,9 +120,13 @@ class MatriculaController extends Controller
             ->firstOrFail();
 
         // Obtener módulos del curso con sus materias
+        // ->with(['moduloMaterias.materia'])
         $modulos = Modulo::where('curso_id', $curso->id)
             ->where('estado', 'activo')
-            ->with(['moduloMaterias.materia'])
+            ->with(['moduloMaterias' => function($q){
+                $q->where('estado', 'activo')
+                    ->with('materia');
+            }])
             ->orderBy('fecha_inicio')
             ->get()
             ->map(function ($modulo) use ($matricula) {
