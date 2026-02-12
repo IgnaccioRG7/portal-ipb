@@ -113,6 +113,7 @@ class AcademicSeeder extends Seeder
         // ADMIN
         // =====================================================
         $admin = User::where('email', 'admin@instituto.com')->firstOrFail();
+        $prof = User::where('email', 'profe@instituto.com')->firstOrFail();
 
         // =====================================================
         // CURSOS
@@ -216,7 +217,7 @@ class AcademicSeeder extends Seeder
         $modMat1 = ModuloMateria::create([
             'mod_id' => $moduloESFM1->id,
             'mat_id' => $materiaConocimientos->id,
-            'prof_id' => $admin->id,
+            'prof_id' => $prof->id,
             'orden' => 1,
             'estado' => 'activo',
         ]);
@@ -224,7 +225,7 @@ class AcademicSeeder extends Seeder
         $modMat2 = ModuloMateria::create([
             'mod_id' => $moduloESFM1->id,
             'mat_id' => $materiaLectura->id,
-            'prof_id' => $admin->id,
+            'prof_id' => $prof->id,
             'orden' => 2,
             'estado' => 'activo',
         ]);
@@ -232,7 +233,7 @@ class AcademicSeeder extends Seeder
         $modMat3 = ModuloMateria::create([
             'mod_id' => $moduloESFM2->id,
             'mat_id' => $materiaLectura->id,
-            'prof_id' => $admin->id,
+            'prof_id' => $prof->id,
             'orden' => 1,
             'estado' => 'activo',
         ]);
@@ -240,7 +241,7 @@ class AcademicSeeder extends Seeder
         $modMat4 = ModuloMateria::create([
             'mod_id' => $moduloPreuni1->id,
             'mat_id' => $materiaMatematica->id,
-            'prof_id' => $admin->id,
+            'prof_id' => $prof->id,
             'orden' => 1,
             'estado' => 'activo',
         ]);
@@ -248,7 +249,7 @@ class AcademicSeeder extends Seeder
         $modMat5 = ModuloMateria::create([
             'mod_id' => $moduloPreuni2->id,
             'mat_id' => $materiaFisica->id,
-            'prof_id' => $admin->id,
+            'prof_id' => $prof->id,
             'orden' => 1,
             'estado' => 'activo',
         ]);
@@ -262,6 +263,7 @@ class AcademicSeeder extends Seeder
             'modulo_materia_id' => $modMat1->id,
             'codigo_tema' => 't1',
             'nombre' => 'MATEMATICA',
+            'tipo' => 'opcional',
             'descripcion' => 'Fundamentos de matemática',
             'contenido_json' => json_encode([
                 "questions" => [
@@ -304,6 +306,7 @@ class AcademicSeeder extends Seeder
             'modulo_materia_id' => $modMat1->id,
             'codigo_tema' => 't2',
             'nombre' => 'QUIMICA',
+            'tipo' => 'opcional',
             'descripcion' => 'Conceptos básicos de química',
             'contenido_json' => json_encode([
                 "questions" => [
@@ -339,6 +342,7 @@ class AcademicSeeder extends Seeder
             'modulo_materia_id' => $modMat2->id,
             'codigo_tema' => 't3',
             'nombre' => 'LECTURA 1',
+            'tipo' => 'lectura',
             'descripcion' => 'Análisis de texto sobre deforestación',
             'contenido_json' => json_encode([
                 "reading" => "La región andina de Bolivia ha experimentado una transformación profunda en las últimas décadas. Estudios científicos indican que la cobertura glaciar se ha reducido en un 85% desde 1975, afectando los recursos hídricos de millones de personas...",
@@ -375,6 +379,7 @@ class AcademicSeeder extends Seeder
             'modulo_materia_id' => $modMat3->id,
             'codigo_tema' => 't4',
             'nombre' => 'LECTURA 2',
+            'tipo' => 'lectura',
             'descripcion' => 'Análisis de texto ambiental',
             'contenido_json' => json_encode([
                 "reading" => "El cambio climático representa uno de los mayores desafíos para la humanidad. Según el IPCC, las emisiones de gases de efecto invernadero deben reducirse en un 45% para 2030 para limitar el calentamiento global a 1.5°C...",
@@ -406,6 +411,7 @@ class AcademicSeeder extends Seeder
             'modulo_materia_id' => $modMat4->id,
             'codigo_tema' => 't5',
             'nombre' => 'ECUACIONES',
+            'tipo' => 'opcional',
             'descripcion' => 'Resolución de ecuaciones lineales y cuadráticas',
             'contenido_json' => json_encode([
                 "questions" => [
@@ -436,6 +442,7 @@ class AcademicSeeder extends Seeder
             'modulo_materia_id' => $modMat5->id,
             'codigo_tema' => 't7',
             'nombre' => 'MRU',
+            'tipo' => 'opcional',
             'descripcion' => 'Movimiento Rectilíneo Uniforme',
             'contenido_json' => json_encode([
                 "questions" => [
@@ -471,6 +478,7 @@ class AcademicSeeder extends Seeder
             'modulo_materia_id' => $modMat5->id,
             'codigo_tema' => 't8',
             'nombre' => 'MRUV',
+            'tipo' => 'opcional',
             'descripcion' => 'Movimiento Rectilíneo Uniformemente Variado',
             'contenido_json' => json_encode([
                 "questions" => [

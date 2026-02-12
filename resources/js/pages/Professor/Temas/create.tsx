@@ -23,12 +23,12 @@ type TemaContent = {
   questions: Question[];
 };
 
-export default function TemaCreate({ 
-  curso, 
-  modulo, 
-  materia, 
-  modulo_materia_id, 
-  codigo_sugerido 
+export default function TemaCreate({
+  curso,
+  modulo,
+  materia,
+  modulo_materia_id,
+  codigo_sugerido
 }: any) {
   const { data, setData, post, processing, errors } = useForm<{
     codigo_tema: string;
@@ -37,6 +37,8 @@ export default function TemaCreate({
     tipo: string;
     estado: string;
     contenido: TemaContent;
+    randomizar_preguntas: boolean;
+    randomizar_respuestas: boolean;
   }>({
     codigo_tema: codigo_sugerido || 't1',
     nombre: '',
@@ -45,7 +47,9 @@ export default function TemaCreate({
     estado: 'borrador',
     contenido: {
       questions: []
-    }
+    },
+    randomizar_preguntas: false,
+    randomizar_respuestas:false,
   });
 
   const breadcrumbs: BreadcrumbItem[] = [
@@ -166,11 +170,14 @@ export default function TemaCreate({
     >
       <Head title="Crear Tema" />
 
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <form onSubmit={handleSubmit} className="space-y-6"
+        style={{
+          height: 'calc(100vh - 300px)'
+        }}>
         {/* Info básica */}
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 space-y-4">
           <h3 className="text-lg font-semibold border-b pb-2">Información del Tema</h3>
-          
+
           <div className="grid grid-cols-3 gap-4">
             <div>
               <Label htmlFor="codigo_tema">Código del Tema *</Label>
@@ -239,6 +246,43 @@ export default function TemaCreate({
               placeholder="Describe brevemente el tema..."
             />
           </div>
+          <div className="grid grid-cols-2 gap-4 mt-4">
+            <div className="flex items-center space-x-2 border rounded-lg p-4 bg-gray-50 dark:bg-gray-900">
+              <input
+                type="checkbox"
+                id="randomizar_preguntas"
+                checked={data.randomizar_preguntas || false}
+                onChange={(e) => setData('randomizar_preguntas', e.target.checked)}
+                className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500"
+              />
+              <div>
+                <Label htmlFor="randomizar_preguntas" className="font-medium cursor-pointer">
+                  🔀 Randomizar preguntas
+                </Label>
+                <p className="text-xs text-gray-500">
+                  Las preguntas aparecerán en orden aleatorio para cada estudiante
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center space-x-2 border rounded-lg p-4 bg-gray-50 dark:bg-gray-900">
+              <input
+                type="checkbox"
+                id="randomizar_respuestas"
+                checked={data.randomizar_respuestas || false}
+                onChange={(e) => setData('randomizar_respuestas', e.target.checked)}
+                className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500"
+              />
+              <div>
+                <Label htmlFor="randomizar_respuestas" className="font-medium cursor-pointer">
+                  🎲 Randomizar respuestas
+                </Label>
+                <p className="text-xs text-gray-500">
+                  Las opciones de respuesta aparecerán en orden aleatorio para cada estudiante
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Lectura (solo si tipo === "lectura") */}
@@ -261,7 +305,7 @@ export default function TemaCreate({
 
         {/* Preguntas */}
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-          <div className="flex justify-between items-center mb-4">
+          <div className="flex justify-between items-center sticky top-0 bg-white pb-6 pt-4 dark:bg-gray-800">
             <h3 className="text-lg font-semibold">Preguntas del Quiz</h3>
             <Button type="button" onClick={addQuestion} variant="outline">
               <Plus size={16} className="mr-1" /> Agregar Pregunta
@@ -273,10 +317,10 @@ export default function TemaCreate({
           {data.contenido.questions.length === 0 ? (
             <div className="text-center py-8 border-2 border-dashed rounded-lg">
               <p className="text-gray-500">No hay preguntas agregadas</p>
-              <Button 
-                type="button" 
-                onClick={addQuestion} 
-                variant="link" 
+              <Button
+                type="button"
+                onClick={addQuestion}
+                variant="link"
                 className="mt-2"
               >
                 <Plus size={16} className="mr-1" /> Agregar primera pregunta
@@ -372,16 +416,16 @@ export default function TemaCreate({
         </div>
 
         {/* Botones */}
-        <div className="flex justify-end gap-3 pt-4 border-t">
-          <Button 
-            type="button" 
-            variant="outline" 
+        <div className="flex justify-end gap-3 pt-4 border-t pb-20">
+          <Button
+            type="button"
+            variant="outline"
             onClick={() => window.history.back()}
           >
             Cancelar
           </Button>
-          <Button 
-            type="submit" 
+          <Button
+            type="submit"
             disabled={processing || data.contenido.questions.length === 0}
             className="bg-green-600 hover:bg-green-700"
           >

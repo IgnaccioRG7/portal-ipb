@@ -35,6 +35,8 @@ interface Tema {
   curso_materia_tema_id: number;
   curso_materia_id: number;
   modulo_id: number;
+  randomizar_preguntas: boolean;
+  randomizar_respuestas: boolean;
 }
 
 // Props del componente Topic
@@ -93,16 +95,17 @@ export default function Topic({
   // }
 
   // Para ver los resultados
-  if (isCompleteQuiz) {
-    return (
-      <ResultView
-        breadcrumbs={breadcrumbs}
-        contenido={tema.contenido_json ? JSON.parse(tema?.contenido_json) : []}
-        curso={curso}
-        title={title}
-      />
-    )
-  }
+  // if (isCompleteQuiz) {
+  //   return (
+  //     <ResultView
+  //       breadcrumbs={breadcrumbs}
+  //       contenido={tema.contenido_json ? JSON.parse(tema?.contenido_json) : []}
+  //       curso={curso}
+  //       title={title}
+  //       temaId={tema.id}
+  //     />
+  //   )
+  // }
 
   return (
     <ContentLayout breadcrumbs={breadcrumbs}>
@@ -119,7 +122,12 @@ export default function Topic({
           </Link>
           <h2 className="text-2xl font-bold w-full text-center">Resuelve la prueba de: {title}</h2>
         </header>
-        <Quiz tema={tema} />
+        <Quiz
+          tema={tema}
+          cursoId={curso.id}
+          moduloId={tema.modulo_id}
+          materiaId={materia.id}
+        />
       </section>
     </ContentLayout>
   )

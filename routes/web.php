@@ -143,6 +143,11 @@ Route::middleware(['auth', 'verified', 'role:Estudiante,Admin'])->prefix('estudi
     Route::get('/curso/{course}', [StudentController::class, 'subjects'])->name('subjects');
     Route::get('/curso/{curso}/modulo/{modulo}/materia/{materia}', [StudentController::class, 'topics'])->name('topics');
     Route::get('/curso/{curso}/modulo/{modulo}/materia/{materia}/tema/{tema}', [StudentController::class, 'topic'])->name('topic');
+
+    Route::post('/curso/{curso}/modulo/{modulo}/materia/{materia}/tema/{tema}/examen', [StudentController::class, 'guardarExamen'])
+        ->name('examen.guardar');
+    Route::get('/curso/{curso}/modulo/{modulo}/materia/{materia}/tema/{tema}/resultados', [StudentController::class, 'resultados'])
+        ->name('tema.resultados');
 });
 
 // Rutas para el profesor con el admin
@@ -153,6 +158,8 @@ Route::middleware(['auth', 'verified', 'role:Estudiante,Admin'])->prefix('estudi
 //     Route::get('/{curso}/materias/{materia}/temas/{tema}/edit', [CursoController::class, 'editTema'])->name('temas.edit');
 //     Route::put('/{curso}/materias/{materia}/temas/{tema}', [CursoController::class, 'updateTema'])->name('temas.update');
 // });
+
+
 // Rutas para el profesor - AHORA CON MÓDULOS
 Route::middleware(['auth', 'verified', 'role:Profesor,Admin'])->prefix('cursos')->name('cursos.')->group(function () {
     Route::get('/', [CursoController::class, 'index'])->name('index');
@@ -176,6 +183,13 @@ Route::middleware(['auth', 'verified', 'role:Profesor,Admin'])->prefix('cursos')
 
     // ELIMINAR tema
     Route::delete('/{curso}/modulo/{modulo}/materia/{materia}/tema/{tema}', [CursoController::class, 'destroyTema'])->name('temas.destroy');
+
+    // Ver resultados del tema:
+    Route::get(
+        '/{curso}/modulo/{modulo}/materia/{materia}/tema/{tema}/resultados',
+        [CursoController::class, 'resultadosTemaProfesor']
+    )
+        ->name('temas.resultados');
 });
 
 

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Curso;
 use App\Models\CursoMateria;
+use App\Models\ExamenRealizado;
 use App\Models\Materia;
 use App\Models\Modulo;
 use App\Models\ModuloMateria;
@@ -588,6 +589,8 @@ class CursoController extends Controller
                 'estado' => $tema->estado,
                 'contenido' => $contenido,
                 'modulo_materia_id' => $moduloMateria->id,
+                'randomizar_preguntas' => $tema->randomizar_preguntas ?? false,
+                'randomizar_respuestas' => $tema->randomizar_respuestas ?? false,                 
             ],
             'curso' => $curso->only('id', 'nombre'),
             'modulo' => $modulo->only('id', 'nombre'),
@@ -639,7 +642,7 @@ class CursoController extends Controller
 
         $validated = $request->validate([
             'codigo_tema' => 'required|string|max:20|unique:temas,codigo_tema',
-            'nombre' => 'nullable|string|max:150',
+            'nombre' => 'required|string|max:150',
             'descripcion' => 'nullable|string',
             'tipo' => 'required|in:lectura,opcional,configurable',
             'estado' => 'required|in:activo,inactivo,borrador',
@@ -652,6 +655,8 @@ class CursoController extends Controller
             'contenido.questions.*.options' => 'required|array|min:2',
             'contenido.questions.*.options.*' => 'required|string|min:1',
             'contenido.questions.*.correctAnswer' => 'required|integer|min:0',
+            'randomizar_preguntas' => 'sometimes|boolean',
+            'randomizar_respuestas' => 'sometimes|boolean',
         ]);
 
         Tema::create([
@@ -665,6 +670,8 @@ class CursoController extends Controller
             'visibilidad' => 'estudiantes',
             'fecha_publicacion' => now(),
             'created_by' => $profesorId,
+            'randomizar_preguntas' => $validated['randomizar_preguntas'] ?? false,
+            'randomizar_respuestas' => $validated['randomizar_respuestas'] ?? false,
         ]);
 
         return redirect()
@@ -693,7 +700,7 @@ class CursoController extends Controller
         }
 
         $validated = $request->validate([
-            'nombre' => 'nullable|string|max:150',
+            'nombre' => 'required|string|max:150',
             'descripcion' => 'nullable|string',
             'tipo' => 'required|in:lectura,opcional,configurable',
             'estado' => 'required|in:activo,inactivo,borrador',
@@ -706,6 +713,8 @@ class CursoController extends Controller
             'contenido.questions.*.options' => 'required|array|min:2',
             'contenido.questions.*.options.*' => 'required|string|min:1',
             'contenido.questions.*.correctAnswer' => 'required|integer|min:0',
+            'randomizar_preguntas' => 'sometimes|boolean',
+            'randomizar_respuestas' => 'sometimes|boolean',
         ]);
 
         $tema->update([
@@ -714,6 +723,8 @@ class CursoController extends Controller
             'tipo' => $validated['tipo'],
             'estado' => $validated['estado'],
             'contenido_json' => json_encode($validated['contenido']),
+            'randomizar_preguntas' => $validated['randomizar_preguntas'] ?? false,
+            'randomizar_respuestas' => $validated['randomizar_respuestas'] ?? false,
         ]);
 
         return redirect()
@@ -723,6 +734,91 @@ class CursoController extends Controller
                 'materia' => $materia->id
             ])
             ->with('success', 'Tema actualizado correctamente');
+    }
+
+
+    /**
+     * Mostrar resultados de un tema para todos los estudiantes
+     */
+    public function resultadosTemaProfesor(Curso $curso, Modulo $modulo, Materia $materia, Tema $tema)
+    {
+        $profesorId = auth()->guard()->id();
+
+        // Verificar que el profesor tenga acceso a este tema
+        $moduloMateria = ModuloMateria::where('mod_id', $modulo->id)
+            ->where('mat_id', $materia->id)
+            ->where('prof_id', $profesorId)
+            ->where('estado', 'activo')
+            ->firstOrFail();
+
+        if ($tema->modulo_materia_id !== $moduloMateria->id) {
+            abort(403, 'No tienes permiso para ver estos resultados');
+        }
+
+        // Obtener TODOS los exámenes de este tema
+        $examenes = ExamenRealizado::where('tema_id', $tema->id)
+            ->with(['matricula.estudiante.persona', 'matricula.curso'])
+            ->orderBy('fecha_fin', 'desc')
+            ->get();
+
+        // Agrupar por estudiante y calcular estadísticas
+        $estadisticasPorEstudiante = $examenes->groupBy('matricula.estudiante_id')
+            ->map(function ($examenesEstudiante) {
+                $mejorIntento = $examenesEstudiante->sortByDesc('porcentaje')->first();
+                $ultimoIntento = $examenesEstudiante->sortByDesc('fecha_fin')->first();
+
+                return [
+                    'estudiante_id' => $examenesEstudiante->first()->matricula->estudiante_id,
+                    'estudiante_nombre' => $examenesEstudiante->first()->matricula->estudiante->persona->nombre_completo,
+                    'estudiante_email' => $examenesEstudiante->first()->matricula->estudiante->email,
+                    'total_intentos' => $examenesEstudiante->count(),
+                    'mejor_puntaje' => $mejorIntento->porcentaje,
+                    'mejor_fecha' => $mejorIntento->fecha_fin,
+                    'ultimo_puntaje' => $ultimoIntento->porcentaje,
+                    'ultima_fecha' => $ultimoIntento->fecha_fin,
+                    'promedio' => round($examenesEstudiante->avg('porcentaje'), 2),
+                    'aprobados' => $examenesEstudiante->filter(fn($e) => $e->porcentaje >= 70)->count(),
+                    'reprobados' => $examenesEstudiante->filter(fn($e) => $e->porcentaje < 70)->count(),
+                ];
+            })->values();
+
+        // Estadísticas generales del tema
+        $estadisticasGenerales = [
+            'total_estudiantes' => $estadisticasPorEstudiante->count(),
+            'total_intentos' => $examenes->count(),
+            'promedio_general' => round($examenes->avg('porcentaje'), 2),
+            'nota_maxima' => $examenes->max('porcentaje'),
+            'nota_minima' => $examenes->min('porcentaje'),
+            'total_aprobados' => $examenes->filter(fn($e) => $e->porcentaje >= 70)->count(),
+            'total_reprobados' => $examenes->filter(fn($e) => $e->porcentaje < 70)->count(),
+        ];
+
+        // Obtener todos los intentos detallados (para la tabla expandible)
+        $intentosDetallados = $examenes->map(fn($examen) => [
+            'id' => $examen->id,
+            'estudiante_nombre' => $examen->matricula->estudiante->persona->nombre_completo,
+            'intento_numero' => $examen->intento_numero,
+            'fecha' => $examen->fecha_fin,
+            'tiempo' => $examen->tiempo_utilizado,
+            'puntaje' => $examen->puntaje_total,
+            'porcentaje' => $examen->porcentaje,
+            'estado' => $examen->estado,
+        ]);
+
+        return Inertia::render('Professor/Cursos/resultados', [
+            'curso' => $curso->only('id', 'nombre', 'codigo_curso'),
+            'modulo' => $modulo->only('id', 'nombre', 'codigo_modulo'),
+            'materia' => $materia->only('id', 'nombre', 'codigo_materia'),
+            'tema' => [
+                'id' => $tema->id,
+                'codigo_tema' => $tema->codigo_tema,
+                'nombre' => $tema->nombre,
+                'total_preguntas' => count(json_decode($tema->contenido_json, true)['questions'] ?? []),
+            ],
+            'estadisticas_generales' => $estadisticasGenerales,
+            'estadisticas_estudiantes' => $estadisticasPorEstudiante,
+            'intentos' => $intentosDetallados,
+        ]);
     }
     /*
      *****************************************************************

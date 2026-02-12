@@ -33,6 +33,8 @@ export interface Tema {
   curso_materia_tema_id: number;
   curso_materia_id: number;
   modulo_id: number;
+  randomizar_preguntas: boolean;
+  randomizar_respuestas: boolean;
 }
 
 // Props del componente Topics

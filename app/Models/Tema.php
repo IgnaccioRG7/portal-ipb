@@ -17,7 +17,10 @@ class Tema extends Model
         'descripcion',
         'contenido_json',
         'estado',
+        'tipo',
         'visibilidad',
+        'randomizar_preguntas',
+        'randomizar_respuestas', 
         'fecha_publicacion',
         'created_by'
     ];
@@ -25,6 +28,8 @@ class Tema extends Model
     protected $casts = [
         'contenido_json' => 'array',
         'fecha_publicacion' => 'date',
+        'randomizar_preguntas' => 'boolean',
+        'randomizar_respuestas' => 'boolean', 
     ];
 
     // RELACIONES ACTUALIZADAS

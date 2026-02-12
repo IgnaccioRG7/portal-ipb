@@ -24,18 +24,24 @@ type TemaContent = {
 };
 
 export default function TemaEdit({ tema, curso, modulo, materia }: any) {
+  console.log(tema);
+
   const { data, setData, put, processing, errors } = useForm<{
     nombre: string;
     descripcion: string;
     tipo: string;
     estado: string;
     contenido: TemaContent;
+    randomizar_preguntas: boolean;
+    randomizar_respuestas: boolean;
   }>({
     nombre: tema.nombre || '',
     descripcion: tema.descripcion || '',
     tipo: tema.tipo,
     estado: tema.estado,
-    contenido: tema.contenido || { questions: [] }
+    contenido: tema.contenido || { questions: [] },
+    randomizar_preguntas: tema?.randomizar_preguntas || false,
+    randomizar_respuestas: tema?.randomizar_respuestas || false,
   });
 
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -180,9 +186,13 @@ export default function TemaEdit({ tema, curso, modulo, materia }: any) {
     >
       <Head title="Editar Tema" />
 
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <form onSubmit={handleSubmit} className="space-y-6"
+        style={{
+          height: 'calc(100vh - 300px)'
+        }}>
         {/* Botón de eliminar - Flotante */}
-        <div className="sticky top-20 z-10 flex justify-end mb-4">
+        {/* TODOHOY: importante eliminar el tema solo sino tiene dependencias en los resultados */}
+        {/* <div className="sticky top-20 z-10 flex justify-end mb-4">
           <Button
             type="button"
             variant="destructive"
@@ -192,12 +202,12 @@ export default function TemaEdit({ tema, curso, modulo, materia }: any) {
             <Trash2 size={16} className="mr-2" />
             Eliminar este Tema
           </Button>
-        </div>
+        </div> */}
 
         {/* Info básica */}
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 space-y-4">
           <h3 className="text-lg font-semibold border-b pb-2">Información del Tema</h3>
-          
+
           <div className="grid grid-cols-2 gap-4">
             <div>
               <Label htmlFor="codigo_tema">Código del Tema</Label>
@@ -263,6 +273,44 @@ export default function TemaEdit({ tema, curso, modulo, materia }: any) {
               placeholder="Describe brevemente el tema..."
             />
           </div>
+
+          <div className="grid grid-cols-2 gap-4 mt-4">
+            <div className="flex items-center space-x-2 border rounded-lg p-4 bg-gray-50 dark:bg-gray-900">
+              <input
+                type="checkbox"
+                id="randomizar_preguntas"
+                checked={data.randomizar_preguntas || false}
+                onChange={(e) => setData('randomizar_preguntas', e.target.checked)}
+                className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500"
+              />
+              <div>
+                <Label htmlFor="randomizar_preguntas" className="font-medium cursor-pointer">
+                  🔀 Randomizar preguntas
+                </Label>
+                <p className="text-xs text-gray-500">
+                  Las preguntas aparecerán en orden aleatorio para cada estudiante
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center space-x-2 border rounded-lg p-4 bg-gray-50 dark:bg-gray-900">
+              <input
+                type="checkbox"
+                id="randomizar_respuestas"
+                checked={data.randomizar_respuestas || false}
+                onChange={(e) => setData('randomizar_respuestas', e.target.checked)}
+                className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500"
+              />
+              <div>
+                <Label htmlFor="randomizar_respuestas" className="font-medium cursor-pointer">
+                  🎲 Randomizar respuestas
+                </Label>
+                <p className="text-xs text-gray-500">
+                  Las opciones de respuesta aparecerán en orden aleatorio para cada estudiante
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Lectura (solo si tipo === "lectura") */}
@@ -284,7 +332,7 @@ export default function TemaEdit({ tema, curso, modulo, materia }: any) {
 
         {/* Preguntas */}
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-          <div className="flex justify-between items-center mb-4">
+          <div className="flex justify-between items-center sticky top-0 bg-white pb-6 pt-4 dark:bg-gray-800">
             <h3 className="text-lg font-semibold">Preguntas del Quiz</h3>
             <Button type="button" onClick={addQuestion} variant="outline">
               <Plus size={16} className="mr-1" /> Agregar Pregunta
@@ -296,10 +344,10 @@ export default function TemaEdit({ tema, curso, modulo, materia }: any) {
           {data.contenido.questions.length === 0 ? (
             <div className="text-center py-8 border-2 border-dashed rounded-lg">
               <p className="text-gray-500">No hay preguntas en este quiz</p>
-              <Button 
-                type="button" 
-                onClick={addQuestion} 
-                variant="link" 
+              <Button
+                type="button"
+                onClick={addQuestion}
+                variant="link"
                 className="mt-2"
               >
                 <Plus size={16} className="mr-1" /> Agregar primera pregunta
@@ -395,16 +443,16 @@ export default function TemaEdit({ tema, curso, modulo, materia }: any) {
         </div>
 
         {/* Botones */}
-        <div className="flex justify-end gap-3 pt-4 border-t">
-          <Button 
-            type="button" 
-            variant="outline" 
+        <div className="flex justify-end gap-3 pt-4 border-t pb-20">
+          <Button
+            type="button"
+            variant="outline"
             onClick={() => window.history.back()}
           >
             Cancelar
           </Button>
-          <Button 
-            type="submit" 
+          <Button
+            type="submit"
             disabled={processing}
             className="bg-green-600 hover:bg-green-700"
           >

@@ -7,6 +7,7 @@ use App\Models\Acceso;
 use App\Models\Curso;
 use App\Models\CursoMateria;
 use App\Models\CursoMateriaTema;
+use App\Models\ExamenRealizado;
 use App\Models\Materia;
 use App\Models\Matricula;
 use App\Models\Modulo;
@@ -308,18 +309,13 @@ class StudentController extends Controller
             })
             ->firstOrFail();
 
+        Log::info('TEMA VALIDADO');
+        Log::info($temaValidado);
+
         // Necesitamos el ModuloMateria para algunas cosas (como su ID)
         $moduloMateria = ModuloMateria::where('mod_id', $modulo->id)
             ->where('mat_id', $materia->id)
             ->first();
-
-        // TODO: Aquí se agregará lógica para registrar que el estudiante inició el quiz del tema
-        // ExamenRealizado::create([
-        //     'estudiante_id' => $studentId,
-        //     'tema_id' => $temaValidado->id,
-        //     'modulo_materia_id' => $moduloMateria->id,
-        //     'estado' => 'iniciado'
-        // ]);
 
         return Inertia::render('Student/topic', [
             'curso' => [
@@ -341,11 +337,200 @@ class StudentController extends Controller
                 'modulo_materia_id' => $moduloMateria->id ?? null,
                 'modulo_id' => $modulo->id,
                 'modulo_nombre' => $modulo->nombre,
+                'randomizar_preguntas' => $temaValidado->randomizar_preguntas ?? false,
+                'randomizar_respuestas' => $temaValidado->randomizar_respuestas ?? false,
             ],
             'modulo' => [
                 'id' => $modulo->id,
                 'nombre' => $modulo->nombre,
             ],
+        ]);
+    }
+
+    public function guardarExamen(Request $request, Curso $curso, Modulo $modulo, Materia $materia, Tema $tema)
+    {
+        $studentId = auth()->guard()->id();
+
+        // Validar matrícula activa
+        $matricula = Matricula::where('estudiante_id', $studentId)
+            ->where('curso_id', $curso->id)
+            ->where('estado', 'activo')
+            ->firstOrFail();
+
+        // Validar datos del examen
+        $validated = $request->validate([
+            'respuestas' => 'required|array',
+            'tiempo_utilizado' => 'required|integer|min:1',
+        ]);
+
+        // ✅ OBTENER LAS PREGUNTAS ORIGINALES DEL TEMA
+        $contenidoJson = json_decode($tema->contenido_json, true);
+        $preguntasOriginales = $contenidoJson['questions'] ?? [];
+
+        if (empty($preguntasOriginales)) {
+            return back()->withErrors(['error' => 'No se encontraron preguntas en el tema.']);
+        }
+
+        // ✅ CALCULAR RESPUESTAS CORRECTAS EN EL BACKEND
+        $respuestasUsuario = $validated['respuestas'];
+        $totalPreguntas = count($preguntasOriginales);
+        $respuestasCorrectas = 0;
+        $respuestasDetalladas = [];
+
+        Log::info('RESPUESTAS DEL USUARIO');
+        Log::info($respuestasUsuario);
+
+        // foreach ($preguntasOriginales as $pregunta) {
+        //     $questionId = $pregunta['id'];
+        //     $respuestaCorrecta = $pregunta['correctAnswer'];
+
+        //     // Verificar si el usuario respondió esta pregunta
+        //     if (isset($respuestasUsuario[$questionId])) {
+        //         $respuestaUsuario = $respuestasUsuario[$questionId]['respuesta'];
+        //         $esCorrecta = ($respuestaUsuario === $respuestaCorrecta);
+
+        //         if ($esCorrecta) {
+        //             $respuestasCorrectas++;
+        //         }
+
+        //         $respuestasDetalladas[$questionId] = [
+        //             'respuesta' => $respuestaUsuario,
+        //             'esCorrecta' => $esCorrecta,
+        //             'respuestaCorrecta' => $respuestaCorrecta
+        //         ];
+        //     } else {
+        //         // Pregunta no respondida
+        //         $respuestasDetalladas[$questionId] = [
+        //             'respuesta' => null,
+        //             'esCorrecta' => false,
+        //             'respuestaCorrecta' => $respuestaCorrecta
+        //         ];
+        //     }
+        // }
+        foreach ($preguntasOriginales as $pregunta) {
+            $questionId = $pregunta['id'];
+
+            // 1. Obtenemos el índice correcto original (ej: 0)
+            $indiceCorrectoOriginal = $pregunta['correctAnswer'];
+
+            // 2. IMPORTANTE: Obtenemos el TEXTO que corresponde a ese índice en el JSON original
+            // Si correctAnswer es 0, $textoCorrecto será "a"
+            $textoCorrecto = $pregunta['options'][$indiceCorrectoOriginal] ?? null;
+
+            if (isset($respuestasUsuario[$questionId])) {
+                $respuestaEnviadaPorAlumno = $respuestasUsuario[$questionId]['respuesta'];
+
+                // 3. Comparamos TEXTO contra TEXTO
+                $esCorrecta = ($respuestaEnviadaPorAlumno === $textoCorrecto);
+
+                if ($esCorrecta) {
+                    $respuestasCorrectas++;
+                }
+
+                $respuestasDetalladas[$questionId] = [
+                    'respuesta' => $respuestaEnviadaPorAlumno,
+                    'esCorrecta' => $esCorrecta,
+                    'respuestaCorrecta' => $textoCorrecto // Guardamos el texto para el reporte
+                ];
+            } else {
+                // Pregunta no respondida
+                $respuestasDetalladas[$questionId] = [
+                    'respuesta' => null,
+                    'esCorrecta' => false,
+                    'respuestaCorrecta' => $textoCorrecto
+                ];
+            }
+        }
+
+        $puntajeTotal = $respuestasCorrectas;
+        $porcentaje = $totalPreguntas > 0 ? round(($respuestasCorrectas / $totalPreguntas) * 100, 2) : 0;
+
+        // Obtener número de intento
+        $intentoActual = ExamenRealizado::where('tema_id', $tema->id)
+            ->where('matricula_id', $matricula->id)
+            ->max('intento_numero') ?? 0;
+        $intentoActual++;
+
+        // Registrar el examen
+        ExamenRealizado::create([
+            'tema_id' => $tema->id,
+            'matricula_id' => $matricula->id,
+            'intento_numero' => $intentoActual,
+            'fecha_inicio' => now()->subSeconds($validated['tiempo_utilizado']),
+            'fecha_fin' => now(),
+            'tiempo_utilizado' => $validated['tiempo_utilizado'],
+            'respuestas_json' => $respuestasDetalladas,
+            'puntaje_total' => $puntajeTotal,
+            'porcentaje' => $porcentaje,
+            'estado' => 'completado',
+            'ip_address' => $request->ip(),
+            'user_agent' => $request->userAgent(),
+        ]);
+
+        return redirect()->route('estudiante.tema.resultados', [
+            'curso' => $curso->id,
+            'modulo' => $modulo->id,
+            'materia' => $materia->id,
+            'tema' => $tema->id,
+        ]);
+    }
+
+    public function resultados(Curso $curso, Modulo $modulo, Materia $materia, Tema $tema)
+    {
+        $studentId = auth()->guard()->id();
+
+        // Obtener matrícula
+        $matricula = Matricula::where('estudiante_id', $studentId)
+            ->where('curso_id', $curso->id)
+            ->where('estado', 'activo')
+            ->firstOrFail();
+
+        // Obtener el último intento de este tema
+        $ultimoExamen = ExamenRealizado::where('tema_id', $tema->id)
+            ->where('matricula_id', $matricula->id)
+            ->orderBy('intento_numero', 'desc')
+            ->first();
+
+        // Obtener historial de intentos
+        $intentos = ExamenRealizado::where('tema_id', $tema->id)
+            ->where('matricula_id', $matricula->id)
+            ->orderBy('intento_numero', 'desc')
+            ->get()
+            ->map(fn($examen) => [
+                'id' => $examen->id,
+                'intento_numero' => $examen->intento_numero,
+                'fecha' => $examen->fecha_fin,
+                'tiempo' => $examen->tiempo_utilizado,
+                'puntaje' => $examen->puntaje_total,
+                'porcentaje' => $examen->porcentaje,
+                'estado' => $examen->estado,
+            ]);
+
+        return Inertia::render('Student/resultados', [
+            'curso' => [
+                'id' => $curso->id,
+                'nombre' => $curso->nombre,
+            ],
+            'modulo' => [
+                'id' => $modulo->id,
+                'nombre' => $modulo->nombre,
+            ],
+            'materia' => [
+                'id' => $materia->id,
+                'nombre' => $materia->nombre,
+            ],
+            'tema' => [
+                'id' => $tema->id,
+                'nombre' => $tema->nombre,
+                'contenido_json' => $tema->contenido_json,
+            ],
+            'ultimo_intento' => $ultimoExamen ? [
+                'respuestas' => $ultimoExamen->respuestas_json,
+                'porcentaje' => $ultimoExamen->porcentaje,
+                'tiempo' => $ultimoExamen->tiempo_utilizado,
+                'fecha' => $ultimoExamen->fecha_fin,
+            ] : null,
+            'intentos' => $intentos,
         ]);
     }
 }

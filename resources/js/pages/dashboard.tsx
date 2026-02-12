@@ -33,9 +33,9 @@ export interface Modulo {
 
 export interface Curso {
     id: number;
-    codigo_curso: string;
+    codigo_curso?: string;
     nombre: string;
-    descripcion: string;
+    descripcion?: string;
 }
 
 export interface MatriculaCurso {
@@ -83,7 +83,7 @@ function CourseCard({ data }: { data: MatriculaCurso }) {
             </h2>
 
             {/* Resumen del curso */}
-            <div className="mt-8 mb-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="mt-8 mb-6 grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="rounded-lg bg-blue-50 p-4 dark:bg-gray-700">
                     <div className="flex items-center gap-3">
                         <Calendar className="h-5 w-5 text-blue-600" />
@@ -106,7 +106,8 @@ function CourseCard({ data }: { data: MatriculaCurso }) {
                         </div>
                     </div>
                 </div>
-                <div className="rounded-lg bg-purple-50 p-4 dark:bg-gray-700">
+                {/* TODO: ARREGLAR ESTE VALOR EN LA CONSULTA O QUITARLO DEFINITIVAMENTE. esta mostrando temas totales en el dashboard */}
+                {/* <div className="rounded-lg bg-purple-50 p-4 dark:bg-gray-700">
                     <div className="flex items-center gap-3">
                         <BookOpen className="h-5 w-5 text-purple-600" />
                         <div>
@@ -116,7 +117,7 @@ function CourseCard({ data }: { data: MatriculaCurso }) {
                             </p>
                         </div>
                     </div>
-                </div>
+                </div> */}
             </div>
 
             {/* Lista de módulos */}

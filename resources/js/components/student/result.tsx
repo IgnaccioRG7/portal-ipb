@@ -1,25 +1,31 @@
 import ContentLayout from "@/layouts/content-layout";
-import { Link } from "@inertiajs/react";
+import { Link, router } from "@inertiajs/react";
 import { ArrowLeftToLine, CircleCheck, CircleX, Home, RotateCcw, Trophy } from "lucide-react";
 import { ContenidoJson } from "./quiz";
 import estudiante from "@/routes/estudiante";
 import { BreadcrumbItem } from "@/types";
 import { Curso } from "@/pages/dashboard";
 import { useQuizStore } from "@/store/quiz";
+import { useEffect, useState } from 'react';
 
 export default function ResultView({
   breadcrumbs,
   contenido,
   curso,
-  title
+  title,
+  temaId,
+  matriculaId
 }: {
   breadcrumbs: BreadcrumbItem[]
   contenido: ContenidoJson
   curso: Curso
   title: string
+  temaId: number
+  matriculaId?: number
 }) {
 
   const { answers, reset } = useQuizStore()
+  const [intentos, setIntentos] = useState<any[]>([])
 
   // Para los resultados  
   const correctAnswers = contenido.questions.filter(question => question.correctAnswer === answers[question.id]).length
@@ -55,49 +61,94 @@ export default function ResultView({
         </Link>
         <h2 className="text-2xl font-bold w-full text-center">Resultados de la prueba de: {title}</h2>
       </header>
-      <section className="results grid grid-cols-1 gap-4 md:grid-cols-3">
-        <div className="qualification">
-          <div className={`border-2 rounded-md grid place-content-center min-h-50 ${getBackgroundColor()}`}>
-            <Trophy className={`size-10 mx-auto ${getTextColor()}`} />
-            <span className={`result mx-auto text-4xl font-black ${getTextColor()}`}>
-              {percentage} %
-            </span>
+      <section className="results grid grid-cols-1 gap-4 lg:grid-cols-4">
+        {/* Columna izquierda - Resultado actual */}
+        <div className="lg:col-span-1">
+          <div className="qualification">
+            <div className={`border-2 rounded-md grid place-content-center min-h-50 ${getBackgroundColor()}`}>
+              <Trophy className={`size-10 mx-auto ${getTextColor()}`} />
+              <span className={`result mx-auto text-4xl font-black ${getTextColor()}`}>
+                {percentage} %
+              </span>
+            </div>
+            <div className="buttons grid grid-cols-2 gap-2 w-full py-2">
+              <button className="grow p-2 border border-gray-200 rounded-md shadow-xs font-semibold flex justify-center gap-2 items-center hover:bg-gray-100 transition-colors duration-300 cursor-pointer"
+                onClick={reset}
+              >
+                <RotateCcw /> Reintentar
+              </button>
+              <Link
+                href={estudiante.dashboard().url}
+                className="grow p-2 border border-gray-800 bg-gray-800 text-white rounded-md shadow-xs font-semibold flex justify-center gap-2 items-center hover:bg-gray-900 transition-colors duration-300 cursor-pointer">
+                <Home /> Inicio
+              </Link>
+            </div>
           </div>
-          <div className="buttons grid grid-cols-2 gap-2 w-full py-2">
-            <button className="grow p-2 border border-gray-200 rounded-md shadow-xs font-semibold flex justify-center gap-2 items-center hover:bg-gray-100 transition-colors duration-300 cursor-pointer"
-              onClick={reset}
-            >
-              <RotateCcw /> Reintentar
-            </button>
-            <Link 
-              href={estudiante.dashboard().url}
-              className="grow p-2 border border-gray-800 bg-gray-800 text-white rounded-md shadow-xs font-semibold flex justify-center gap-2 items-center hover:bg-gray-900 transition-colors duration-300 cursor-pointer">
-              <Home /> Inicio
-            </Link>
+          <div className="review col-span-1 md:col-span-2">
+            <h3 className="text-xl font-medium">Revisa tus respuestas</h3>
+            <ul className="flex flex-col gap-2">
+              {
+                contenido?.questions?.map((question, index) => {
+                  const isCorrect = question.correctAnswer === answers[question.id]
+                  return (
+                    <li className={`border-2 rounded-md p-2 flex gap-2 items-start ${isCorrect ? 'bg-green-200/30 border-green-300' : 'bg-red-200/30 border-red-300'}`}>
+                      <div className={`icon ${isCorrect ? 'text-green-400' : 'text-red-400'}`}>
+                        {isCorrect ? <CircleCheck /> : <CircleX />}
+                      </div>
+                      <div className="response flex flex-col">
+                        <span className="question text-gray-600 text-sm dark:text-gray-300">Pregunta {index + 1}</span>
+                        <p className="font-semibold">{question.text}</p>
+                        {!isCorrect && (<span className="incorrect text-sm text-gray-600 dark:text-gray-300">Tu respuesta: <span className="font-bold text-base text-red-800 dark:text-red-200">{question.options[answers[question.id]]}</span></span>)}
+                        <span className="correct text-sm text-gray-600 dark:text-gray-300">Correcta: <span className="font-bold text-base text-green-800 dark:text-green-100">{question.options[question.correctAnswer]}</span></span>
+                      </div>
+                    </li>
+                  )
+                })
+              }
+            </ul>
           </div>
         </div>
-        <div className="review col-span-1 md:col-span-2">
-          <h3 className="text-xl font-medium">Revisa tus respuestas</h3>
-          <ul className="flex flex-col gap-2">
-            {
-              contenido?.questions?.map((question, index) => {
-                const isCorrect = question.correctAnswer === answers[question.id]
-                return (
-                  <li className={`border-2 rounded-md p-2 flex gap-2 items-start ${isCorrect ? 'bg-green-200/30 border-green-300' : 'bg-red-200/30 border-red-300'}`}>
-                    <div className={`icon ${isCorrect ? 'text-green-400' : 'text-red-400'}`}>
-                      {isCorrect ? <CircleCheck /> : <CircleX />}
+        {/* Columna derecha - Historial de intentos */}
+        <div className="lg:col-span-3">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+            <h3 className="text-xl font-semibold mb-4">📊 Historial de Intentos</h3>
+
+            {intentos.length === 0 ? (
+              <p className="text-gray-500">No hay intentos anteriores</p>
+            ) : (
+              <div className="space-y-4">
+                {intentos.map((intento, index) => (
+                  <div
+                    key={intento.id}
+                    className="border rounded-lg p-4 flex items-center justify-between"
+                  >
+                    <div>
+                      <div className="flex items-center gap-3">
+                        <span className="text-lg font-bold">#{intento.intento_numero}</span>
+                        <span className={`px-3 py-1 rounded-full text-xs ${intento.porcentaje >= 70
+                            ? 'bg-green-100 text-green-700'
+                            : 'bg-yellow-100 text-yellow-700'
+                          }`}>
+                          {intento.porcentaje}%
+                        </span>
+                        <span className="text-sm text-gray-500">
+                          {new Date(intento.fecha_fin).toLocaleDateString()}
+                        </span>
+                      </div>
+                      <p className="text-sm text-gray-600 mt-1">
+                        ⏱️ {Math.floor(intento.tiempo_utilizado / 60)}:{(intento.tiempo_utilizado % 60).toString().padStart(2, '0')} min
+                      </p>
                     </div>
-                    <div className="response flex flex-col">
-                      <span className="question text-gray-600 text-sm dark:text-gray-300">Pregunta {index + 1}</span>
-                      <p className="font-semibold">{question.text}</p>
-                      {!isCorrect && (<span className="incorrect text-sm text-gray-600 dark:text-gray-300">Tu respuesta: <span className="font-bold text-base text-red-800 dark:text-red-200">{question.options[answers[question.id]]}</span></span>)}
-                      <span className="correct text-sm text-gray-600 dark:text-gray-300">Correcta: <span className="font-bold text-base text-green-800 dark:text-green-100">{question.options[question.correctAnswer]}</span></span>
+                    <div className="text-right">
+                      <p className="text-sm font-semibold">
+                        {intento.puntaje_total}/{contenido.questions.length} correctas
+                      </p>
                     </div>
-                  </li>
-                )
-              })
-            }
-          </ul>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
       </section>
     </section>

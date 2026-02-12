@@ -150,16 +150,16 @@ function MateriaCard({ data, modulo, cursoId }: {
                       </p>
                     )}
                   </div>
-                  <button 
+                  {/* // TODO: Aquí iría la acción para entrar directamente al tema */}
+                  {/* <button 
                     className="flex items-center gap-1 text-sm font-semibold text-blue-600 hover:underline"
                     onClick={(e) => {
                       e.stopPropagation();
-                      // Aquí iría la acción para entrar al tema
                     }}
                   >
                     <PlayCircle size={16} />
                     Entrar
-                  </button>
+                  </button> */}
                 </li>
               ))}
             </ul>

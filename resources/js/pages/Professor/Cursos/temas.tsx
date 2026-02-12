@@ -1,7 +1,7 @@
 import ContentLayout from '@/layouts/content-layout';
 import { Head, Link } from '@inertiajs/react';
 import { DataTable } from '@/components/data-table';
-import { Edit, Plus, Eye } from 'lucide-react';
+import { Edit, Plus, Eye, BarChart3 } from 'lucide-react';
 import { BreadcrumbItem } from '@/types';
 import cursos from '@/routes/cursos';
 import { Button } from '@/components/ui/button';
@@ -23,10 +23,9 @@ export default function MateriaTemas({ curso, modulo, materia, temas, modulo_mat
             key: 'estado',
             label: 'Estado',
             render: (tema: any) => (
-                <span className={`px-2 py-1 rounded text-xs ${
-                    tema.estado === 'activo' ? 'bg-green-500 text-white' : 
-                    tema.estado === 'borrador' ? 'bg-yellow-500 text-white' : 'bg-gray-300'
-                }`}>
+                <span className={`px-2 py-1 rounded text-xs ${tema.estado === 'activo' ? 'bg-green-500 text-white' :
+                        tema.estado === 'borrador' ? 'bg-yellow-500 text-white' : 'bg-gray-300'
+                    }`}>
                     {tema.estado}
                 </span>
             )
@@ -47,6 +46,23 @@ export default function MateriaTemas({ curso, modulo, materia, temas, modulo_mat
                     <Edit size={18} /> Editar
                 </Link>
             )
+        },
+        {
+            key: 'resultados',
+            label: 'Resultados',
+            render: (tema: any) => (
+                <Link
+                    href={cursos.temas.resultados({
+                        curso: curso.id,
+                        modulo: modulo.id,
+                        materia: materia.id,
+                        tema: tema.id
+                    })}
+                    className="text-green-600 hover:text-green-900 flex items-center gap-1"
+                >
+                    <BarChart3 size={18} /> Ver Resultados
+                </Link>
+            )
         }
     ];
 
@@ -57,7 +73,7 @@ export default function MateriaTemas({ curso, modulo, materia, temas, modulo_mat
             breadcrumbs={breadcrumbs}
         >
             <Head title={`Temas - ${materia.nombre}`} />
-            
+
             <div className="mb-4 flex justify-end">
                 <Link
                     href={cursos.temas.create({
@@ -72,7 +88,7 @@ export default function MateriaTemas({ curso, modulo, materia, temas, modulo_mat
                     </Button>
                 </Link>
             </div>
-            
+
             <DataTable columns={columns} data={temas} />
         </ContentLayout>
     );

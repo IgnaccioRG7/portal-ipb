@@ -54,6 +54,7 @@ export default function TemaEdit({ tema }: any) {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     put(cursos.temas.update({
+      modulo: tema.modulo_materia_id,
       curso: tema.curso_id,
       materia: tema.materia_id,
       tema: tema.id
@@ -163,10 +164,12 @@ export default function TemaEdit({ tema }: any) {
     >
       <Head title="Editar Quiz" />
 
+      {/* Truco para que el sticky se quede arriba */}
       <form onSubmit={handleSubmit} className="space-y-4 relative"
-        style={{ 
-          // Truco para que el sticky se quede arriba
-          height: 'calc(100vh - 300px)' 
+        style={{
+          // height: '700px',
+          // overflowY: 'scroll'
+          height: 'calc(100vh - 300px)'
         }}
       >
         {/* Info básica */}
