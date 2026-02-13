@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\CursoController;
+use App\Http\Controllers\Admin\MateriaController;
 use App\Http\Controllers\Admin\MatriculaController;
 use App\Http\Controllers\Admin\RecursoController as AdminRecursoController;
 use App\Http\Controllers\Admin\UserController;
@@ -115,6 +116,16 @@ Route::middleware(['auth', 'verified', 'role:Admin'])->prefix('admin')->name('ad
         // Asignar materias al curso
         Route::get('/{curso}/asignar-materias', [CursoController::class, 'asignarMaterias'])->name('asignar-materias');
         Route::post('/{curso}/guardar-materias', [CursoController::class, 'guardarMaterias'])->name('guardar-materias');
+    });
+
+    // Gestión de Materias
+    Route::prefix('materias')->name('materias.')->group(function () {
+        Route::get('/', [MateriaController::class, 'index'])->name('index');
+        Route::get('/create', [MateriaController::class, 'create'])->name('create');
+        Route::post('/', [MateriaController::class, 'store'])->name('store');
+        Route::get('/{materia}/edit', [MateriaController::class, 'edit'])->name('edit');
+        Route::put('/{materia}', [MateriaController::class, 'update'])->name('update');
+        Route::delete('/{materia}', [MateriaController::class, 'destroy'])->name('destroy');
     });
 
     // TODO: Validar la ruta directa publica para que no puedan ingresar directamente desde la url

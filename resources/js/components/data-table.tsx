@@ -65,17 +65,17 @@ export function DataTable({ columns, data, onEdit, onToggleStatus }: DataTablePr
           </div>
         ) : (
           data.map((row, rowIndex) => (
-            <div key={rowIndex} className="bg-white rounded-lg shadow overflow-hidden">
+            <div key={rowIndex} className="bg-white rounded-lg shadow overflow-hidden dark:bg-gray-800">
               {columns.map((column, colIndex) => (
                 <div
                   key={colIndex}
                   className={`px-4 py-3 ${colIndex !== columns.length - 1 ? 'border-b border-gray-200' : ''}`}
                 >
                   <div className="flex justify-between items-center">
-                    <span className="text-sm font-medium text-gray-500">
+                    <span className="text-sm font-medium text-gray-500 dark:text-gray-300">
                       {column.label}
                     </span>
-                    <span className="text-sm text-gray-900">
+                    <span className="text-sm text-gray-900 dark:text-gray-300">
                       {column.render ? column.render(row) : row[column.key]}
                     </span>
                   </div>

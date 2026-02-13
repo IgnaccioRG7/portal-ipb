@@ -1,5 +1,5 @@
 import { Link, usePage } from '@inertiajs/react';
-import { BookOpen, File, Folder, LayoutGrid, School, Users } from 'lucide-react';
+import { BookOpen, Folder, LayoutGrid, School, Users, BookMarked, Library } from 'lucide-react';
 // import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
@@ -73,6 +73,11 @@ export function AppSidebar() {
                 icon: Users,
             });
             items.push({
+                title: 'Materias',
+                href: admin.materias.index(),
+                icon: BookMarked,
+            });
+            items.push({
                 title: 'Cursos',
                 // href: cursos.index(),
                 href: admin.cursos.index(),
@@ -81,7 +86,7 @@ export function AppSidebar() {
             items.push({
                 title: 'Recursos',
                 href: admin.recursos.index(),
-                icon: File,
+                icon: Library,
             });
         }
 

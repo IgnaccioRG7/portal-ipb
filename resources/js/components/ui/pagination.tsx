@@ -24,8 +24,8 @@ export default function Pagination({ links }: PaginationProps) {
               preserveScroll
               className={`px-3 py-2 rounded-md ${
                 !link.url
-                  ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                  : 'bg-white text-gray-700 hover:bg-gray-100'
+                  ? 'bg-gray-200 text-gray-400 cursor-not-allowed dark:bg-gray-700'
+                  : 'bg-white text-gray-700 hover:bg-gray-100 dark:bg-gray-700 dark:text-gray-300'
               }`}
             >
               <ChevronLeft className="w-4 h-4" />
@@ -42,8 +42,8 @@ export default function Pagination({ links }: PaginationProps) {
               preserveScroll
               className={`px-3 py-2 rounded-md ${
                 !link.url
-                  ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                  : 'bg-white text-gray-700 hover:bg-gray-100'
+                  ? 'bg-gray-200 text-gray-400 cursor-not-allowed dark:bg-gray-700'
+                  : 'bg-white text-gray-700 hover:bg-gray-100 dark:bg-gray-700 dark:text-gray-300'
               }`}
             >
               <ChevronRight className="w-4 h-4" />
@@ -59,8 +59,8 @@ export default function Pagination({ links }: PaginationProps) {
             preserveScroll
             className={`px-4 py-2 rounded-md ${
               link.active
-                ? 'bg-blue-600 text-white'
-                : 'bg-white text-gray-700 hover:bg-gray-100'
+                ? 'bg-blue-600 text-white dark:bg-blue-900'
+                : 'bg-white text-gray-700 hover:bg-gray-100 dark:bg-gray-300'
             }`}
           >
             {link.label}

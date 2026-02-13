@@ -12,6 +12,7 @@ import {
   Calendar,
   ChevronDown,
   ChevronUp,
+  BarChart3,
 } from 'lucide-react';
 import { useState } from 'react';
 
@@ -74,8 +75,8 @@ interface Props {
   modulos: Modulo[];
 }
 
-function MateriaCard({ data, modulo, cursoId }: { 
-  data: MateriaConTemas; 
+function MateriaCard({ data, modulo, cursoId }: {
+  data: MateriaConTemas;
   modulo: Modulo;
   cursoId: number;
 }) {
@@ -93,7 +94,7 @@ function MateriaCard({ data, modulo, cursoId }: {
   return (
     <article className="overflow-hidden rounded-xl border bg-white shadow-sm transition-all hover:shadow-md dark:bg-gray-800 flex flex-col mb-4">
       {/* Header de la materia */}
-      <div 
+      <div
         className="p-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors flex items-center justify-between"
         onClick={() => setExpandida(!expandida)}
       >
@@ -128,7 +129,7 @@ function MateriaCard({ data, modulo, cursoId }: {
           <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
             {materia.descripcion}
           </p>
-          
+
           {/* Lista de temas */}
           <div className="mb-4">
             <h4 className="font-semibold text-gray-700 dark:text-gray-300 mb-2">
@@ -150,6 +151,21 @@ function MateriaCard({ data, modulo, cursoId }: {
                       </p>
                     )}
                   </div>
+                  <button
+                    className="flex items-center gap-1 text-sm font-semibold text-green-600 hover:underline cursor-pointer"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      router.visit(estudiante.tema.resultados({
+                        curso: cursoId,
+                        materia: materia.id,
+                        modulo: modulo.id,
+                        tema: tema.id
+                      }).url);
+                    }}
+                  >
+                    <BarChart3 size={16} />
+                    Puntaje
+                  </button>
                   {/* // TODO: Aquí iría la acción para entrar directamente al tema */}
                   {/* <button 
                     className="flex items-center gap-1 text-sm font-semibold text-blue-600 hover:underline"
@@ -191,7 +207,7 @@ function ModuloCard({ modulo, cursoId }: { modulo: Modulo; cursoId: number }) {
   return (
     <div className="rounded-xl border bg-white shadow-sm dark:bg-gray-800 mb-6 overflow-hidden">
       {/* Header del módulo */}
-      <div 
+      <div
         className="p-5 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors border-b dark:border-gray-700"
         onClick={() => setExpandido(!expandido)}
       >
@@ -232,9 +248,9 @@ function ModuloCard({ modulo, cursoId }: { modulo: Modulo; cursoId: number }) {
         <div className="p-5">
           <div className="grid grid-cols-1 gap-4">
             {modulo.materias.map((materia) => (
-              <MateriaCard 
-                key={materia.modulo_materia_id} 
-                data={materia} 
+              <MateriaCard
+                key={materia.modulo_materia_id}
+                data={materia}
                 modulo={modulo}
                 cursoId={cursoId}
               />
@@ -249,14 +265,14 @@ function ModuloCard({ modulo, cursoId }: { modulo: Modulo; cursoId: number }) {
 export default function Index({ curso, modulos }: Props) {
   console.log(curso);
   console.log(modulos);
-  
+
   const [searchTerm, setSearchTerm] = useState('');
 
   // Filtrar módulos que contengan materias que coincidan con la búsqueda
   const modulosFiltrados = modulos
     .map(modulo => ({
       ...modulo,
-      materias: modulo.materias.filter(materia => 
+      materias: modulo.materias.filter(materia =>
         materia.materia.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
         materia.materia.descripcion.toLowerCase().includes(searchTerm.toLowerCase())
       )
@@ -332,9 +348,9 @@ export default function Index({ curso, modulos }: Props) {
       <section>
         {modulosFiltrados.length > 0 ? (
           modulosFiltrados.map((modulo) => (
-            <ModuloCard 
-              key={modulo.id} 
-              modulo={modulo} 
+            <ModuloCard
+              key={modulo.id}
+              modulo={modulo}
               cursoId={curso.id}
             />
           ))
@@ -347,7 +363,7 @@ export default function Index({ curso, modulos }: Props) {
               No se encontraron materias
             </h3>
             <p className="text-gray-500 dark:text-gray-400">
-              {searchTerm 
+              {searchTerm
                 ? `No hay materias que coincidan con "${searchTerm}"`
                 : 'No hay módulos disponibles en este curso'}
             </p>

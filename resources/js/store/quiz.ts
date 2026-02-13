@@ -32,7 +32,7 @@ interface QuizState {
     cursoId: number
     moduloId: number
     materiaId: number
-    temaId: number
+    temaId: number  
     contenido: ContenidoJson
     tiempoInicio: number
   }) => Promise<void>

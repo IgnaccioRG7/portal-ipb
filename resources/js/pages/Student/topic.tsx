@@ -1,5 +1,4 @@
 import { ContenidoJson, Quiz } from "@/components/student/quiz";
-import ResultView from "@/components/student/result";
 import ContentLayout from "@/layouts/content-layout";
 import { dashboard } from "@/routes";
 import estudiante from "@/routes/estudiante";
@@ -91,19 +90,6 @@ export default function Topic({
   //         <Quiz tema={tema} />
   //       </section>
   //     </ContentLayout>
-  //   )
-  // }
-
-  // Para ver los resultados
-  // if (isCompleteQuiz) {
-  //   return (
-  //     <ResultView
-  //       breadcrumbs={breadcrumbs}
-  //       contenido={tema.contenido_json ? JSON.parse(tema?.contenido_json) : []}
-  //       curso={curso}
-  //       title={title}
-  //       temaId={tema.id}
-  //     />
   //   )
   // }
 

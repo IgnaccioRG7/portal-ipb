@@ -1,13 +1,14 @@
 import ContentLayout from "@/layouts/content-layout";
 import { Link, router } from "@inertiajs/react";
 import { ArrowLeftToLine, CircleCheck, CircleX, Home, RotateCcw, Trophy } from "lucide-react";
-import { ContenidoJson } from "./quiz";
+import { ContenidoJson } from "../student/quiz";
 import estudiante from "@/routes/estudiante";
 import { BreadcrumbItem } from "@/types";
 import { Curso } from "@/pages/dashboard";
 import { useQuizStore } from "@/store/quiz";
 import { useEffect, useState } from 'react';
 
+// TODOahora: Usar este componente en la vista del profesor para comparar las respuestas
 export default function ResultView({
   breadcrumbs,
   contenido,
@@ -23,7 +24,6 @@ export default function ResultView({
   temaId: number
   matriculaId?: number
 }) {
-
   const { answers, reset } = useQuizStore()
   const [intentos, setIntentos] = useState<any[]>([])
 
@@ -89,7 +89,9 @@ export default function ResultView({
             <ul className="flex flex-col gap-2">
               {
                 contenido?.questions?.map((question, index) => {
-                  const isCorrect = question.correctAnswer === answers[question.id]
+                  const userAnswer = answers[question.id as keyof typeof answers]
+                  const isCorrect = question.correctAnswer === userAnswer
+
                   return (
                     <li className={`border-2 rounded-md p-2 flex gap-2 items-start ${isCorrect ? 'bg-green-200/30 border-green-300' : 'bg-red-200/30 border-red-300'}`}>
                       <div className={`icon ${isCorrect ? 'text-green-400' : 'text-red-400'}`}>
@@ -98,8 +100,13 @@ export default function ResultView({
                       <div className="response flex flex-col">
                         <span className="question text-gray-600 text-sm dark:text-gray-300">Pregunta {index + 1}</span>
                         <p className="font-semibold">{question.text}</p>
-                        {!isCorrect && (<span className="incorrect text-sm text-gray-600 dark:text-gray-300">Tu respuesta: <span className="font-bold text-base text-red-800 dark:text-red-200">{question.options[answers[question.id]]}</span></span>)}
-                        <span className="correct text-sm text-gray-600 dark:text-gray-300">Correcta: <span className="font-bold text-base text-green-800 dark:text-green-100">{question.options[question.correctAnswer]}</span></span>
+                        {!isCorrect && userAnswer && (
+                          <span className="incorrect text-sm text-gray-600 dark:text-gray-300">
+                            Tu respuesta: <span className="font-bold text-base text-red-800 dark:text-red-200">
+                              {typeof userAnswer === 'number' ? question.options[userAnswer] : String(userAnswer)}
+                            </span>
+                          </span>
+                        )}
                       </div>
                     </li>
                   )
@@ -126,8 +133,8 @@ export default function ResultView({
                       <div className="flex items-center gap-3">
                         <span className="text-lg font-bold">#{intento.intento_numero}</span>
                         <span className={`px-3 py-1 rounded-full text-xs ${intento.porcentaje >= 70
-                            ? 'bg-green-100 text-green-700'
-                            : 'bg-yellow-100 text-yellow-700'
+                          ? 'bg-green-100 text-green-700'
+                          : 'bg-yellow-100 text-yellow-700'
                           }`}>
                           {intento.porcentaje}%
                         </span>

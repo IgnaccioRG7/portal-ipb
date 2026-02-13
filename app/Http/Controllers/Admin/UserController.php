@@ -39,6 +39,7 @@ class UserController extends Controller
 
         $search = $request->query('search', '');
         $perPage = $request->query('per_page', 4);
+        $rolFilter = $request->query('rol', '');
 
         $query = User::with(['persona', 'rol'])
             ->select(
