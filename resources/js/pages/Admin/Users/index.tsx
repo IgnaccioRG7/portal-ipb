@@ -36,7 +36,8 @@ interface PaginatedUsers {
 
 interface Filters {
   search: string,
-  per_page: number
+  per_page: number,
+  role: string
 }
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -69,6 +70,9 @@ export default function Index({
   const [perPage, setPerPage] = useState<number>(() => {
     return filters.per_page
   })
+  const [selectedRole, setSelectedRole] = useState(() => {
+    return filters.role ?? ''
+  })
 
   // console.log(users);
 
@@ -76,14 +80,25 @@ export default function Index({
   const handlePerPageChange = (results: number) => {
     setPerPage(results);
 
+    const params: any = {};
+
+    // Mantener búsqueda si existe
+    if (search) params.search = search;
+
+    // Agregar rol solo si no es vacío (no es "Todos")
+    if (selectedRole !== '') {
+      params.role = selectedRole;
+    }
+
     if (results === DEFAULT_VALUE_FILTERS.per_page) {
-      router.get(admin.users.index(), {}, {
+      router.get(admin.users.index(), params, {
         preserveState: true,
         preserveScroll: true,
         replace: true
       });
     } else {
       router.get(admin.users.index(), {
+        ...params,
         per_page: results
       }, {
         preserveState: true,
@@ -93,6 +108,32 @@ export default function Index({
     }
   }
 
+  // Filtrando dator por el tipo de rol
+  const handleRolFilter = (rol: string) => {
+    setSelectedRole(rol);
+
+    const params: any = {};
+
+    // Mantener búsqueda si existe
+    if (search) params.search = search;
+
+    // Mantener per_page si no es el default
+    if (perPage !== DEFAULT_VALUE_FILTERS.per_page) {
+      params.per_page = perPage;
+    }
+
+    // Agregar rol solo si no es vacío (no es "Todos")
+    if (rol !== '') {
+      params.rol = rol;
+    }
+
+    router.get(admin.users.index().url, params, {
+      preserveState: true,
+      preserveScroll: true,
+      replace: true
+    });
+  };
+
   // Filtrando datos por el buscador
   // 1. Función de debounce independiente (NO dentro de useEffect)
   const debounceSearch = (value: string) => {
@@ -101,17 +142,29 @@ export default function Index({
       clearTimeout(debounceRef.current);
     }
 
+    let params: any = {}
+
+    // Mantener per_page si no es el default
+    if (perPage !== DEFAULT_VALUE_FILTERS.per_page) {
+      params.per_page = perPage;
+    }
+
+    // Agregar rol solo si no es vacío (no es "Todos")
+    if (selectedRole !== '') {
+      params.role = selectedRole;
+    }
+
     debounceRef.current = setTimeout(() => {
       if (value.trim() === '') {
         // Si está vacío, quitar el parámetro search de la URL
-        router.get(admin.users.index(), {}, {
+        router.get(admin.users.index(), params, {
           preserveState: true,
           preserveScroll: true,
           replace: true
         });
       } else {
         // Si tiene valor, buscar con el parámetro
-        router.get(admin.users.index(), { search: value }, {
+        router.get(admin.users.index(), { ...params, search: value }, {
           preserveState: true,
           preserveScroll: true,
           replace: true
@@ -137,21 +190,6 @@ export default function Index({
       }
     };
   }, []);
-
-  const handleSearch = (newFilters: Filters) => {
-    const params: any = {}
-    Object.keys(newFilters).forEach(key => {
-      if (newFilters[key as keyof Filters] !== DEFAULT_VALUE_FILTERS[key as keyof Filters]) {
-        params[key] = newFilters[key as keyof Filters]
-      }
-    })
-
-    router.get(admin.users.index(), params, {
-      preserveState: true,
-      preserveScroll: true,
-      replace: true
-    })
-  }
 
   const handleEdit = (userId: number) => {
     // Redirigir a la página de edición
@@ -284,10 +322,42 @@ export default function Index({
           </label>
         </search>
         <div className="roles flex flex-row px-4 py-2 gap-3 items-center text-sm bg-gray-100 md:px-4 rounded-full font-medium text-gray-600 dark:bg-gray-600 dark:text-gray-300">
-          <span className='bg-white dark:bg-gray-200 px-2 py-1 rounded-md shadow-md text-black'>Todos</span>
-          <span>Profesor</span>
-          <span>Estudiante</span>
-          <span>Tutor</span>
+          <span
+            onClick={() => handleRolFilter('')}
+            className={`px-2 py-1 rounded-md cursor-pointer transition-all ${selectedRole === ''
+              ? 'bg-white dark:bg-gray-200 shadow-md text-black'
+              : 'hover:bg-gray-200 dark:hover:bg-gray-500'
+              }`}
+          >
+            Todos
+          </span>
+          <span
+            onClick={() => handleRolFilter('Profesor')}
+            className={`px-2 py-1 rounded-md cursor-pointer transition-all ${selectedRole === 'Profesor'
+              ? 'bg-white dark:bg-gray-200 shadow-md text-black'
+              : 'hover:bg-gray-200 dark:hover:bg-gray-500'
+              }`}
+          >
+            Profesor
+          </span>
+          <span
+            onClick={() => handleRolFilter('Estudiante')}
+            className={`px-2 py-1 rounded-md cursor-pointer transition-all ${selectedRole === 'Estudiante'
+              ? 'bg-white dark:bg-gray-200 shadow-md text-black'
+              : 'hover:bg-gray-200 dark:hover:bg-gray-500'
+              }`}
+          >
+            Estudiante
+          </span>
+          <span
+            onClick={() => handleRolFilter('Tutor')}
+            className={`px-2 py-1 rounded-md cursor-pointer transition-all ${selectedRole === 'Tutor'
+              ? 'bg-white dark:bg-gray-200 shadow-md text-black'
+              : 'hover:bg-gray-200 dark:hover:bg-gray-500'
+              }`}
+          >
+            Tutor
+          </span>
         </div>
         <div className='text-gray-200 flex gap-2 items-center'>
           {/* <ListFilter /> */}

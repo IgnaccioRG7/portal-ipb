@@ -24,7 +24,7 @@ export default function MateriaTemas({ curso, modulo, materia, temas, modulo_mat
             label: 'Estado',
             render: (tema: any) => (
                 <span className={`px-2 py-1 rounded text-xs ${tema.estado === 'activo' ? 'bg-green-500 text-white' :
-                        tema.estado === 'borrador' ? 'bg-yellow-500 text-white' : 'bg-gray-300'
+                    tema.estado === 'borrador' ? 'bg-yellow-500 text-white' : 'bg-gray-300'
                     }`}>
                     {tema.estado}
                 </span>
@@ -71,23 +71,20 @@ export default function MateriaTemas({ curso, modulo, materia, temas, modulo_mat
             title={`Temas de ${materia.nombre}`}
             subtitle={`Módulo: ${modulo.nombre} | Curso: ${curso.nombre}`}
             breadcrumbs={breadcrumbs}
+            actions={<Link
+                href={cursos.temas.create({
+                    curso: curso.id,
+                    modulo: modulo.id,
+                    materia: materia.id
+                })}
+            >
+                <Button className="bg-green-600 hover:bg-green-700 text-white">
+                    <Plus className="w-4 h-4 mr-2" />
+                    Nuevo Tema
+                </Button>
+            </Link>}
         >
             <Head title={`Temas - ${materia.nombre}`} />
-
-            <div className="mb-4 flex justify-end">
-                <Link
-                    href={cursos.temas.create({
-                        curso: curso.id,
-                        modulo: modulo.id,
-                        materia: materia.id
-                    })}
-                >
-                    <Button className="bg-green-600 hover:bg-green-700 text-white">
-                        <Plus className="w-4 h-4 mr-2" />
-                        Nuevo Tema
-                    </Button>
-                </Link>
-            </div>
 
             <DataTable columns={columns} data={temas} />
         </ContentLayout>

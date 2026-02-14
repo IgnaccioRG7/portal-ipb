@@ -159,7 +159,7 @@ class AcademicSeeder extends Seeder
 
         $moduloPreuni1 = Modulo::create([
             'curso_id' => $cursoPreuniversitario->id,
-            'codigo_modulo' => 'm3',
+            'codigo_modulo' => 'm1',
             'nombre' => 'Módulo 1',
             'fecha_inicio' => '2026-01-01',
             'fecha_fin' => '2026-04-30',
@@ -167,7 +167,7 @@ class AcademicSeeder extends Seeder
 
         $moduloPreuni2 = Modulo::create([
             'curso_id' => $cursoPreuniversitario->id,
-            'codigo_modulo' => 'm4',
+            'codigo_modulo' => 'm2',
             'nombre' => 'Módulo 2',
             'fecha_inicio' => '2026-05-01',
             'fecha_fin' => '2026-08-31',

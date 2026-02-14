@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Acceso;
 use App\Models\Curso;
 use App\Models\CursoMateria;
 use App\Models\ExamenRealizado;
@@ -271,7 +272,7 @@ class CursoController extends Controller
         ]);
 
         DB::transaction(function () use ($curso, $validated) {
-            // 1️⃣ Obtener TODOS los módulos actuales (con dependencias)
+            // 1 Obtener TODOS los módulos actuales (con dependencias)
             $modulosActuales = Modulo::where('curso_id', $curso->id)
                 ->with(['moduloMaterias' => function ($q) {
                     $q->withCount(['temas', 'accesos']);
@@ -279,23 +280,23 @@ class CursoController extends Controller
                 ->get()
                 ->keyBy('codigo_modulo');
 
-            // 2️⃣ Obtener los códigos que vienen del formulario
+            // 2 Obtener los códigos que vienen del formulario
             $codigosFormulario = collect($validated['modulos'])->pluck('codigo_modulo')->toArray();
 
-            // 3️⃣ ELIMINAR módulos que NO están en el formulario Y NO tienen dependencias
+            // 3 ELIMINAR módulos que NO están en el formulario Y NO tienen dependencias
             foreach ($modulosActuales as $codigo => $modulo) {
                 if (!in_array($codigo, $codigosFormulario)) {
                     $tieneDependencias = $modulo->moduloMaterias->sum('temas_count') > 0
                         || $modulo->moduloMaterias->sum('accesos_count') > 0;
 
                     if ($tieneDependencias) {
-                        // 🔒 Con dependencias → Solo INACTIVAR
+                        // Con dependencias → Solo INACTIVAR
                         if ($modulo->estado !== 'inactivo') {
                             $modulo->update(['estado' => 'inactivo']);
                             $modulo->moduloMaterias()->update(['estado' => 'inactivo']);
                         }
                     } else {
-                        // ✅ Sin dependencias → ELIMINAR completamente
+                        // Sin dependencias → ELIMINAR completamente
                         $modulo->moduloMaterias()->delete();
                         $modulo->delete();
                     }
@@ -345,52 +346,163 @@ class CursoController extends Controller
 
     private function sincronizarMateriasModulo($modulo, array $materiasData)
     {
-        // Obtener materias existentes con dependencias
-        $materiasExistentes = $modulo->moduloMaterias()
-            ->withCount(['temas', 'accesos'])
+        // 1 Obtener TODOS los registros actuales del módulo (activos e inactivos)
+        $registrosActuales = ModuloMateria::where('mod_id', $modulo->id)
+            ->where('estado', 'activo')
             ->get()
-            ->keyBy('mat_id');
+            ->keyBy(function ($item) {
+                return $item->mat_id . '_' . ($item->prof_id ?? 'null');
+            });
 
-        $materiasIdsFormulario = collect($materiasData)->pluck('materia_id')->toArray();
+        // Log::info("Registros actuales en BD:");
+        // foreach ($registrosActuales as $key => $registro) {
+        //     Log::info("  Key: {$key} → ID: {$registro->id}, Materia: {$registro->mat_id}, Profesor: " . ($registro->prof_id ?? 'NULL') . ", Estado: {$registro->estado}");
+        // }
 
-        // 1️⃣ ELIMINAR materias que NO están en formulario Y NO tienen dependencias
-        foreach ($materiasExistentes as $materiaId => $moduloMateria) {
-            if (!in_array($materiaId, $materiasIdsFormulario)) {
-                if ($moduloMateria->temas_count > 0 || $moduloMateria->accesos_count > 0) {
-                    // 🔒 Con dependencias → INACTIVAR
-                    if ($moduloMateria->estado !== 'inactivo') {
-                        $moduloMateria->update(['estado' => 'inactivo']);
-                    }
+        // 2️⃣ Procesar cada materia que viene del formulario
+        foreach ($materiasData as $index => $materiaData) {
+            $materiaId = $materiaData['materia_id'];
+            $nuevoProfId = $materiaData['prof_id'] ?? null;
+            $key = $materiaId . '_' . ($nuevoProfId ?? 'null');
+
+            Log::info("--- Procesando materia {$materiaId} con profesor " . ($nuevoProfId ?? 'SIN PROFESOR') . " ---");
+
+            // Buscar si YA EXISTE esta combinación exacta (materia + profesor)
+            $registroExistente = $registrosActuales->get($key);
+
+            if ($registroExistente) {
+                // CASO 1: La combinación materia+profesor YA EXISTE
+                Log::info("CASO 1: Registro existente ID {$registroExistente->id} - Solo actualizar orden/estado");
+
+                $registroExistente->update([
+                    'orden' => $materiaData['orden'] ?? 1,
+                    'estado' => $materiaData['estado'],
+                ]);
+
+                Log::info("Actualizado registro {$registroExistente->id}. Los accesos NO se tocan (ya están bien).");
+
+                // Marcar como procesado (para no inactivarlo después)
+                $registrosActuales->forget($key);
+            } else {
+                // CASO 2: NUEVA combinación (materia + profesor diferente o nuevo)
+                Log::info("CASO 2: Nueva combinación detectada");
+
+                // Buscar si existe un registro ACTIVO de esta materia con OTRO profesor
+                $registroAnterior = ModuloMateria::where('mod_id', $modulo->id)
+                    ->where('mat_id', $materiaId)
+                    ->where('estado', 'activo')
+                    ->first();
+
+                if ($registroAnterior) {
+                    Log::info("Encontrado registro ANTERIOR activo: ID {$registroAnterior->id} con profesor " . ($registroAnterior->prof_id ?? 'NULL'));
                 } else {
-                    // ✅ Sin dependencias → ELIMINAR
-                    $moduloMateria->delete();
+                    Log::info("NO hay registro anterior activo para esta materia");
+                }
+
+                // Buscar si existe un registro INACTIVO con la MISMA combinación materia+profesor
+                $registroInactivoMismoProf = ModuloMateria::where('mod_id', $modulo->id)
+                    ->where('mat_id', $materiaId)
+                    ->where(function ($q) use ($nuevoProfId) {
+                        if ($nuevoProfId === null) {
+                            $q->whereNull('prof_id');
+                        } else {
+                            $q->where('prof_id', $nuevoProfId);
+                        }
+                    })
+                    ->where('estado', 'inactivo')
+                    ->first();
+
+                if ($registroInactivoMismoProf) {
+                    // CASO 2A: Reactivar un registro inactivo existente
+                    Log::info("CASO 2A: Reactivando registro inactivo ID {$registroInactivoMismoProf->id}");
+
+                    $nuevoRegistro = $registroInactivoMismoProf;
+                    $nuevoRegistro->update([
+                        'orden' => $materiaData['orden'] ?? 1,
+                        'estado' => 'activo',
+                    ]);
+
+                    Log::info("Registro {$nuevoRegistro->id} reactivado");
+                } else {
+                    // CASO 2B: Crear un registro completamente NUEVO
+                    Log::info("CASO 2B: Creando NUEVO registro en modulos_materias");
+
+                    $nuevoRegistro = ModuloMateria::create([
+                        'mod_id' => $modulo->id,
+                        'mat_id' => $materiaId,
+                        'prof_id' => $nuevoProfId,
+                        'orden' => $materiaData['orden'] ?? 1,
+                        'estado' => $materiaData['estado'],
+                    ]);
+
+                    Log::info("Nuevo registro creado con ID {$nuevoRegistro->id}");
+                }
+
+                // TRANSFERIR ACCESOS si había un registro anterior DIFERENTE
+                if ($registroAnterior && $registroAnterior->id != $nuevoRegistro->id) {
+                    Log::info("⚠️ CAMBIO DE PROFESOR: Transferir accesos de {$registroAnterior->id} → {$nuevoRegistro->id}");
+
+                    // Contar accesos antes de transferir
+                    $cantidadAccesos = Acceso::where('modulo_materia_id', $registroAnterior->id)->count();
+                    Log::info("Accesos a transferir: {$cantidadAccesos}");
+
+                    if ($cantidadAccesos > 0) {
+                        // SIMPLE: Solo actualizar modulo_materia_id
+                        try {
+                            $actualizados = Acceso::where('modulo_materia_id', $registroAnterior->id)
+                                ->update(['modulo_materia_id' => $nuevoRegistro->id]);
+                            Log::info("✅ {$actualizados} accesos transferidos");
+                        } catch (\Exception $e) {
+                            Log::error("❌ ERROR al transferir accesos: " . $e->getMessage());
+                            Log::error($e->getTraceAsString());
+                        }
+
+                        Log::info("✅ {$actualizados} accesos transferidos exitosamente");
+
+                        // Verificar después de transferir
+                        $accesosDespues = Acceso::where('modulo_materia_id', $nuevoRegistro->id)->count();
+                        Log::info("Total accesos en nuevo registro: {$accesosDespues}");
+                    } else {
+                        Log::info("No hay accesos para transferir");
+                    }
+
+                    //  Inactivar el registro anterior
+                    $registroAnterior->update(['estado' => 'inactivo']);
+                    Log::info("Registro anterior {$registroAnterior->id} inactivado");
+                } else {
+                    Log::info("No requiere transferencia de accesos (mismo registro o no hay anterior)");
                 }
             }
         }
 
-        // 2️⃣ PROCESAR materias del formulario
-        foreach ($materiasData as $materiaData) {
-            $materiaId = $materiaData['materia_id'];
-            $moduloMateria = $materiasExistentes->get($materiaId);
+        Log::info("--- FIN procesamiento materias del formulario ---");
+        Log::info("Registros pendientes de revisar:", $registrosActuales->pluck('id')->toArray());
 
-            if ($moduloMateria) {
-                // ACTUALIZAR existente
-                $moduloMateria->update([
-                    'prof_id' => $materiaData['prof_id'] ?? null,
-                    'orden' => $materiaData['orden'] ?? 1,
-                    'estado' => $materiaData['estado'],
-                ]);
+        // 3️⃣ Inactivar registros que YA NO están en el formulario
+        foreach ($registrosActuales as $registro) {
+            Log::info("Revisando registro {$registro->id}: materia {$registro->mat_id}, profesor " . ($registro->prof_id ?? 'NULL'));
+
+            // Verificar si esta combinación materia+profesor sigue en el formulario
+            $sigueEnFormulario = collect($materiasData)->contains(function ($materiaData) use ($registro) {
+                $profFormulario = $materiaData['prof_id'] ?? null;
+                $profRegistro = $registro->prof_id;
+
+                $mismaMateria = $materiaData['materia_id'] == $registro->mat_id;
+                $mismoProf = ($profFormulario === $profRegistro) ||
+                    (is_null($profFormulario) && is_null($profRegistro));
+
+                return $mismaMateria && $mismoProf;
+            });
+
+            if (!$sigueEnFormulario && $registro->estado === 'activo') {
+                Log::info("⚠️ Registro {$registro->id} NO está en formulario → Inactivar");
+                $registro->update(['estado' => 'inactivo']);
             } else {
-                // CREAR nueva
-                ModuloMateria::create([
-                    'mod_id' => $modulo->id,
-                    'mat_id' => $materiaId,
-                    'prof_id' => $materiaData['prof_id'] ?? null,
-                    'orden' => $materiaData['orden'] ?? 1,
-                    'estado' => $materiaData['estado'],
-                ]);
+                Log::info("Registro {$registro->id} sigue vigente o ya está inactivo");
             }
         }
+
+        Log::info("========== FIN SINCRONIZACIÓN ==========");
     }
     /*
      *****************************************************************
@@ -413,6 +525,9 @@ class CursoController extends Controller
         // Obtener cursos donde el profesor tiene materias asignadas en algún módulo
         // TODOhoy: revisar esta relacion porque no esta contabilizando el moduloMaterias
         $cursos = Curso::where('estado', 'activo')
+            ->whereHas('modulos', function ($q) {
+                $q->where('estado', 'activo');
+            })
             ->whereHas('modulos.moduloMaterias', function ($query) use ($profesorId) {
                 $query->where('prof_id', $profesorId)
                     ->where('estado', 'activo');
@@ -590,7 +705,7 @@ class CursoController extends Controller
                 'contenido' => $contenido,
                 'modulo_materia_id' => $moduloMateria->id,
                 'randomizar_preguntas' => $tema->randomizar_preguntas ?? false,
-                'randomizar_respuestas' => $tema->randomizar_respuestas ?? false,                 
+                'randomizar_respuestas' => $tema->randomizar_respuestas ?? false,
             ],
             'curso' => $curso->only('id', 'nombre'),
             'modulo' => $modulo->only('id', 'nombre'),

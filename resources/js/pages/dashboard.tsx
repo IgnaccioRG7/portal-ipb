@@ -224,9 +224,10 @@ export default function Dashboard({ matriculas }: Props) {
     }, 0) || 0;
 
     return (
+        // TODOHOY colocar el nombre del estudiantes aqui
         <ContentLayout
             breadcrumbs={breadcrumbs}
-            title='Bienvenido Juan!'
+            title='Bienvenido!'
             subtitle={`Estas inscrito en ${totalCursos} curso(s) con ${totalMaterias} materia(s) activas actualmente.`}
         >
             <div className="w-full grid grid-cols-1 lg:grid-cols-12 gap-6">

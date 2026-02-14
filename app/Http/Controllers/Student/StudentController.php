@@ -302,6 +302,7 @@ class StudentController extends Controller
             ->whereHas('moduloMateria', function ($query) use ($matricula, $modulo, $materia) {
                 $query->where('mod_id', $modulo->id)
                     ->where('mat_id', $materia->id)
+                    ->where('estado', 'activo')
                     ->whereHas('accesos', function ($q) use ($matricula) {
                         $q->where('mat_id', $matricula->id)
                             ->where('estado', 'activo');
@@ -309,8 +310,25 @@ class StudentController extends Controller
             })
             ->firstOrFail();
 
-        Log::info('TEMA VALIDADO');
-        Log::info($temaValidado);
+        // FILTRAR correctAnswer del contenido_json
+        $contenido = json_decode($temaValidado->contenido_json, true);
+
+        if (isset($contenido['questions']) && is_array($contenido['questions'])) {
+            // Eliminar correctAnswer de cada pregunta
+            $contenido['questions'] = array_map(function ($question) {
+                // Crear una copia sin correctAnswer
+                return [
+                    'id' => $question['id'],
+                    'type' => $question['type'] ?? 'select',
+                    'text' => $question['text'],
+                    'options' => $question['options'],
+                    // NO incluimos correctAnswer
+                ];
+            }, $contenido['questions']);
+        }
+
+        // Re-encode a JSON
+        $contenidoFiltrado = json_encode($contenido);
 
         // Necesitamos el ModuloMateria para algunas cosas (como su ID)
         $moduloMateria = ModuloMateria::where('mod_id', $modulo->id)
@@ -333,7 +351,7 @@ class StudentController extends Controller
                 'nombre' => $temaValidado->nombre,
                 'descripcion' => $temaValidado->descripcion,
                 'tipo' => $temaValidado->tipo ?? 'quiz',
-                'contenido_json' => $temaValidado->contenido_json,
+                'contenido_json' => $contenidoFiltrado,
                 'modulo_materia_id' => $moduloMateria->id ?? null,
                 'modulo_id' => $modulo->id,
                 'modulo_nombre' => $modulo->nombre,
@@ -349,118 +367,73 @@ class StudentController extends Controller
 
     public function guardarExamen(Request $request, Curso $curso, Modulo $modulo, Materia $materia, Tema $tema)
     {
+        // Validar
         $studentId = auth()->guard()->id();
-
-        // Validar matrícula activa
         $matricula = Matricula::where('estudiante_id', $studentId)
             ->where('curso_id', $curso->id)
             ->where('estado', 'activo')
             ->firstOrFail();
 
-        // Validar datos del examen
         $validated = $request->validate([
             'respuestas' => 'required|array',
             'tiempo_utilizado' => 'required|integer|min:1',
         ]);
 
-        // ✅ OBTENER LAS PREGUNTAS ORIGINALES DEL TEMA
-        $contenidoJson = json_decode($tema->contenido_json, true);
-        $preguntasOriginales = $contenidoJson['questions'] ?? [];
+        // Obtener preguntas originales (con correctAnswer)
+        $preguntasOriginales = json_decode($tema->contenido_json, true)['questions'] ?? [];
 
         if (empty($preguntasOriginales)) {
-            return back()->withErrors(['error' => 'No se encontraron preguntas en el tema.']);
+            return back()->withErrors(['error' => 'No se encontraron preguntas']);
         }
 
-        // ✅ CALCULAR RESPUESTAS CORRECTAS EN EL BACKEND
+        // Evaluar
         $respuestasUsuario = $validated['respuestas'];
-        $totalPreguntas = count($preguntasOriginales);
-        $respuestasCorrectas = 0;
-        $respuestasDetalladas = [];
+        $total = count($preguntasOriginales);
+        $correctas = 0;
+        $detalles = [];
 
-        Log::info('RESPUESTAS DEL USUARIO');
-        Log::info($respuestasUsuario);
-
-        // foreach ($preguntasOriginales as $pregunta) {
-        //     $questionId = $pregunta['id'];
-        //     $respuestaCorrecta = $pregunta['correctAnswer'];
-
-        //     // Verificar si el usuario respondió esta pregunta
-        //     if (isset($respuestasUsuario[$questionId])) {
-        //         $respuestaUsuario = $respuestasUsuario[$questionId]['respuesta'];
-        //         $esCorrecta = ($respuestaUsuario === $respuestaCorrecta);
-
-        //         if ($esCorrecta) {
-        //             $respuestasCorrectas++;
-        //         }
-
-        //         $respuestasDetalladas[$questionId] = [
-        //             'respuesta' => $respuestaUsuario,
-        //             'esCorrecta' => $esCorrecta,
-        //             'respuestaCorrecta' => $respuestaCorrecta
-        //         ];
-        //     } else {
-        //         // Pregunta no respondida
-        //         $respuestasDetalladas[$questionId] = [
-        //             'respuesta' => null,
-        //             'esCorrecta' => false,
-        //             'respuestaCorrecta' => $respuestaCorrecta
-        //         ];
-        //     }
-        // }
         foreach ($preguntasOriginales as $pregunta) {
-            $questionId = $pregunta['id'];
+            $id = $pregunta['id'];
 
-            // 1. Obtenemos el índice correcto original (ej: 0)
-            $indiceCorrectoOriginal = $pregunta['correctAnswer'];
+            // 👇 CAMBIO AQUÍ: Convertir índice a texto
+            $correcto = $pregunta['options'][$pregunta['correctAnswer']];
 
-            // 2. IMPORTANTE: Obtenemos el TEXTO que corresponde a ese índice en el JSON original
-            // Si correctAnswer es 0, $textoCorrecto será "a"
-            $textoCorrecto = $pregunta['options'][$indiceCorrectoOriginal] ?? null;
+            if (isset($respuestasUsuario[$id])) {
+                $respondido = $respuestasUsuario[$id]['respuesta'];
+                $esCorrecta = ($respondido === $correcto); // Usar === para comparación estricta
 
-            if (isset($respuestasUsuario[$questionId])) {
-                $respuestaEnviadaPorAlumno = $respuestasUsuario[$questionId]['respuesta'];
+                if ($esCorrecta) $correctas++;
 
-                // 3. Comparamos TEXTO contra TEXTO
-                $esCorrecta = ($respuestaEnviadaPorAlumno === $textoCorrecto);
-
-                if ($esCorrecta) {
-                    $respuestasCorrectas++;
-                }
-
-                $respuestasDetalladas[$questionId] = [
-                    'respuesta' => $respuestaEnviadaPorAlumno,
-                    'esCorrecta' => $esCorrecta,
-                    'respuestaCorrecta' => $textoCorrecto // Guardamos el texto para el reporte
+                $detalles[$id] = [
+                    'respondido' => $respondido,
+                    'correcto' => $correcto,
+                    'esCorrecta' => $esCorrecta
                 ];
             } else {
-                // Pregunta no respondida
-                $respuestasDetalladas[$questionId] = [
-                    'respuesta' => null,
-                    'esCorrecta' => false,
-                    'respuestaCorrecta' => $textoCorrecto
+                $detalles[$id] = [
+                    'respondido' => null,
+                    'correcto' => $correcto,
+                    'esCorrecta' => false
                 ];
             }
         }
 
-        $puntajeTotal = $respuestasCorrectas;
-        $porcentaje = $totalPreguntas > 0 ? round(($respuestasCorrectas / $totalPreguntas) * 100, 2) : 0;
+        $porcentaje = round(($correctas / $total) * 100, 2);
 
-        // Obtener número de intento
-        $intentoActual = ExamenRealizado::where('tema_id', $tema->id)
+        // Guardar
+        $intento = (ExamenRealizado::where('tema_id', $tema->id)
             ->where('matricula_id', $matricula->id)
-            ->max('intento_numero') ?? 0;
-        $intentoActual++;
+            ->max('intento_numero') ?? 0) + 1;
 
-        // Registrar el examen
         ExamenRealizado::create([
             'tema_id' => $tema->id,
             'matricula_id' => $matricula->id,
-            'intento_numero' => $intentoActual,
+            'intento_numero' => $intento,
             'fecha_inicio' => now()->subSeconds($validated['tiempo_utilizado']),
             'fecha_fin' => now(),
             'tiempo_utilizado' => $validated['tiempo_utilizado'],
-            'respuestas_json' => $respuestasDetalladas,
-            'puntaje_total' => $puntajeTotal,
+            'respuestas_json' => $detalles,
+            'puntaje_total' => $correctas,
             'porcentaje' => $porcentaje,
             'estado' => 'completado',
             'ip_address' => $request->ip(),

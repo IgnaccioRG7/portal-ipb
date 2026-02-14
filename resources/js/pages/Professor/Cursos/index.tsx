@@ -30,7 +30,7 @@ export default function CursosIndex({ cursos : cursosData }: { cursos: any[] }) 
           href={cursos.modulos({
             curso: curso.id
           }).url}
-          className="text-blue-600 hover:text-blue-900 flex items-center gap-1"
+          className="text-blue-600 hover:text-blue-900 flex items-center gap-1 dark:hover:text-blue-500"
           title="Ver materias"
         >
           <Eye size={18} /> Ver Materias

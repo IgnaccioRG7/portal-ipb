@@ -87,8 +87,9 @@ export default function MatriculaEstudiante({
   };
 
   return (
+    // TODOhoy: arreglar el nombre completo del estudiante aqui
     <ContentLayout
-      title={`Matricular Estudiante: ${estudiante.nombre}`}
+      title={`Matricular Estudiante: ${estudiante.nombre ?? ''}`}
       subtitle={`Email: ${estudiante.email}`}
       breadcrumbs={breadcrumbs}
     >
@@ -223,7 +224,7 @@ export default function MatriculaEstudiante({
                       </span>
                     </div>
 
-                    <div className="flex justify-between items-center mt-4">
+                    <div className="flex justify-end items-center mt-4">
                       <Link
                         // href={route('admin.matriculas.materias', {
                         //   user: estudiante.id,
@@ -241,12 +242,12 @@ export default function MatriculaEstudiante({
                       >
                         Gestionar materias →
                       </Link>
-                      <Link
+                      {/* <Link
                         // href={route('admin.matriculas.edit', matricula.id)}
                         className="text-sm text-gray-600 hover:text-gray-800"
                       >
                         Editar
-                      </Link>
+                      </Link> */}
                     </div>
                   </div>
                 ))}

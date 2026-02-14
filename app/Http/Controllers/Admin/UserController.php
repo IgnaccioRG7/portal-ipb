@@ -6,8 +6,10 @@ use App\Http\Controllers\Controller;
 use App\Models\Persona;
 use App\Models\Rol;
 use App\Models\User;
+use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 
 class UserController extends Controller
@@ -69,6 +71,12 @@ class UserController extends Controller
             });
         }
 
+        if (!empty($rolFilter)) {
+            $query->whereHas('rol', function ($q) use ($rolFilter) {
+                $q->where('nombre', $rolFilter);
+            });
+        }
+
         $users = $query
             ->paginate($perPage)
             ->through(function ($user) {
@@ -93,7 +101,8 @@ class UserController extends Controller
             'stats' => $stats,
             'filters' => [
                 'search' => $search,
-                'per_page' => $perPage
+                'per_page' => $perPage,
+                'role' => $rolFilter
             ]
         ]);
     }
@@ -405,12 +414,19 @@ class UserController extends Controller
 
     public function destroy(User $user)
     {
-        // Eliminar usuario y su persona asociada
-        $user->delete();
-        $user->persona->delete();
+        try {
+            // Eliminar usuario y su persona asociada
+            $user->delete();
+            $user->persona->delete();
 
-        return redirect()->route('admin.users.index')
-            ->with('success', 'Usuario eliminado exitosamente');
+            return redirect()->route('admin.users.index')
+                ->with('success', 'Usuario eliminado exitosamente');
+        } catch (QueryException $e) {
+            //throw $th;
+            Log::info("Error al eliminar el usuario");
+            Log::info($e);
+            // return redirect()->route();
+        }
     }
 
 

@@ -20,7 +20,7 @@ return new class extends Migration
             $table->enum('estado', ['activo', 'inactivo'])->default('activo');
             $table->timestamps();
 
-            $table->unique(['mod_id', 'mat_id']);
+            $table->unique(['mod_id', 'mat_id', 'prof_id'], 'mod_mat_prof_unique');
         });
     }
 

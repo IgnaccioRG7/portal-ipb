@@ -100,10 +100,7 @@ export function Quiz({ tema, cursoId, moduloId, materiaId }: DirectTopicProps) {
   const prev = () => {
     if (currentQuestion > 0) setCurrentQuestion(currentQuestion - 1);
   };
-
-  // const selectOption = (n: number) => {
-  //   answerQuestion(question.id, n)
-  // }
+  
   const selectOption = (n: number) => {
     const valorRespuesta = question.options[n];
     answerQuestion(question.id, valorRespuesta);
@@ -123,6 +120,7 @@ export function Quiz({ tema, cursoId, moduloId, materiaId }: DirectTopicProps) {
           </h3>
         </header>
 
+        {/* TODOFIXME: arreglar que cuando la respuestas en las opciones tienen el mismo valor entonces al seleccionar se pinta ambas */}
         <ul className="space-y-3">
           {question?.options.map((opt, i) => (
             <li
