@@ -367,7 +367,6 @@ class StudentController extends Controller
 
     public function guardarExamen(Request $request, Curso $curso, Modulo $modulo, Materia $materia, Tema $tema)
     {
-        // Validar
         $studentId = auth()->guard()->id();
         $matricula = Matricula::where('estudiante_id', $studentId)
             ->where('curso_id', $curso->id)
@@ -379,72 +378,70 @@ class StudentController extends Controller
             'tiempo_utilizado' => 'required|integer|min:1',
         ]);
 
-        // Obtener preguntas originales (con correctAnswer)
         $preguntasOriginales = json_decode($tema->contenido_json, true)['questions'] ?? [];
 
         if (empty($preguntasOriginales)) {
             return back()->withErrors(['error' => 'No se encontraron preguntas']);
         }
 
-        // Evaluar
         $respuestasUsuario = $validated['respuestas'];
-        $total = count($preguntasOriginales);
         $correctas = 0;
         $detalles = [];
 
-        foreach ($preguntasOriginales as $pregunta) {
-            $id = $pregunta['id'];
+        // Mapa para buscar preguntas por id rápidamente
+        $preguntasMap = collect($preguntasOriginales)->keyBy('id');
 
-            // 👇 CAMBIO AQUÍ: Convertir índice a texto
+        // Iterar sobre lo que respondió el usuario (no sobre el total del tema)
+        foreach ($respuestasUsuario as $id => $respuesta) {
+            // Seguridad: verificar que la pregunta existe en el tema
+            if (!$preguntasMap->has($id)) continue;
+
+            $pregunta = $preguntasMap[$id];
             $correcto = $pregunta['options'][$pregunta['correctAnswer']];
+            $respondido = $respuesta['respuesta']; // ✅ accede al valor dentro de cada respuesta
+            $esCorrecta = ($respondido === $correcto);
 
-            if (isset($respuestasUsuario[$id])) {
-                $respondido = $respuestasUsuario[$id]['respuesta'];
-                $esCorrecta = ($respondido === $correcto); // Usar === para comparación estricta
+            if ($esCorrecta) $correctas++;
 
-                if ($esCorrecta) $correctas++;
-
-                $detalles[$id] = [
-                    'respondido' => $respondido,
-                    'correcto' => $correcto,
-                    'esCorrecta' => $esCorrecta
-                ];
-            } else {
-                $detalles[$id] = [
-                    'respondido' => null,
-                    'correcto' => $correcto,
-                    'esCorrecta' => false
-                ];
-            }
+            $detalles[$id] = [
+                'respondido' => $respondido,
+                'correcto'   => $correcto,
+                'esCorrecta' => $esCorrecta
+            ];
         }
 
-        $porcentaje = round(($correctas / $total) * 100, 2);
+        $totalRespondidas = count($detalles);
 
-        // Guardar
+        if ($totalRespondidas === 0) {
+            return back()->withErrors(['error' => 'No se encontraron respuestas válidas']);
+        }
+
+        $porcentaje = round(($correctas / $totalRespondidas) * 100, 2);
+
         $intento = (ExamenRealizado::where('tema_id', $tema->id)
             ->where('matricula_id', $matricula->id)
             ->max('intento_numero') ?? 0) + 1;
 
         ExamenRealizado::create([
-            'tema_id' => $tema->id,
-            'matricula_id' => $matricula->id,
-            'intento_numero' => $intento,
-            'fecha_inicio' => now()->subSeconds($validated['tiempo_utilizado']),
-            'fecha_fin' => now(),
+            'tema_id'          => $tema->id,
+            'matricula_id'     => $matricula->id,
+            'intento_numero'   => $intento,
+            'fecha_inicio'     => now()->subSeconds($validated['tiempo_utilizado']),
+            'fecha_fin'        => now(),
             'tiempo_utilizado' => $validated['tiempo_utilizado'],
-            'respuestas_json' => $detalles,
-            'puntaje_total' => $correctas,
-            'porcentaje' => $porcentaje,
-            'estado' => 'completado',
-            'ip_address' => $request->ip(),
-            'user_agent' => $request->userAgent(),
+            'respuestas_json'  => $detalles,
+            'puntaje_total'    => $correctas,
+            'porcentaje'       => $porcentaje,
+            'estado'           => 'completado',
+            'ip_address'       => $request->ip(),
+            'user_agent'       => $request->userAgent(),
         ]);
 
         return redirect()->route('estudiante.tema.resultados', [
-            'curso' => $curso->id,
+            'curso'  => $curso->id,
             'modulo' => $modulo->id,
             'materia' => $materia->id,
-            'tema' => $tema->id,
+            'tema'   => $tema->id,
         ]);
     }
 

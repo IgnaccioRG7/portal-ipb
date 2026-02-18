@@ -15,7 +15,7 @@ import {
   Mail,
   Eye
 } from 'lucide-react';
-import { useState } from 'react';
+import React, { useState } from 'react';
 import cursos from '@/routes/cursos';
 
 interface Props {
@@ -246,9 +246,10 @@ export default function ResultadosTemaProfesor({
               </thead>
               <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
                 {estadisticas_estudiantes.map((est, index) => (
-                  <>
+                  <React.Fragment
+                    key={`${est.estudiante_id}-${index + (Math.floor(Math.random() * 10000))}-est'`}
+                  >
                     <tr
-                      key={`${est.estudiante_id}-${index + (Math.floor(Math.random() * 10000))}-est'`}
                       className="hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer"
                       onClick={() => toggleEstudiante(est.estudiante_id)}
                     >
@@ -367,7 +368,7 @@ export default function ResultadosTemaProfesor({
                         </td>
                       </tr>
                     )}
-                  </>
+                  </React.Fragment>
                 ))}
               </tbody>
             </table>

@@ -2,7 +2,7 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import { router } from '@inertiajs/react'
-import { ContenidoJson } from '@/components/student/quiz'
+import { ContenidoJson, Question } from '@/components/student/quiz'
 import estudiante from '@/routes/estudiante'
 
 export type QuizMode = 'tema' | 'mix'
@@ -17,9 +17,12 @@ interface QuizState {
   tiempoInicio: number | null
   tiempoFin: number | null
   examenEnviado: boolean
+  cantidadPreguntas: number | null
+  setCantidadPreguntas: (n: number | null) => void
 
-  answers: Record<string, string | number> // Acepta ambos por si acaso
-  answerQuestion: (id: string, answer: string | number) => void
+  // answers: Record<string, string | number> // Acepta ambos por si acaso
+  answers: Record<string, { valor: string | number; indiceSeleccionado: number }>
+  answerQuestion: (id: string, answer: string | number, index: number) => void
 
   setCurrentQuestion: (n: number) => void
   setSubjectId: (n: number) => void
@@ -32,10 +35,12 @@ interface QuizState {
     cursoId: number
     moduloId: number
     materiaId: number
-    temaId: number  
+    temaId: number
     contenido: ContenidoJson
     tiempoInicio: number
-  }) => Promise<void>
+  }) => Promise<void>,
+  shuffledQuestions: Question[] | null
+  setShuffledQuestions: (questions: Question[]) => void
 }
 
 export const useQuizStore = create<QuizState>()(
@@ -50,6 +55,11 @@ export const useQuizStore = create<QuizState>()(
       tiempoFin: null,
       examenEnviado: false,
       isSubmitting: false,
+      shuffledQuestions: null,
+      cantidadPreguntas: null,
+      setCantidadPreguntas: (n) => set({ cantidadPreguntas: n }),
+
+      setShuffledQuestions: (questions: Question[]) => set({ shuffledQuestions: questions }),
 
       setSubjectId: (n) => {
         set({ subjectId: n })
@@ -59,12 +69,13 @@ export const useQuizStore = create<QuizState>()(
         set({ currentQuestion: n })
       },
 
-      answerQuestion: (id, answer) => {
+      answerQuestion: (id, answer, index) => {
         const answers = get().answers
         set({
           answers: {
             ...answers,
-            [id]: answer
+            [id]: { valor: answer, indiceSeleccionado: index }
+            // [id]: answer
           }
         })
       },
@@ -86,7 +97,9 @@ export const useQuizStore = create<QuizState>()(
           tiempoInicio: null,
           tiempoFin: null,
           examenEnviado: false,
-          isSubmitting: false
+          isSubmitting: false,
+          shuffledQuestions: null,
+          cantidadPreguntas: null
         })
       },
 
@@ -126,23 +139,12 @@ export const useQuizStore = create<QuizState>()(
         })
 
         const answers = state.answers
-        // const correctAnswers = contenido.questions.filter(
-        //   q => q.correctAnswer === answers[q.id]
-        // ).length
-        // const puntajeTotal = correctAnswers
-        const totalPreguntas = contenido.questions.length
-        // const porcentaje = Math.floor((correctAnswers / totalPreguntas) * 100)
 
-        // const respuestas = contenido.questions.reduce((acc, q) => {
-        //   acc[q.id] = {
-        //     respuesta: answers[q.id],
-        //     esCorrecta: answers[q.id] === q.correctAnswer
-        //   }
-        //   return acc
-        // }, {} as Record<string, any>)
+        const totalPreguntas = contenido.questions.length
+
         const respuestas = Object.keys(answers).reduce((acc, questionId) => {
           acc[questionId] = {
-            respuesta: answers[questionId]
+            respuesta: answers[questionId].valor  // <-- solo el texto, como antes
           }
           return acc
         }, {} as Record<string, any>)
@@ -161,8 +163,6 @@ export const useQuizStore = create<QuizState>()(
           {
             respuestas: respuestas,
             tiempo_utilizado: tiempoUtilizado,
-            // puntaje_total: puntajeTotal,
-            // porcentaje: porcentaje,
           },
           {
             preserveScroll: true,

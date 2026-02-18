@@ -609,7 +609,7 @@ class CursoController extends Controller
             ->where('prof_id', $profesorId)
             ->where('estado', 'activo')
             ->with('materia:id,nombre,codigo_materia,area,color')
-            ->withCount('temas as total_temas')
+            ->withCount('temas')
             ->get()
             ->map(function ($mm) {
                 return [

@@ -1,4 +1,4 @@
-import { Form, Head } from '@inertiajs/react';
+import { Form, Head, usePage } from '@inertiajs/react';
 import InputError from '@/components/input-error';
 import TextLink from '@/components/text-link';
 import { Button } from '@/components/ui/button';
@@ -21,7 +21,12 @@ export default function Login({
     status,
     canResetPassword,
     canRegister,
-}: Props) {
+}: Props) { 
+
+    const { errors, flash } = usePage().props; // 👈 Traer flash también
+    console.log('Errors:', errors);
+    console.log('Flash:', flash); // Aquí deberías ver tu mensaje
+
     return (
         <AuthLayout
             title="Inicia sesión en tu cuenta"

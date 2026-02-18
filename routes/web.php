@@ -63,6 +63,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
 // Rutas para el administrador
 Route::middleware(['auth', 'verified', 'role:Admin'])->prefix('admin')->name('admin.')->group(function () {
+    // Gestión de usuarios
     Route::get('/', fn() => Inertia::render('Admin/dashboard'))->name('dashboard');
     Route::get('/users', [UserController::class, 'index'])->name('users.index');
     Route::get('/users/create', [UserController::class, 'create'])->name('users.create');
@@ -71,9 +72,10 @@ Route::middleware(['auth', 'verified', 'role:Admin'])->prefix('admin')->name('ad
     Route::put('/users/{user}', [UserController::class, 'update'])->name('users.update');
     Route::delete('/users/{user}', [UserController::class, 'destroy'])->name('users.destroy');
     Route::get('/students/search', [UserController::class, 'search']);
+    Route::patch('/users/{user}/toggle-estado', [UserController::class, 'toggleEstado'])->name('users.toggle-estado');
 
 
-    // 🆕 Gestión de recursos
+    // Gestión de recursos
     Route::get('/recursos', [AdminRecursoController::class, 'index'])->name('recursos.index');
     Route::get('/recursos/create', [AdminRecursoController::class, 'create'])->name('recursos.create');
     Route::post('/recursos', [AdminRecursoController::class, 'store'])->name('recursos.store');
@@ -171,6 +173,7 @@ Route::middleware(['auth', 'verified', 'role:Estudiante,Admin'])->prefix('estudi
 // });
 
 
+// TODO: Compartir estas rutas en la vista del administrador para que en caso se inactive al profesor el admin pueda seguir viendo los temas
 // Rutas para el profesor - AHORA CON MÓDULOS
 Route::middleware(['auth', 'verified', 'role:Profesor,Admin'])->prefix('cursos')->name('cursos.')->group(function () {
     Route::get('/', [CursoController::class, 'index'])->name('index');

@@ -1,4 +1,5 @@
 import { ContenidoJson, Quiz } from "@/components/student/quiz";
+import { generarOpciones, SelectorCantidad } from "@/components/student/selector-cantidad";
 import ContentLayout from "@/layouts/content-layout";
 import { dashboard } from "@/routes";
 import estudiante from "@/routes/estudiante";
@@ -45,14 +46,19 @@ interface TopicProps {
   tema: Tema;
 }
 
+//TODO: arreglar que cuando de click en salir o que cuando cambie de pestania reiniciar el quiz y que pierda todo el progreso
 export default function Topic({
   curso,
   materia,
   tema
 }: TopicProps) {
   console.log(tema);
-  const { isCompleteQuiz, subjectId, setSubjectId, reset } = useQuizStore()
+  const { isCompleteQuiz, subjectId, setSubjectId, reset, cantidadPreguntas, setCantidadPreguntas, setShuffledQuestions } = useQuizStore()
   const title = tema.nombre ? tema.nombre : materia.nombre
+  const contenido = JSON.parse(tema.contenido_json)
+  const totalPreguntas = contenido.questions?.length ?? 0
+
+  const opcionesPreguntas = generarOpciones(totalPreguntas)
 
   const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Inicio', href: dashboard().url },
@@ -65,33 +71,33 @@ export default function Topic({
       reset()
       setSubjectId(tema.id)
     }
+
+    return () => {
+      // setCantidadPreguntas(null)
+      // setShuffledQuestions([])
+
+      // if (tema.tipo === 'configurable') {      
+      //   reset()
+      // }
+    }
+
   }, [tema.id])
 
   console.log(tema.tipo);
 
-  // if (tema.tipo === 'configurable') {
-  //   const QUESTION_OPTIONS = [5, 10, 15, 20];
+  if (tema.tipo === 'configurable' && !cantidadPreguntas) {
+    return (
+      <ContentLayout breadcrumbs={breadcrumbs}>
+        <SelectorCantidad
+          opciones={opcionesPreguntas}
+          onSeleccionar={setCantidadPreguntas}
+          curso={curso}
+          title={title}
+        />
+      </ContentLayout>
+    )
+  }
 
-  //   return (
-  //     <ContentLayout breadcrumbs={breadcrumbs}>
-  //       <section className="quiz flex flex-col gap-4">
-  //         <header className="flex flex-row items-center gap-2 relative">
-  //           <Link
-  //             className="absolute left-0 flex flex-row gap-2"
-  //             href={estudiante.subjects({
-  //               course: curso.id,
-  //             })}
-  //           >
-  //             <ArrowLeftToLine className="size-6" />
-  //             <span className="hidden md:block">Salir</span>
-  //           </Link>
-  //           <h2 className="text-2xl font-bold w-full text-center">Selecciona la cantidad de preguntas a resolver</h2>
-  //         </header>
-  //         <Quiz tema={tema} />
-  //       </section>
-  //     </ContentLayout>
-  //   )
-  // }
 
   return (
     <ContentLayout breadcrumbs={breadcrumbs}>

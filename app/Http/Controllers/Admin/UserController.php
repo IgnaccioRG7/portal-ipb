@@ -425,7 +425,8 @@ class UserController extends Controller
             //throw $th;
             Log::info("Error al eliminar el usuario");
             Log::info($e);
-            // return redirect()->route();
+            return redirect()->route('admin.users.index')
+                ->withErrors(['error' => 'No es posible eliminar a este usuario.']);
         }
     }
 
@@ -465,5 +466,15 @@ class UserController extends Controller
             });
 
         return response()->json($students);
+    }
+
+    public function toggleEstado(User $user) {
+        Log::info($user);
+        $nuevoEstado = $user->estado === 'activo' ? 'inactivo' : 'activo';
+        $user->update(['estado' => $nuevoEstado]);
+        Log::info($nuevoEstado);
+        Log::info($user);
+
+        return back()->with('success', "Usuario {$nuevoEstado} correctamente");
     }
 }

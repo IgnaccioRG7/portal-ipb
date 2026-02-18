@@ -6,6 +6,8 @@ import { BreadcrumbItem } from '@/types';
 import cursos from '@/routes/cursos';
 
 export default function ModuloMaterias({ curso, modulo, materias }: any) {
+    console.log({ curso, modulo, materias });
+    
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'Cursos', href: cursos.index().url },
         { title: curso.nombre, href: cursos.modulos(curso.id).url },

@@ -2,7 +2,7 @@ import ContentLayout from '@/layouts/content-layout';
 import admin from '@/routes/admin';
 import { Head, Link, router } from '@inertiajs/react';
 import { DataTable } from '@/components/data-table';
-import { Eye, Pencil, Plus } from 'lucide-react';
+import { Eye, LayoutList, Pencil, Plus, SlidersHorizontal } from 'lucide-react';
 import cursos from '@/routes/cursos';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
@@ -51,17 +51,24 @@ export default function CursosIndex({ cursos: cursosData }: { cursos: any[] }) {
         <div className="flex items-center gap-2">
           <Link
             href={admin.cursos.edit(curso.id).url}
-            className="text-blue-600 hover:text-blue-900 flex items-center gap-1"
+            className="text-blue-600 hover:text-blue-900 flex items-center gap-1 border-b border-transparent hover:border-blue-900"
             title="Editar curso"
           >
             <Pencil size={16} /> Editar
           </Link>
           <Link
             href={admin.cursos.asignarMaterias(curso.id).url}
-            className="text-purple-600 hover:text-purple-900 flex items-center gap-1"
+            className="text-emerald-600 hover:text-emerald-900 flex items-center gap-1 border-b border-transparent hover:border-emerald-900"
             title="Asignar materias"
           >
-            <Eye size={16} /> Materias
+            <SlidersHorizontal size={16} /> Materias
+          </Link>
+          <Link
+            href={'#'}
+            className="text-cyan-600 hover:text-cyan-900 flex items-center gap-1 border-b border-transparent hover:border-cyan-900"
+            title="Asignar materias"
+          >
+            <LayoutList size={16} /> Gestionar
           </Link>
         </div>
       )

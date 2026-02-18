@@ -1,13 +1,20 @@
 import { DataTable } from '@/components/data-table';
+import { Alert } from '@/components/ui/alert';
+import { Button } from '@/components/ui/button';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
+import { Dialog, DialogClose, DialogFooter, DialogHeader, DialogOverlay, DialogPortal, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import Pagination from '@/components/ui/pagination';
+import { Switch } from '@/components/ui/switch';
 import AppLayout from '@/layouts/app-layout';
 import ContentLayout from '@/layouts/content-layout';
 import { dashboard } from '@/routes';
 import admin from '@/routes/admin';
 import { BreadcrumbItem } from '@/types';
-import { Head, Link, router } from '@inertiajs/react';
-import { UserPlus, Edit, ShieldOff, Users, UserRoundCheck, UserRoundX, Search, ListFilter } from 'lucide-react';
+import { Head, Link, router, usePage } from '@inertiajs/react';
+import { DialogContent, DialogDescription, DialogTrigger } from '@radix-ui/react-dialog';
+import { UserPlus, Edit, ShieldOff, Users, UserRoundCheck, UserRoundX, Search, ListFilter, XIcon } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 
 interface Stats {
@@ -63,6 +70,13 @@ export default function Index({
     stats: Stats,
     filters: Filters
   }) {
+
+  // const [openDialog, setOpenDialog] = useState(false)
+  const [deleteDialog, setDeleteDialog] = useState({
+    open: false,
+    userId: null as number | null
+  });
+
   const [search, setSearch] = useState(() => {
     return filters?.search
   })
@@ -196,17 +210,45 @@ export default function Index({
     router.visit(admin.users.edit(userId));
   };
 
+  // const handleDelete = (userId: number) => {
+  //   if (confirm('¿Estás seguro de eliminar este usuario? Esta acción no se puede deshacer.')) {
+  //     router.delete(admin.users.destroy(userId), {
+  //       preserveScroll: true,
+  //       onSuccess: () => {
+  //         // Aquí podrías agregar un toast de éxito si lo deseas
+  //         console.log('Usuario eliminado');
+  //       }
+  //     });
+  //   }
+  // };
   const handleDelete = (userId: number) => {
-    if (confirm('¿Estás seguro de eliminar este usuario? Esta acción no se puede deshacer.')) {
-      router.delete(admin.users.destroy(userId), {
+    setDeleteDialog({
+      open: true,
+      userId
+    });
+  };
+
+  const confirmDelete = () => {
+    if (deleteDialog.userId) {
+      router.delete(admin.users.destroy(deleteDialog.userId), {
         preserveScroll: true,
         onSuccess: () => {
-          // Aquí podrías agregar un toast de éxito si lo deseas
           console.log('Usuario eliminado');
         }
       });
     }
   };
+
+  const handleToggleStatusUser = (userId: number) => {
+    router.patch(admin.users.toggleEstado(userId), {}, {
+      onSuccess: () => {
+        console.log('Cambio de estado exitosamente');
+      },
+      onError: () => {
+        console.log('Ocurrio un error al cambiar el estado');
+      },
+    });
+  }
 
   const columns = [
     { key: 'id', label: 'ID' },
@@ -217,12 +259,25 @@ export default function Index({
       key: 'estado',
       label: 'Estado',
       render: (user: User) => (
-        <span className={`w-2 h-2 block rounded-full text-xs ${user.estado === 'activo' ? 'bg-green-500' :
-          user.estado === 'inactivo' ? 'bg-red-100 text-red-800' :
-            'bg-gray-100 text-gray-800'
-          }`}>
-          {/* {user.estado} */}
-        </span>
+        <div className='flex items-center gap-1'>
+          {/* <span className={`w-2 h-2 block rounded-full text-xs ${user.estado === 'activo' ? 'bg-green-500' :
+            user.estado === 'inactivo' ? 'bg-red-100 text-red-800' :
+              'bg-gray-100 text-gray-800'
+            }`}>
+          </span> */}
+          <Switch
+            checked={user.estado === 'activo'}
+            onCheckedChange={() => handleToggleStatusUser(user.id)}
+            aria-label='Cambiar estado del usuario'
+          />
+          <Label className="text-xs">
+            {user.estado === 'activo' ? (
+              <span className="text-green-600 font-semibold">Activo</span>
+            ) : (
+              <span className="text-red-600 font-semibold">Inactivo</span>
+            )}
+          </Label>
+        </div>
       )
     },
     // { key: 'created_at', label: 'Registro' },
@@ -281,6 +336,63 @@ export default function Index({
         </>
       }
     >
+      <ConfirmDialog
+        open={deleteDialog.open}
+        onOpenChange={(open) => setDeleteDialog({ ...deleteDialog, open })}
+        onConfirm={confirmDelete}
+        title="Eliminar usuario"
+        description="¿Estás seguro de eliminar este usuario? Esta acción no se puede deshacer."
+        confirmText="Eliminar"
+        cancelText="Cancelar"
+        variant="danger"
+      />
+      {/* <Dialog open={openDialog} onOpenChange={setOpenDialog}>
+        <DialogTrigger asChild>
+          <Button className='cursor-pointer'>Open dialog</Button>
+        </DialogTrigger>
+
+        <DialogPortal>
+          <DialogOverlay className="fixed inset-0 bg-black/50 z-50" />
+          <DialogContent className="fixed top-[50%] left-[50%] translate-x-[-50%] translate-y-[-50%] z-50 w-full max-w-md bg-white rounded-lg shadow-xl p-6 border border-gray-200">
+            <DialogHeader>
+              <DialogTitle className="text-lg font-semibold mb-2">
+                Título del Diálogo
+              </DialogTitle>
+              <DialogDescription className="text-sm text-gray-500 mb-4">
+                Descripción del diálogo
+              </DialogDescription>
+            </DialogHeader>
+            <div className="py-4">
+              Contenido del diálogo...
+            </div>
+
+            <DialogFooter className="flex justify-end gap-2 mt-4">
+              <Button
+                variant="outline"
+                onClick={() => setOpenDialog(false)}
+                className="cursor-pointer"
+              >
+                Cancelar
+              </Button>
+              <Button
+                onClick={() => {
+                  // Acción de confirmación
+                  setOpenDialog(false);
+                }}
+                className="cursor-pointer"
+              >
+                Confirmar
+              </Button>
+            </DialogFooter>
+            <DialogClose className="absolute right-4 top-4 rounded-sm opacity-70 hover:opacity-100">
+              <XIcon className="h-4 w-4" />
+              <span className="sr-only">Cerrar</span>
+            </DialogClose>
+          </DialogContent>
+        </DialogPortal>
+      </Dialog> */}
+
+
       {/* Stats */}
       <section className="stats grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
         <div className="bg-white rounded-lg shadow px-4 py-2 dark:bg-gray-800 flex justify-between items-center">

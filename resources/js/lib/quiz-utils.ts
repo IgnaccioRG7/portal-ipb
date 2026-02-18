@@ -4,7 +4,6 @@ export interface Question {
   type: 'select' | 'input';
   text: string;
   options: string[];
-  correctAnswer: number;
 }
 
 /**
@@ -23,25 +22,10 @@ export function shuffleArray<T>(array: T[]): T[] {
  * Mezcla las opciones de respuesta y ajusta la respuesta correcta
  */
 export function shuffleOptions(question: Question): Question {
-  // Crear pares [opción, índiceOriginal]
-  const optionPairs = question.options.map((opt, idx) => ({ 
-    text: opt, 
-    originalIndex: idx 
-  }));
-  
-  // Mezclar
-  const shuffledPairs = shuffleArray(optionPairs);
-  
-  // Encontrar dónde quedó la respuesta correcta
-  const correctOriginalIndex = question.correctAnswer;
-  const newCorrectIndex = shuffledPairs.findIndex(
-    pair => pair.originalIndex === correctOriginalIndex
-  );
-  
+  const shuffled = shuffleArray(question.options);
   return {
     ...question,
-    options: shuffledPairs.map(p => p.text),
-    correctAnswer: newCorrectIndex
+    options: shuffled
   };
 }
 
@@ -57,12 +41,12 @@ export function prepareQuestions(
 ): Question[] {
   let prepared = [...questions];
   
-  // 1. Randomizar preguntas (si está activado)
+  // 1. Randomizar preguntas
   if (config.randomizar_preguntas) {
     prepared = shuffleArray(prepared);
   }
   
-  // 2. Randomizar respuestas (si está activado)
+  // 2. Randomizar respuestas
   if (config.randomizar_respuestas) {
     prepared = prepared.map(q => shuffleOptions(q));
   }

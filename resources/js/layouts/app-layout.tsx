@@ -1,3 +1,4 @@
+import { Toaster } from '@/components/ui/toaster';
 import AppLayoutTemplate from '@/layouts/app/app-sidebar-layout';
 import type { AppLayoutProps } from '@/types';
 import { Head } from '@inertiajs/react';
@@ -14,6 +15,7 @@ export default ({ children, breadcrumbs, ...props }: AppLayoutProps) => (
             />
         </Head>
         <AppLayoutTemplate breadcrumbs={breadcrumbs} {...props}>
+            <Toaster />
             {children}
         </AppLayoutTemplate>
     </>
