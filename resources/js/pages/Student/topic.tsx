@@ -3,27 +3,25 @@ import { generarOpciones, SelectorCantidad } from "@/components/student/selector
 import ContentLayout from "@/layouts/content-layout";
 import { dashboard } from "@/routes";
 import estudiante from "@/routes/estudiante";
-import { useQuizStore } from "@/store/quiz";
+import { useHydration, useQuizStore } from "@/store/quiz";
 import { BreadcrumbItem } from "@/types";
-import { Link } from "@inertiajs/react";
-import { ArrowLeftToLine, CircleCheck, CircleX, RotateCcw, Home, Trophy } from "lucide-react";
-import { useEffect } from "react";
+import { Link, router } from "@inertiajs/react";
+import { ArrowLeftToLine } from "lucide-react";
+import { useEffect, useRef } from "react";
+import { navigationGuard } from '@/lib/navigation-guard'
 
-// Curso
 interface Curso {
   id: number;
   nombre: string;
   codigo: string;
 }
 
-// Materia
 interface Materia {
   id: number;
   nombre: string;
   area: string;
 }
 
-// Tema
 interface Tema {
   id: number;
   nombre: string | null;
@@ -39,26 +37,19 @@ interface Tema {
   randomizar_respuestas: boolean;
 }
 
-// Props del componente Topic
 interface TopicProps {
   curso: Curso;
   materia: Materia;
   tema: Tema;
 }
 
-//TODO: arreglar que cuando de click en salir o que cuando cambie de pestania reiniciar el quiz y que pierda todo el progreso
-export default function Topic({
-  curso,
-  materia,
-  tema
-}: TopicProps) {
-  console.log(tema);
-  const { isCompleteQuiz, subjectId, setSubjectId, reset, cantidadPreguntas, setCantidadPreguntas, setShuffledQuestions } = useQuizStore()
+export default function Topic({ curso, materia, tema }: TopicProps) {
+  const { subjectId, setSubjectId, reset, cantidadPreguntas, setCantidadPreguntas, shuffledQuestions, setShuffledQuestions } = useQuizStore()
   const title = tema.nombre ? tema.nombre : materia.nombre
   const contenido = JSON.parse(tema.contenido_json)
   const totalPreguntas = contenido.questions?.length ?? 0
-
   const opcionesPreguntas = generarOpciones(totalPreguntas)
+  const mountedRef = useRef(false)
 
   const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Inicio', href: dashboard().url },
@@ -66,24 +57,86 @@ export default function Topic({
     { title: 'Temas', href: '#' }
   ];
 
+  // Si cambia el tema o es la primera vez, resetear y asignar el nuevo subjectId
   useEffect(() => {
-    if (subjectId !== tema?.id) {
+    // Si estamos navegando fuera, no re-asignar subjectId
+    console.log("VALOR IS NAVIGATING AWAT");
+    console.log(navigationGuard.isNavigatingAway);
+
+    if (navigationGuard.isNavigatingAway) return
+
+    if (subjectId !== tema.id) {
       reset()
       setSubjectId(tema.id)
     }
+  }, [tema.id, subjectId])
 
-    return () => {
-      // setCantidadPreguntas(null)
-      // setShuffledQuestions([])
-
-      // if (tema.tipo === 'configurable') {      
-      //   reset()
-      // }
+  // Interceptar navegación para confirmar salida y resetear
+  useEffect(() => {
+    // Solo limpiar el guard en el PRIMER montaje real del componente
+    // no en remontajes intermedios de Inertia
+    if (!mountedRef.current) {
+      mountedRef.current = true
+      // NO limpiar aquí todavía
     }
 
-  }, [tema.id])
+    let yaConfirmo = false
 
-  console.log(tema.tipo);
+    const unsubscribeInertia = router.on('before', (event) => {
+      const nuevaRuta = event.detail.visit.url.href
+      const rutaActual = window.location.href
+
+      console.log("VERIFICANDO QUE YA CONFIRMO");
+      console.log(yaConfirmo);
+
+      if (nuevaRuta === rutaActual) return
+      if (useQuizStore.getState().isSubmitting) return
+      if (event.detail.visit.prefetch) return
+      if (yaConfirmo) return
+
+      const confirmar = window.confirm('¿Estás seguro que deseas salir? Perderás todo el progreso del examen.')
+
+      if (!confirmar) {
+        event.preventDefault()
+        return
+      }
+
+      yaConfirmo = true
+      navigationGuard.setNavigatingAway(true)
+      useQuizStore.getState().reset()
+    })
+
+    const handlePopState = () => {
+      if (useQuizStore.getState().isSubmitting) return
+
+      const confirmar = window.confirm('¿Estás seguro que deseas salir? Perderás todo el progreso del examen.')
+
+      if (!confirmar) {
+        // window.history.pushState(null, '', window.location.href)
+        window.history.pushState({ quizIntercepted: true }, '', window.location.href)
+        return
+      }
+
+      yaConfirmo = true
+      navigationGuard.setNavigatingAway(true)
+      useQuizStore.getState().reset()
+      console.log("Reseteando el quiz");
+      console.log(useQuizStore.getState().shuffledQuestions);
+
+      router.visit(estudiante.subjects({ course: curso.id }))
+    }
+
+    if (!window.history.state?.quizIntercepted) {
+      window.history.pushState({ quizIntercepted: true }, '', window.location.href)
+    }
+
+    window.addEventListener('popstate', handlePopState)
+
+    return () => {
+      unsubscribeInertia()
+      window.removeEventListener('popstate', handlePopState)
+    }
+  }, [])
 
   if (tema.tipo === 'configurable' && !cantidadPreguntas) {
     return (
@@ -98,16 +151,13 @@ export default function Topic({
     )
   }
 
-
   return (
     <ContentLayout breadcrumbs={breadcrumbs}>
       <section className="quiz flex flex-col gap-4">
         <header className="flex flex-row items-center gap-2 relative">
           <Link
             className="absolute left-0 flex flex-row gap-2"
-            href={estudiante.subjects({
-              course: curso.id,
-            })}
+            href={estudiante.subjects({ course: curso.id })}
           >
             <ArrowLeftToLine className="size-6" />
             <span className="hidden md:block">Salir</span>

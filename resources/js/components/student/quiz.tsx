@@ -1,7 +1,7 @@
 import { Tema } from "@/pages/Student/topics";
 import { useEffect, useMemo, useRef } from "react";
 import Progress from "./progress";
-import { useQuizStore } from "@/store/quiz";
+import { useHydration, useQuizStore } from "@/store/quiz";
 import { prepareQuestions } from "@/lib/quiz-utils";
 import { BookOpen } from "lucide-react";
 
@@ -26,6 +26,8 @@ interface DirectTopicProps {
 }
 
 export function Quiz({ tema, cursoId, moduloId, materiaId }: DirectTopicProps) {
+  const hasHydrated = useHydration()
+
   const {
     shuffledQuestions,
     setShuffledQuestions,
@@ -36,14 +38,17 @@ export function Quiz({ tema, cursoId, moduloId, materiaId }: DirectTopicProps) {
     enviarExamen,
     isSubmitting,
     reset,
-    cantidadPreguntas
+    cantidadPreguntas,
+    subjectId
   } = useQuizStore()
 
-  console.log(tema);
-
-  // Para randomizar las preguntas y/o respuestas
   const questions = useMemo(() => {
-    // Si ya hay preguntas shuffleadas, usarlas
+    console.log("SUBJECTID");
+    console.log(subjectId);    
+    
+    if (!subjectId) return []
+    
+    // Si ya hay preguntas shuffleadas en el store, usarlas directamente
     if (shuffledQuestions && shuffledQuestions.length > 0) {
       return shuffledQuestions
     }
@@ -63,27 +68,33 @@ export function Quiz({ tema, cursoId, moduloId, materiaId }: DirectTopicProps) {
       prepared = prepared.slice(0, cantidadPreguntas)
     }
 
+    console.log("PREGUNTAS PREPARADAS");
+    console.log(prepared);
+
     return prepared;
   }, [tema.id, shuffledQuestions, cantidadPreguntas])
 
-  useEffect(() => {
-    if (!shuffledQuestions || shuffledQuestions.length === 0) {
-      setShuffledQuestions(questions as Question[])
-    }
-  }, [questions])
+   useEffect(() => {
+      if (!hasHydrated) return
+  
+      if (!shuffledQuestions || shuffledQuestions.length === 0) {
+        // Solo guardar si el subjectId del store coincide con este tema
+        // Evita guardar durante el proceso de reset/navegación
+        if (useQuizStore.getState().subjectId === tema.id) {
+          setShuffledQuestions(questions as Question[])
+        }
+      }
+    }, [questions, hasHydrated])
 
   const contenido: ContenidoJson = useMemo<ContenidoJson>(() => {
     return JSON.parse(tema.contenido_json)
   }, [tema.contenido_json])
 
-  // Guardar tiempo de inicio en ref local (no se pierde)
   const tiempoInicioRef = useRef<number>(Date.now())
   const temaIdRef = useRef(tema.id)
 
   useEffect(() => {
-    // Si cambió el tema, resetear
     if (temaIdRef.current !== tema.id) {
-      console.log('🔄 Nuevo tema, reseteando')
       reset()
       temaIdRef.current = tema.id
       tiempoInicioRef.current = Date.now()
@@ -92,7 +103,6 @@ export function Quiz({ tema, cursoId, moduloId, materiaId }: DirectTopicProps) {
 
   const total = questions.length;
   const question = total >= currentQuestion ? questions[currentQuestion] : questions[0]
-  // const selectedOption = answers[question?.id] ?? null
   const selectedAnswer = answers[question?.id] ?? null
   const selectedIndex = selectedAnswer?.indiceSeleccionado ?? null
 
@@ -105,8 +115,6 @@ export function Quiz({ tema, cursoId, moduloId, materiaId }: DirectTopicProps) {
   };
 
   const enviarResultados = async () => {
-    console.log('📤 Enviando con tiempo:', tiempoInicioRef.current)
-
     await enviarExamen({
       cursoId,
       moduloId,
@@ -133,17 +141,15 @@ export function Quiz({ tema, cursoId, moduloId, materiaId }: DirectTopicProps) {
     <section className="space-y-6">
       <Progress total={total} current={currentQuestion} />
 
-      {
-        tipo === 'lectura' && (
-          <div className="card border border-dashed border-cyan-700 rounded-md px-2 py-4 md:px-4 bg-cyan-800/20">
-            <h3 className="title flex flex-row gap-2 items-center text-base md:text-lg font-bold pb-2 md:pb-3">
-              <BookOpen />
-              {tema.nombre}
-            </h3>
-            <p className="py-4 h-auto max-h-64 overflow-x-hidden overflow-y-auto text-pretty text-sm md:text-base">{reading}</p>
-          </div>
-        )
-      }
+      {tipo === 'lectura' && (
+        <div className="card border border-dashed border-cyan-700 rounded-md px-2 py-4 md:px-4 bg-cyan-800/20">
+          <h3 className="title flex flex-row gap-2 items-center text-base md:text-lg font-bold pb-2 md:pb-3">
+            <BookOpen />
+            {tema.nombre}
+          </h3>
+          <p className="py-4 h-auto max-h-64 overflow-x-hidden overflow-y-auto text-pretty text-sm md:text-base">{reading}</p>
+        </div>
+      )}
 
       <div className="space-y-4">
         <header className="flex flex-col gap-2">
@@ -159,14 +165,13 @@ export function Quiz({ tema, cursoId, moduloId, materiaId }: DirectTopicProps) {
           {question?.options.map((opt, i) => (
             <li
               key={i}
-              className={`p-3 rounded-lg border-4 flex items-center gap-2 cursor-pointer ${selectedIndex === i  // <-- comparar por ÍNDICE, no por texto
-                ? 'border-[#fde047] bg-[#fde047]/20 dark:bg-yellow-700 dark:border-[#d4b61c]'
-                : 'dark:bg-gray-800 dark:hover:bg-gray-700 hover:bg-gray-100 border-gray-200'
+              className={`p-3 rounded-lg border-4 flex items-center gap-2 cursor-pointer ${selectedIndex === i
+                  ? 'border-[#fde047] bg-[#fde047]/20 dark:bg-yellow-700 dark:border-[#d4b61c]'
+                  : 'dark:bg-gray-800 dark:hover:bg-gray-700 hover:bg-gray-100 border-gray-200'
                 }`}
               onClick={() => selectOption(i)}
             >
-              <span className={`font-black size-8 min-w-8 grid place-content-center rounded-full leading-0 
-      ${selectedIndex === i  // <-- también aquí
+              <span className={`font-black size-8 min-w-8 grid place-content-center rounded-full leading-0 ${selectedIndex === i
                   ? 'bg-[#fddd3c] text-gray-800'
                   : 'bg-gray-200 text-gray-800 dark:bg-gray-500 dark:text-gray-300'
                 }`}>
@@ -175,25 +180,6 @@ export function Quiz({ tema, cursoId, moduloId, materiaId }: DirectTopicProps) {
               <p className="text-sm md:text-base">{opt}</p>
             </li>
           ))}
-          {/* {question?.options.map((opt, i) => (
-            <li
-              key={i}
-              className={`p-3 rounded-lg border-4 flex items-center gap-2 cursor-pointer ${selectedOption === opt
-                ? 'border-[#fde047] bg-[#fde047]/20 dark:bg-yellow-700 dark:border-[#d4b61c]'
-                : 'dark:bg-gray-800 dark:hover:bg-gray-700 hover:bg-gray-100 border-gray-200'
-                }`}
-              onClick={() => selectOption(i)}
-            >
-              <span className={`font-black size-8 min-w-8 grid place-content-center rounded-full leading-0 
-          ${selectedOption === opt
-                  ? 'bg-[#fddd3c] text-gray-800'
-                  : 'bg-gray-200 text-gray-800 dark:bg-gray-500 dark:text-gray-300'
-                }`}>
-                {String.fromCharCode(65 + i)}
-              </span>
-              <p className="text-sm md:text-base">{opt}</p>
-            </li>
-          ))} */}
         </ul>
       </div>
 
@@ -212,7 +198,6 @@ export function Quiz({ tema, cursoId, moduloId, materiaId }: DirectTopicProps) {
 
         <button
           onClick={next}
-          // disabled={selectedOption === null || isSubmitting}
           disabled={selectedAnswer === null || isSubmitting}
           className="px-4 py-2 rounded-lg bg-blue-600 text-white text-sm disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
         >

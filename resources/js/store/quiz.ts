@@ -1,9 +1,9 @@
-// store/quiz.ts
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import { router } from '@inertiajs/react'
 import { ContenidoJson, Question } from '@/components/student/quiz'
 import estudiante from '@/routes/estudiante'
+import { useEffect, useState } from 'react'
 
 export type QuizMode = 'tema' | 'mix'
 
@@ -11,22 +11,20 @@ interface QuizState {
   isSubmitting: boolean
   startedQuiz: boolean
   currentQuestion: number
-  // answers: Record<string, number>
   subjectId: number | null
   isCompleteQuiz: boolean
   tiempoInicio: number | null
   tiempoFin: number | null
   examenEnviado: boolean
   cantidadPreguntas: number | null
-  setCantidadPreguntas: (n: number | null) => void
-
-  // answers: Record<string, string | number> // Acepta ambos por si acaso
+  shuffledQuestions: Question[] | null
   answers: Record<string, { valor: string | number; indiceSeleccionado: number }>
-  answerQuestion: (id: string, answer: string | number, index: number) => void
 
+  setCantidadPreguntas: (n: number | null) => void
+  answerQuestion: (id: string, answer: string | number, index: number) => void
   setCurrentQuestion: (n: number) => void
   setSubjectId: (n: number) => void
-  // answerQuestion: (id: string, answer: number) => void
+  setShuffledQuestions: (questions: Question[]) => void
   reset: () => void
   completeQuiz: (val: boolean) => void
   startQuiz: (val: boolean) => void
@@ -38,9 +36,7 @@ interface QuizState {
     temaId: number
     contenido: ContenidoJson
     tiempoInicio: number
-  }) => Promise<void>,
-  shuffledQuestions: Question[] | null
-  setShuffledQuestions: (questions: Question[]) => void
+  }) => Promise<void>
 }
 
 export const useQuizStore = create<QuizState>()(
@@ -56,18 +52,12 @@ export const useQuizStore = create<QuizState>()(
       examenEnviado: false,
       isSubmitting: false,
       shuffledQuestions: null,
-      cantidadPreguntas: null,
+      cantidadPreguntas: null,      
+
       setCantidadPreguntas: (n) => set({ cantidadPreguntas: n }),
-
-      setShuffledQuestions: (questions: Question[]) => set({ shuffledQuestions: questions }),
-
-      setSubjectId: (n) => {
-        set({ subjectId: n })
-      },
-
-      setCurrentQuestion: (n) => {
-        set({ currentQuestion: n })
-      },
+      setShuffledQuestions: (questions) => set({ shuffledQuestions: questions }),
+      setSubjectId: (n) => set({ subjectId: n }),
+      setCurrentQuestion: (n) => set({ currentQuestion: n }),
 
       answerQuestion: (id, answer, index) => {
         const answers = get().answers
@@ -75,7 +65,6 @@ export const useQuizStore = create<QuizState>()(
           answers: {
             ...answers,
             [id]: { valor: answer, indiceSeleccionado: index }
-            // [id]: answer
           }
         })
       },
@@ -85,7 +74,6 @@ export const useQuizStore = create<QuizState>()(
         if (currentTiempoInicio === null) {
           const nuevoTiempo = Date.now()
           set({ tiempoInicio: nuevoTiempo })
-          console.log('⏱️ Tiempo iniciado en store:', nuevoTiempo)
         }
       },
 
@@ -99,59 +87,29 @@ export const useQuizStore = create<QuizState>()(
           examenEnviado: false,
           isSubmitting: false,
           shuffledQuestions: null,
-          cantidadPreguntas: null
+          cantidadPreguntas: null,
+          subjectId: null,
         })
       },
 
-      completeQuiz: (val) => {
-        set({
-          isCompleteQuiz: val,
-          tiempoFin: Date.now()
-        })
-      },
-
-      startQuiz: (val) => {
-        set({ startedQuiz: val })
-      },
+      completeQuiz: (val) => set({ isCompleteQuiz: val, tiempoFin: Date.now() }),
+      startQuiz: (val) => set({ startedQuiz: val }),
 
       enviarExamen: async ({ cursoId, moduloId, materiaId, temaId, contenido, tiempoInicio }) => {
         const state = get()
-
-        if (state.isSubmitting) {
-          return
-        }
+        if (state.isSubmitting) return
 
         const tiempoFin = Date.now()
         let tiempoUtilizado = Math.floor((tiempoFin - tiempoInicio) / 1000)
+        if (tiempoUtilizado < 1) tiempoUtilizado = 1
 
-        if (tiempoUtilizado < 1) {
-          tiempoUtilizado = 1
-        }
-
-        // console.log('⏰ Tiempo Inicio:', new Date(tiempoInicio).toISOString())
-        // console.log('⏰ Tiempo Fin:', new Date(tiempoFin).toISOString())
-        // console.log('📊 Tiempo utilizado:', tiempoUtilizado, 'segundos')
-
-        set({
-          isSubmitting: true,
-          isCompleteQuiz: true,
-          tiempoFin: tiempoFin
-        })
+        set({ isSubmitting: true, isCompleteQuiz: true, tiempoFin })
 
         const answers = state.answers
-
-        const totalPreguntas = contenido.questions.length
-
         const respuestas = Object.keys(answers).reduce((acc, questionId) => {
-          acc[questionId] = {
-            respuesta: answers[questionId].valor  // <-- solo el texto, como antes
-          }
+          acc[questionId] = { respuesta: answers[questionId].valor }
           return acc
         }, {} as Record<string, any>)
-
-        console.log(contenido);
-        console.log(answers);
-
 
         router.post(
           estudiante.examen.guardar({
@@ -161,14 +119,12 @@ export const useQuizStore = create<QuizState>()(
             tema: temaId
           }),
           {
-            respuestas: respuestas,
+            respuestas,
             tiempo_utilizado: tiempoUtilizado,
           },
           {
             preserveScroll: true,
-            onSuccess: () => {
-              set({ examenEnviado: true, isSubmitting: false })
-            },
+            onSuccess: () => set({ examenEnviado: true, isSubmitting: false }),
             onError: (errors) => {
               set({ isSubmitting: false })
               console.error('❌ Error al guardar examen:', errors)
@@ -178,7 +134,42 @@ export const useQuizStore = create<QuizState>()(
       }
     }),
     {
-      name: 'quiz-progress'
+      name: 'quiz-progress',
+      partialize: (state) => ({
+        currentQuestion: state.currentQuestion,
+        answers: state.answers,
+        subjectId: state.subjectId,
+        isCompleteQuiz: state.isCompleteQuiz,
+        tiempoInicio: state.tiempoInicio,
+        tiempoFin: state.tiempoFin,
+        examenEnviado: state.examenEnviado,
+        shuffledQuestions: state.shuffledQuestions,
+        cantidadPreguntas: state.cantidadPreguntas,
+      })
     }
   )
 )
+
+
+
+export const useHydration = () => {
+  const [hydrated, setHydrated] = useState(false)
+
+  useEffect(() => {
+    // Si ya hidró antes de que montara el componente
+    const alreadyHydrated = useQuizStore.persist.hasHydrated()
+    if (alreadyHydrated) {
+      setHydrated(true)
+      return
+    }
+
+    // Si no, esperar
+    const unsubHydrate = useQuizStore.persist.onFinishHydration(() => {
+      setHydrated(true)
+    })
+
+    return () => unsubHydrate()
+  }, [])
+
+  return hydrated
+}
