@@ -852,6 +852,7 @@ class CursoController extends Controller
     }
 
 
+    // TODO: ver si vamos a mover esta funcion a la parte de profesores o a un controlador a parte
     /**
      * Mostrar resultados de un tema para todos los estudiantes
      */
@@ -918,8 +919,21 @@ class CursoController extends Controller
             'puntaje' => $examen->puntaje_total,
             'porcentaje' => $examen->porcentaje,
             'estado' => $examen->estado,
+            'respuestas' => $examen->respuestas_json
         ]);
 
+        // TODO: Terminar para que el profe pueda visualizar las respuestas que el usuario completo esto por intento en el frontend
+        // Filtrar contenido json
+        $contenido = json_decode($tema->contenido_json, true);
+        if (isset($contenido['questions']) && is_array($contenido['questions'])) {
+            $contenido['questions'] = array_map(function ($question) {
+                return[
+                    'id' => $question['id'],
+                    'text' => $question['text'],
+                ];
+            }, $contenido['questions']);
+        }
+ 
         return Inertia::render('Professor/Cursos/resultados', [
             'curso' => $curso->only('id', 'nombre', 'codigo_curso'),
             'modulo' => $modulo->only('id', 'nombre', 'codigo_modulo'),
@@ -929,6 +943,7 @@ class CursoController extends Controller
                 'codigo_tema' => $tema->codigo_tema,
                 'nombre' => $tema->nombre,
                 'total_preguntas' => count(json_decode($tema->contenido_json, true)['questions'] ?? []),
+                'contenido_json' => $contenido,
             ],
             'estadisticas_generales' => $estadisticasGenerales,
             'estadisticas_estudiantes' => $estadisticasPorEstudiante,

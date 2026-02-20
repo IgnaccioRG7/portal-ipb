@@ -360,7 +360,7 @@ export default function Index({ curso, modulos }: Props) {
               <Search className="h-8 w-8 text-gray-400" />
             </div>
             <h3 className="mb-2 text-lg font-semibold text-gray-900 dark:text-gray-100">
-              No se encontraron materias
+              No se encontraron materias aun en este curso
             </h3>
             <p className="text-gray-500 dark:text-gray-400">
               {searchTerm

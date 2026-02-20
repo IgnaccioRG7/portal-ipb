@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import React, { useState } from 'react';
 import cursos from '@/routes/cursos';
+import admin from '@/routes/admin';
 
 interface Props {
   curso: {
@@ -83,26 +84,13 @@ export default function ResultadosTemaProfesor({
   estadisticas_estudiantes,
   intentos
 }: Props) {
-
-  console.log({
-    curso,
-    modulo,
-    materia,
-    tema,
-    estadisticas_generales,
-    estadisticas_estudiantes,
-    intentos
-  });
-
-
   const [expandido, setExpandido] = useState<Record<number, boolean>>({});
   const [verDetalle, setVerDetalle] = useState<number | null>(null);
 
   const breadcrumbs: BreadcrumbItem[] = [
-    { title: 'Cursos', href: cursos.index().url },
-    { title: curso.nombre, href: cursos.modulos(curso.id).url },
-    { title: modulo.nombre, href: cursos.materias({ curso: curso.id, modulo: modulo.id }).url },
-    { title: materia.nombre, href: cursos.temas({ curso: curso.id, modulo: modulo.id, materia: materia.id }).url },
+    { title: 'Cursos', href: admin.cursos.index().url },
+    { title: curso.nombre, href: admin.gestion.modulos(curso.id).url },
+    { title: modulo.nombre, href: admin.gestion.materias({ curso: curso.id, modulo: modulo.id }).url },
     { title: `Resultados: ${tema.nombre || tema.codigo_tema}`, href: '#' },
   ];
 
@@ -390,14 +378,13 @@ export default function ResultadosTemaProfesor({
         {/* Botón de volver */}
         <div className="flex justify-end">
           <Link
-            href={cursos.temas({
+            href={admin.gestion.materias({
               curso: curso.id,
-              modulo: modulo.id,
-              materia: materia.id
-            }).url}
+              modulo: modulo.id
+            })}
             className="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg text-sm"
           >
-            Volver a Temas
+            Volver
           </Link>
         </div>
       </div>

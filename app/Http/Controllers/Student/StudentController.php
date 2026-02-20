@@ -444,7 +444,7 @@ class StudentController extends Controller
             'tema'   => $tema->id,
         ]);
     }
-
+    
     public function resultados(Curso $curso, Modulo $modulo, Materia $materia, Tema $tema)
     {
         $studentId = auth()->guard()->id();

@@ -7,8 +7,24 @@ import cursos from '@/routes/cursos';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
+import { BreadcrumbItem } from '@/types';
 
-export default function CursosIndex({ cursos: cursosData }: { cursos: any[] }) {
+interface Curso {
+  codigo_curso: string
+  estado: string
+  id: number
+  materias_count: number
+  nivel: string
+  nombre: string
+  precio: string
+}
+
+export default function CursosIndex({ cursos: cursosData }: { cursos: Curso[] }) {
+  
+  const breadcrumbs: BreadcrumbItem[] = [
+    { title: 'Cursos', href: admin.cursos.index().url },
+  ];
+  
   const handleToggleEstado = (curso: any) => {
     router.patch(admin.cursos.toggleEstado(curso.id).url, {}, {
       preserveScroll: true,
@@ -22,12 +38,12 @@ export default function CursosIndex({ cursos: cursosData }: { cursos: any[] }) {
     {
       key: 'precio',
       label: 'Precio (Bs)',
-      render: (curso: any) => `${curso.precio} Bs`
+      render: (curso: Curso) => `${curso.precio} Bs`
     },
     {
       key: 'estado',
       label: 'Estado',
-      render: (curso: any) => (
+      render: (curso: Curso) => (
         <div className="flex items-center gap-2">
           <Switch
             checked={curso.estado === 'activo'}
@@ -47,7 +63,7 @@ export default function CursosIndex({ cursos: cursosData }: { cursos: any[] }) {
     {
       key: 'acciones',
       label: 'Acciones',
-      render: (curso: any) => (
+      render: (curso: Curso) => (
         <div className="flex items-center gap-2">
           <Link
             href={admin.cursos.edit(curso.id).url}
@@ -64,9 +80,11 @@ export default function CursosIndex({ cursos: cursosData }: { cursos: any[] }) {
             <SlidersHorizontal size={16} /> Materias
           </Link>
           <Link
-            href={'#'}
+            href={admin.gestion.modulos({
+              curso: curso.id
+            }).url}
             className="text-cyan-600 hover:text-cyan-900 flex items-center gap-1 border-b border-transparent hover:border-cyan-900"
-            title="Asignar materias"
+            title="Gestionar este curso"
           >
             <LayoutList size={16} /> Gestionar
           </Link>
@@ -79,6 +97,7 @@ export default function CursosIndex({ cursos: cursosData }: { cursos: any[] }) {
     <ContentLayout
       title="Gestión de Cursos"
       subtitle="Administra los cursos de la plataforma"
+      breadcrumbs={breadcrumbs}
       actions={<div className="">
         <Link href={admin.cursos.create().url}>
           <Button className="bg-green-600 hover:bg-green-500">

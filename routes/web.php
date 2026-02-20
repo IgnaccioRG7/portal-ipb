@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\CursoController;
+use App\Http\Controllers\Admin\CursoGestionController;
 use App\Http\Controllers\Admin\MateriaController;
 use App\Http\Controllers\Admin\MatriculaController;
 use App\Http\Controllers\Admin\RecursoController as AdminRecursoController;
@@ -128,6 +129,24 @@ Route::middleware(['auth', 'verified', 'role:Admin'])->prefix('admin')->name('ad
         Route::get('/{materia}/edit', [MateriaController::class, 'edit'])->name('edit');
         Route::put('/{materia}', [MateriaController::class, 'update'])->name('update');
         Route::delete('/{materia}', [MateriaController::class, 'destroy'])->name('destroy');
+    });
+
+    // Gestión de resultados para admin (mismo flujo que profesor para que este pueda visualizar los resultados de los quizes que gestionan los profesores y que resuelven los estudiantes)
+    Route::prefix('gestion-cursos')->name('gestion.')->group(function () {
+        // Ver módulos de un curso
+        Route::get('/{curso}/modulos', [CursoGestionController::class, 'modulos'])->name('modulos');
+
+        // Ver materias de un módulo
+        Route::get('/{curso}/modulo/{modulo}/materias', [CursoGestionController::class, 'materias'])->name('materias');
+
+        // Ver temas de una materia
+        Route::get('/{curso}/modulo/{modulo}/materia/{materia}/prof/{profesor}/temas', [CursoGestionController::class, 'temas'])->name('temas');
+
+        // Ver resultados de un tema
+        Route::get(
+            '/{curso}/modulo/{modulo}/materia/{materia}/tema/{tema}/resultados',
+            [CursoGestionController::class, 'resultados']
+        )->name('resultados');
     });
 
     // TODO: Validar la ruta directa publica para que no puedan ingresar directamente desde la url
