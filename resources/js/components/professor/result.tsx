@@ -1,35 +1,42 @@
-import ContentLayout from "@/layouts/content-layout";
 import { Link, router } from "@inertiajs/react";
 import { ArrowLeftToLine, CircleCheck, CircleX, Home, RotateCcw, Trophy } from "lucide-react";
 import { ContenidoJson } from "../student/quiz";
-import estudiante from "@/routes/estudiante";
-import { BreadcrumbItem } from "@/types";
-import { Curso } from "@/pages/dashboard";
+import estudiante from "@/routes/estudiante";;
 import { useQuizStore } from "@/store/quiz";
 import { useEffect, useState } from 'react';
 
-// TODOahora: Usar este componente en la vista del profesor para comparar las respuestas
-export default function ResultView({
-  breadcrumbs,
-  contenido,
-  curso,
-  title,
-  temaId,
-  matriculaId
-}: {
-  breadcrumbs: BreadcrumbItem[]
-  contenido: ContenidoJson
-  curso: Curso
-  title: string
-  temaId: number
-  matriculaId?: number
-}) {
-  const { answers, reset } = useQuizStore()
-  const [intentos, setIntentos] = useState<any[]>([])
+interface Answer {
+  correcto: string
+  respondido: string
+  esCorrecta: boolean
+}
 
-  // Para los resultados  
-  const correctAnswers = contenido.questions.filter(question => question.correctAnswer === answers[question.id]).length
-  const percentage = Math.floor(((correctAnswers) / contenido.questions.length) * 100)
+interface Question {
+  id: string,
+  text: string
+}
+
+// TODOahora: Usar este componente en la vista del profesor para comparar las respuestas
+export function StudentResults({
+  percentage,
+  questions = [],
+  answers = {}
+}: {
+  percentage: number
+  questions: Question[]
+  answers: Record<string, Answer>
+}) {
+
+  console.log("Lo que llega");
+  console.log({
+    percentage,
+    questions,
+    answers
+  });
+
+
+  const objQuestions = Object.fromEntries(questions?.map(q => [q.id, q.text]))
+  const arrayAnswers = Object.entries(answers)
 
   const getBackgroundColor = () => {
     if (percentage >= 80) return "bg-emerald-600/10 border-emerald-600";
@@ -47,21 +54,10 @@ export default function ResultView({
     return "text-red-600";
   }
 
-  return (<ContentLayout breadcrumbs={breadcrumbs}>
+  return (
     <section className="quiz flex flex-col gap-4">
-      <header className="flex flex-row items-center gap-2 relative">
-        <Link
-          className="absolute left-0 flex flex-row gap-2"
-          href={estudiante.subjects({
-            course: curso.id,
-          })}
-        >
-          <ArrowLeftToLine className="size-6" />
-          <span className="hidden md:block">Salir</span>
-        </Link>
-        <h2 className="text-2xl font-bold w-full text-center">Resultados de la prueba de: {title}</h2>
-      </header>
-      <section className="results grid grid-cols-1 gap-4 lg:grid-cols-4">
+      <h2 className="text-2xl font-bold w-full text-center">Resultados</h2>
+      <section className="results">
         {/* Columna izquierda - Resultado actual */}
         <div className="lg:col-span-1">
           <div className="qualification">
@@ -71,42 +67,41 @@ export default function ResultView({
                 {percentage} %
               </span>
             </div>
-            <div className="buttons grid grid-cols-2 gap-2 w-full py-2">
-              <button className="grow p-2 border border-gray-200 rounded-md shadow-xs font-semibold flex justify-center gap-2 items-center hover:bg-gray-100 transition-colors duration-300 cursor-pointer"
-                onClick={reset}
-              >
-                <RotateCcw /> Reintentar
-              </button>
-              <Link
-                href={estudiante.dashboard().url}
-                className="grow p-2 border border-gray-800 bg-gray-800 text-white rounded-md shadow-xs font-semibold flex justify-center gap-2 items-center hover:bg-gray-900 transition-colors duration-300 cursor-pointer">
-                <Home /> Inicio
-              </Link>
-            </div>
           </div>
           <div className="review col-span-1 md:col-span-2">
-            <h3 className="text-xl font-medium">Revisa tus respuestas</h3>
-            <ul className="flex flex-col gap-2">
+            <h3 className="text-xl font-medium my-4">Revisa tus respuestas</h3>
+            <ul className="flex flex-col gap-2 max-h-80 overflow-y-auto">
               {
-                contenido?.questions?.map((question, index) => {
-                  const userAnswer = answers[question.id as keyof typeof answers]
-                  const isCorrect = question.correctAnswer === userAnswer
+                arrayAnswers?.map((answer, index) => {
+
+                  const [key, response] = answer
+                  const isCorrect = response.esCorrecta
+                  const userAnswer = response.respondido
+                  const quizAnswer = response.correcto
 
                   return (
-                    <li className={`border-2 rounded-md p-2 flex gap-2 items-start ${isCorrect ? 'bg-green-200/30 border-green-300' : 'bg-red-200/30 border-red-300'}`}>
+                    <li
+                      key={key}
+                      className={`border-2 rounded-md p-2 flex gap-2 items-start ${isCorrect ? 'bg-green-200/30 border-green-300' : 'bg-red-200/30 border-red-300'}`}>
                       <div className={`icon ${isCorrect ? 'text-green-400' : 'text-red-400'}`}>
                         {isCorrect ? <CircleCheck /> : <CircleX />}
                       </div>
                       <div className="response flex flex-col">
                         <span className="question text-gray-600 text-sm dark:text-gray-300">Pregunta {index + 1}</span>
-                        <p className="font-semibold">{question.text}</p>
-                        {!isCorrect && userAnswer && (
-                          <span className="incorrect text-sm text-gray-600 dark:text-gray-300">
-                            Tu respuesta: <span className="font-bold text-base text-red-800 dark:text-red-200">
-                              {typeof userAnswer === 'number' ? question.options[userAnswer] : String(userAnswer)}
+                        <p className="font-semibold">{objQuestions[key]}</p>
+                        <p className="text-gray-600 dark:text-gray-300 text-base">
+                          <span>Tu respuesta: </span>
+                          <span className={`font-medium text-base ${isCorrect ? 'text-green-800 dark:text-green-200' : 'text-red-800 dark:text-red-200'}`}>
+                            {userAnswer}
+                          </span>
+                          <br />
+                          <span className={`${isCorrect ? 'hidden' : ''}`}>
+                            <span>Correcta: </span>
+                            <span className={`font-medium text-base text-green-800 dark:text-green-200'`}>
+                              {quizAnswer}
                             </span>
                           </span>
-                        )}
+                        </p>
                       </div>
                     </li>
                   )
@@ -115,49 +110,7 @@ export default function ResultView({
             </ul>
           </div>
         </div>
-        {/* Columna derecha - Historial de intentos */}
-        <div className="lg:col-span-3">
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-            <h3 className="text-xl font-semibold mb-4">📊 Historial de Intentos</h3>
-
-            {intentos.length === 0 ? (
-              <p className="text-gray-500">No hay intentos anteriores</p>
-            ) : (
-              <div className="space-y-4">
-                {intentos.map((intento, index) => (
-                  <div
-                    key={intento.id}
-                    className="border rounded-lg p-4 flex items-center justify-between"
-                  >
-                    <div>
-                      <div className="flex items-center gap-3">
-                        <span className="text-lg font-bold">#{intento.intento_numero}</span>
-                        <span className={`px-3 py-1 rounded-full text-xs ${intento.porcentaje >= 70
-                          ? 'bg-green-100 text-green-700'
-                          : 'bg-yellow-100 text-yellow-700'
-                          }`}>
-                          {intento.porcentaje}%
-                        </span>
-                        <span className="text-sm text-gray-500">
-                          {new Date(intento.fecha_fin).toLocaleDateString()}
-                        </span>
-                      </div>
-                      <p className="text-sm text-gray-600 mt-1">
-                        ⏱️ {Math.floor(intento.tiempo_utilizado / 60)}:{(intento.tiempo_utilizado % 60).toString().padStart(2, '0')} min
-                      </p>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-sm font-semibold">
-                        {intento.puntaje_total}/{contenido.questions.length} correctas
-                      </p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
       </section>
     </section>
-  </ContentLayout>)
-}
+  )
+};

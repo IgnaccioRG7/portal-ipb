@@ -169,6 +169,16 @@ class CursoGestionController extends Controller
             abort(404);
         }
 
+        $contenido = json_decode($tema->contenido_json, true);
+        if (isset($contenido['questions']) && is_array($contenido['questions'])) {
+            $contenido['questions'] = array_map(function ($question) {
+                return [
+                    'id' => $question['id'],
+                    'text' => $question['text']
+                ];
+            },$contenido['questions']);
+        }
+
         // Verificar que el tema pertenezca a algún módulo_materia de esta materia
         $moduloMateriaIds = ModuloMateria::where('mod_id', $modulo->id)
             ->where('mat_id', $materia->id)
@@ -237,6 +247,7 @@ class CursoGestionController extends Controller
             'puntaje' => $examen->puntaje_total,
             'porcentaje' => $examen->porcentaje,
             'estado' => $examen->estado,
+            'respuestas' => $examen->respuestas_json
         ]);
 
         return Inertia::render('Admin/GestionCursos/resultados', [
@@ -248,6 +259,7 @@ class CursoGestionController extends Controller
                 'codigo_tema' => $tema->codigo_tema,
                 'nombre' => $tema->nombre,
                 'total_preguntas' => count(json_decode($tema->contenido_json, true)['questions'] ?? []),
+                'contenido_json' => $contenido,
                 'profesor' => $profesorInfo ? [
                     'name' => $profesorInfo->name,
                 ] : null,

@@ -13,10 +13,29 @@ import {
   ChevronUp,
   Download,
   Mail,
-  Eye
+  Eye,
+  XIcon
 } from 'lucide-react';
 import React, { useState } from 'react';
 import cursos from '@/routes/cursos';
+import { Dialog, DialogClose, DialogOverlay, DialogTitle } from '@/components/ui/dialog';
+import { DialogContent, DialogPortal, DialogTrigger } from '@radix-ui/react-dialog';
+import { StudentResults } from '@/components/professor/result';
+
+interface Answer {
+  correcto: string
+  respondido: string
+  esCorrecta: boolean
+}
+
+interface Question {
+  id: string,
+  text: string
+}
+
+interface ContenidoJson{
+  questions: Question[]
+}
 
 interface Props {
   curso: {
@@ -39,6 +58,7 @@ interface Props {
     codigo_tema: string;
     nombre: string;
     total_preguntas: number;
+    contenido_json: ContenidoJson;
   };
   estadisticas_generales: {
     total_estudiantes: number;
@@ -71,6 +91,7 @@ interface Props {
     puntaje: number;
     porcentaje: number;
     estado: string;
+    respuestas: Answer;
   }>;
 }
 
@@ -97,6 +118,11 @@ export default function ResultadosTemaProfesor({
 
   const [expandido, setExpandido] = useState<Record<number, boolean>>({});
   const [verDetalle, setVerDetalle] = useState<number | null>(null);
+  const [dialog, setDialog] = useState<boolean>(false)
+  const [result, setResult] = useState({
+    percentage:0,
+    answers: {}
+  })
 
   const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Cursos', href: cursos.index().url },
@@ -155,6 +181,14 @@ export default function ResultadosTemaProfesor({
       hour12: false
     });
   };
+
+  const viewExamDetail = (percentage:any, answers:any) => {
+    setResult({
+      percentage,
+      answers
+    })
+    setDialog(true)
+  }
 
   return (
     <ContentLayout
@@ -252,7 +286,6 @@ export default function ResultadosTemaProfesor({
                     Promedio
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-
                   </th>
                 </tr>
               </thead>
@@ -349,6 +382,7 @@ export default function ResultadosTemaProfesor({
                                   <th className="py-2 text-left">Tiempo</th>
                                   <th className="py-2 text-left">Puntaje</th>
                                   <th className="py-2 text-left">Estado</th>
+                                  <th></th>
                                 </tr>
                               </thead>
                               <tbody>
@@ -371,6 +405,11 @@ export default function ResultadosTemaProfesor({
                                           }`}>
                                           {intento.porcentaje >= 70 ? 'Aprobado' : 'Reprobado'}
                                         </span>
+                                      </td>
+                                      <td className='py-2 text-center flex justify-center'>
+                                        <button onClick={() => viewExamDetail(intento.porcentaje,intento.respuestas)}>
+                                          <Eye />
+                                        </button>
                                       </td>
                                     </tr>
                                   ))}
@@ -401,6 +440,30 @@ export default function ResultadosTemaProfesor({
           </Link>
         </div>
       </div>
+
+      <Dialog open={dialog} onOpenChange={setDialog}>
+
+        <DialogPortal>
+          <DialogOverlay className="fixed inset-0 bg-black/50 z-50" />
+          <DialogContent aria-describedby={undefined} className="fixed top-[50%] left-[50%] translate-x-[-50%] translate-y-[-50%] z-50 w-full max-w-md bg-white rounded-lg shadow-xl p-6 border border-gray-200 sm:max-w-3xl">
+            <DialogTitle className='text-lg text-black hidden'>
+              Resultados de la prueba del Quiz
+            </DialogTitle>
+            <div className="content">
+              <StudentResults
+                percentage={result.percentage}
+                answers={result.answers}
+                questions={tema.contenido_json.questions}
+              />
+            </div>
+
+            <DialogClose className="absolute right-4 top-4 rounded-sm opacity-70 hover:opacity-100 text-black">
+              <XIcon className="h-6 w-6" />
+              <span className="sr-only">Cerrar</span>
+            </DialogClose>
+          </DialogContent>
+        </DialogPortal>
+      </Dialog>
     </ContentLayout>
   );
 }
