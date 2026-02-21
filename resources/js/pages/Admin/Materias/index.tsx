@@ -199,13 +199,13 @@ export default function Index({
             <Edit className="w-4 h-4" />
           </button>
 
-          {/* <button
+          <button
             onClick={() => handleDelete(materia.id)}
             className="flex items-center gap-1 p-2 text-sm rounded-md transition-colors bg-red-500 text-white hover:bg-red-600 cursor-pointer"
             title="Eliminar materia"
           >
             <Trash2 className="w-4 h-4" />
-          </button> */}
+          </button>
         </div>
       ),
     },

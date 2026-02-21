@@ -33,7 +33,7 @@ interface Question {
   text: string
 }
 
-interface ContenidoJson{
+interface ContenidoJson {
   questions: Question[]
 }
 
@@ -394,7 +394,8 @@ export default function ResultadosTemaProfesor({
                                         </span>
                                       </td>
                                       <td className='py-2 text-center flex justify-center'>
-                                        <button onClick={() => viewExamDetail(intento.porcentaje, intento.respuestas)}>
+                                        <button onClick={() => viewExamDetail(intento.porcentaje, intento.respuestas)}
+                                          className='cursor-pointer'>
                                           <Eye />
                                         </button>
                                       </td>
@@ -432,14 +433,14 @@ export default function ResultadosTemaProfesor({
 
         <DialogPortal>
           <DialogOverlay className="fixed inset-0 bg-black/50 z-50" />
-          <DialogContent aria-describedby={undefined} className="fixed top-[50%] left-[50%] translate-x-[-50%] translate-y-[-50%] z-50 w-full max-w-md bg-white rounded-lg shadow-xl p-6 border border-gray-200 sm:max-w-3xl">
+          <DialogContent aria-describedby={undefined} className="fixed top-[50%] left-[50%] translate-x-[-50%] translate-y-[-50%] z-50 w-full max-w-md bg-white dark:bg-gray-800 rounded-lg shadow-xl p-6 border border-gray-200 sm:max-w-3xl">
             <DialogTitle className='text-lg text-black hidden'>
               Resultados de la prueba del Quiz
             </DialogTitle>
             <div className="content">
               <StudentResults
                 percentage={result.percentage}
-                answers={result.answers}                
+                answers={result.answers}
                 questions={tema.contenido_json.questions}
               />
             </div>

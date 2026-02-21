@@ -16,7 +16,6 @@ interface Question {
   text: string
 }
 
-// TODOahora: Usar este componente en la vista del profesor para comparar las respuestas
 export function StudentResults({
   percentage,
   questions = [],

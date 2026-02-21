@@ -192,7 +192,6 @@ Route::middleware(['auth', 'verified', 'role:Estudiante,Admin'])->prefix('estudi
 // });
 
 
-// TODO: Compartir estas rutas en la vista del administrador para que en caso se inactive al profesor el admin pueda seguir viendo los temas
 // Rutas para el profesor - AHORA CON MÓDULOS
 Route::middleware(['auth', 'verified', 'role:Profesor,Admin'])->prefix('cursos')->name('cursos.')->group(function () {
     Route::get('/', [CursoController::class, 'index'])->name('index');

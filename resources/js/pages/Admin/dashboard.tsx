@@ -45,7 +45,7 @@ export default function Dashboard() {
                 <div className="bg-white rounded-lg shadow px-6 py-4 dark:bg-gray-800 flex flex-col items-start gap-2">
                     <div className="icon w-full flex flex-row justify-between items-center gap-2">
                         <FileEdit />
-                        <div className="text-md font-bold text-gray-500 dark:text-gray-300">Examanes hoy</div>
+                        <div className="text-md font-bold text-gray-500 dark:text-gray-300">Examenes hoy</div>
                     </div>
                     <div className="content w-full flex flex-row items-center justify-between gap-2">
                         <Brain className='text-cyan-600' />

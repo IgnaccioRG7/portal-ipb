@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Materia;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 
 class MateriaController extends Controller
@@ -88,9 +89,15 @@ class MateriaController extends Controller
 
     public function destroy(Materia $materia)
     {
-        $materia->delete();
+        try {
+            $materia->delete();
 
-        return redirect()->route('admin.materias.index')
+            return redirect()->route('admin.materias.index')
             ->with('success', 'Materia eliminada exitosamente');
+        } catch (\Throwable $th) {
+            Log::info("Error al eliminar la materia");
+            return redirect()->route('admin.materias.index')
+                ->withErrors(['error' => 'No es posible eliminar esta materia']);
+        }        
     }
 }

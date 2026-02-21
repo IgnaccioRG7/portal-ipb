@@ -922,7 +922,6 @@ class CursoController extends Controller
             'respuestas' => $examen->respuestas_json
         ]);
 
-        // TODO: Terminar para que el profe pueda visualizar las respuestas que el usuario completo esto por intento en el frontend
         // Filtrar contenido json
         $contenido = json_decode($tema->contenido_json, true);
         if (isset($contenido['questions']) && is_array($contenido['questions'])) {

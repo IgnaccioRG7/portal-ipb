@@ -33,7 +33,7 @@ interface Question {
   text: string
 }
 
-interface ContenidoJson{
+interface ContenidoJson {
   questions: Question[]
 }
 
@@ -120,7 +120,7 @@ export default function ResultadosTemaProfesor({
   const [verDetalle, setVerDetalle] = useState<number | null>(null);
   const [dialog, setDialog] = useState<boolean>(false)
   const [result, setResult] = useState({
-    percentage:0,
+    percentage: 0,
     answers: {}
   })
 
@@ -182,7 +182,7 @@ export default function ResultadosTemaProfesor({
     });
   };
 
-  const viewExamDetail = (percentage:any, answers:any) => {
+  const viewExamDetail = (percentage: any, answers: any) => {
     setResult({
       percentage,
       answers
@@ -407,7 +407,9 @@ export default function ResultadosTemaProfesor({
                                         </span>
                                       </td>
                                       <td className='py-2 text-center flex justify-center'>
-                                        <button onClick={() => viewExamDetail(intento.porcentaje,intento.respuestas)}>
+                                        <button onClick={() => viewExamDetail(intento.porcentaje, intento.respuestas)}
+                                          className='cursor-pointer'
+                                        >
                                           <Eye />
                                         </button>
                                       </td>
@@ -445,7 +447,7 @@ export default function ResultadosTemaProfesor({
 
         <DialogPortal>
           <DialogOverlay className="fixed inset-0 bg-black/50 z-50" />
-          <DialogContent aria-describedby={undefined} className="fixed top-[50%] left-[50%] translate-x-[-50%] translate-y-[-50%] z-50 w-full max-w-md bg-white rounded-lg shadow-xl p-6 border border-gray-200 sm:max-w-3xl">
+          <DialogContent aria-describedby={undefined} className="fixed top-[50%] left-[50%] translate-x-[-50%] translate-y-[-50%] z-50 w-full max-w-md bg-white dark:bg-gray-800 rounded-lg shadow-xl p-6 border border-gray-200 sm:max-w-3xl dark:border-gray-700">
             <DialogTitle className='text-lg text-black hidden'>
               Resultados de la prueba del Quiz
             </DialogTitle>
@@ -457,7 +459,7 @@ export default function ResultadosTemaProfesor({
               />
             </div>
 
-            <DialogClose className="absolute right-4 top-4 rounded-sm opacity-70 hover:opacity-100 text-black">
+            <DialogClose className="absolute right-4 top-4 rounded-sm opacity-70 hover:opacity-100 text-black dark:text-white">
               <XIcon className="h-6 w-6" />
               <span className="sr-only">Cerrar</span>
             </DialogClose>
