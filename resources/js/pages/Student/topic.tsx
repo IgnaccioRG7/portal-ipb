@@ -29,6 +29,7 @@ interface Tema {
   orden: number;
   tipo: 'opcional' | 'lectura' | 'configurable';
   estado: 'activo' | string;
+  max_intentos: number | null;
   contenido_json: string;
   curso_materia_tema_id: number;
   curso_materia_id: number;
@@ -44,6 +45,9 @@ interface TopicProps {
 }
 
 export default function Topic({ curso, materia, tema }: TopicProps) {
+
+  console.log(tema);
+
   const { subjectId, setSubjectId, reset, cantidadPreguntas, setCantidadPreguntas, shuffledQuestions, setShuffledQuestions } = useQuizStore()
   const title = tema.nombre ? tema.nombre : materia.nombre
   const contenido = JSON.parse(tema.contenido_json)
@@ -151,18 +155,25 @@ export default function Topic({ curso, materia, tema }: TopicProps) {
     )
   }
 
+  const intentosDescripcion = tema?.max_intentos
+    ? `Solo tienes ${tema.max_intentos} intento${tema.max_intentos === 1 ? '' : 's'}.`
+    : '¡Buena suerte en tu Quiz!';
+
   return (
     <ContentLayout breadcrumbs={breadcrumbs}>
       <section className="quiz flex flex-col gap-4">
         <header className="flex flex-row items-center gap-2 relative">
           <Link
-            className="absolute left-0 flex flex-row gap-2"
+            className="flex flex-row gap-2"
             href={estudiante.subjects({ course: curso.id })}
           >
             <ArrowLeftToLine className="size-6" />
             <span className="hidden md:block">Salir</span>
           </Link>
-          <h2 className="text-2xl font-bold w-full text-center">Resuelve la prueba de: {title}</h2>
+          <h2 className="text-2xl font-bold w-full text-center text-balance">Resuelve la prueba de: {title}</h2>
+          <span className="text-gray-200 text-sm text-end text-balance font-semibold">
+            {intentosDescripcion}
+          </span>
         </header>
         <Quiz
           tema={tema}

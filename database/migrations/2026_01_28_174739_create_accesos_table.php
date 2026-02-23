@@ -10,7 +10,6 @@ return new class extends Migration
      * Run the migrations.
      */
 
-    // TODO: arreglar esta foranea ya que si elimina el registro de la tabla modulo_materia entonces eliminara todos los accesos asociados a esta. eso es un ERROR
     public function up(): void
     {
         Schema::create('accesos', function (Blueprint $table) {

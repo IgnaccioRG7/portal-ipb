@@ -10,8 +10,8 @@ export default function AuthSimpleLayout({
     description,
 }: AuthLayoutProps) {
     return (
-        <div className="min-h-screen flex flex-col items-center bg-[#FDFDFC] px-6 py-4 text-[#1b1b18] dark:text-white lg:justify-center dark:bg-gray-900">
-            <header className="mb-6 w-full text-sm not-has-[nav]:hidden lg:max-w-7xl mx-auto flex justify-between gap-2 absolute top-0 px-6 py-2 lg:px-8">
+        <div className="min-h-screen flex flex-col items-center bg-[#FDFDFC] px-6 lg:px-2 py-4 text-[#1b1b18] dark:text-white lg:justify-center dark:bg-gray-900">
+            <header className="mb-6 w-full text-sm not-has-[nav]:hidden lg:max-w-7xl mx-auto flex justify-between gap-2 absolute top-0 py-2">
                 <Link
                     href={'/'}
                 >

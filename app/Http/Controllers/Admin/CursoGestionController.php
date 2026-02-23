@@ -100,13 +100,12 @@ class CursoGestionController extends Controller
 
         $prof = User::find($profesorId);
 
-        // TODO: Cambiar el codigo de estado para este error y tambien crear una vista como el 404
         if (!$prof) {
-            abort(403, "No existe ese profesor");
+            abort(404, "No existe ese profesor");
         }
 
         if ($prof->rol->nombre !== "Profesor") {
-            abort(403, "Profesor no encontrado");
+            abort(404, "Profesor no encontrado");
         }
 
         if ($modulo->curso_id !== $curso->id) {

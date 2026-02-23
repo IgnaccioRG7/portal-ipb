@@ -32,6 +32,7 @@ export default function TemaEdit({ tema, curso, modulo, materia }: any) {
     tipo: string;
     estado: string;
     contenido: TemaContent;
+    max_intentos: number | null;
     randomizar_preguntas: boolean;
     randomizar_respuestas: boolean;
   }>({
@@ -39,6 +40,7 @@ export default function TemaEdit({ tema, curso, modulo, materia }: any) {
     descripcion: tema.descripcion || '',
     tipo: tema.tipo,
     estado: tema.estado,
+    max_intentos: tema.max_intentos,
     contenido: tema.contenido || { questions: [] },
     randomizar_preguntas: tema?.randomizar_preguntas || false,
     randomizar_respuestas: tema?.randomizar_respuestas || false,
@@ -183,6 +185,19 @@ export default function TemaEdit({ tema, curso, modulo, materia }: any) {
       title={`Editar: ${tema.nombre || tema.codigo_tema}`}
       subtitle={`${materia.nombre} - ${modulo.nombre}`}
       breadcrumbs={breadcrumbs}
+      actions={
+        <Button
+          type="button"
+          variant="destructive"
+          onClick={handleDelete}
+          title='Eliminar este tema'
+          className="bg-red-600 hover:bg-red-700 text-white shadow-lg cursor-pointer"
+        >
+          {/* TODOHOY: importante eliminar el tema solo sino tiene dependencias en los resultados */}
+          <Trash2 size={24} className="" />
+          <span>Eliminar tema</span>
+        </Button>
+      }
     >
       <Head title="Editar Tema" />
 
@@ -190,25 +205,12 @@ export default function TemaEdit({ tema, curso, modulo, materia }: any) {
         style={{
           height: 'calc(100vh - 300px)'
         }}>
-        {/* Botón de eliminar - Flotante */}
-        {/* TODOHOY: importante eliminar el tema solo sino tiene dependencias en los resultados */}
-        {/* <div className="sticky top-20 z-10 flex justify-end mb-4">
-          <Button
-            type="button"
-            variant="destructive"
-            onClick={handleDelete}
-            className="bg-red-600 hover:bg-red-700 text-white shadow-lg"
-          >
-            <Trash2 size={16} className="mr-2" />
-            Eliminar este Tema
-          </Button>
-        </div> */}
 
         {/* Info básica */}
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 space-y-4">
           <h3 className="text-lg font-semibold border-b pb-2">Información del Tema</h3>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
             <div>
               <Label htmlFor="codigo_tema">Código del Tema</Label>
               <Input
@@ -230,23 +232,6 @@ export default function TemaEdit({ tema, curso, modulo, materia }: any) {
               />
               <InputError message={errors.nombre} />
             </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="tipo">Tipo de Tema *</Label>
-              <select
-                id="tipo"
-                value={data.tipo}
-                onChange={e => handleTipoChange(e.target.value)}
-                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2"
-              >
-                <option value="opcional">Opcional</option>
-                <option value="lectura">Lectura</option>
-                <option value="configurable">Configurable</option>
-              </select>
-              <InputError message={errors.tipo} />
-            </div>
 
             <div>
               <Label htmlFor="estado">Estado</Label>
@@ -260,6 +245,34 @@ export default function TemaEdit({ tema, curso, modulo, materia }: any) {
                 <option value="activo">Activo</option>
                 <option value="inactivo">Inactivo</option>
               </select>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+            <div className='col-span-1 lg:col-span-2'>
+              <Label htmlFor="tipo">Tipo de Tema *</Label>
+              <select
+                id="tipo"
+                value={data.tipo}
+                onChange={e => handleTipoChange(e.target.value)}
+                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2"
+              >
+                <option value="opcional">Opcional</option>
+                <option value="lectura">Lectura</option>
+                <option value="configurable">Configurable</option>
+              </select>
+              <InputError message={errors.tipo} />
+            </div>
+            <div>
+              <Label htmlFor='max_intentos'>Intentos permitidos</Label>
+              <Input
+                id='max_intentos'
+                value={data.max_intentos ?? ''}
+                type='number'
+                placeholder='0, 1, 2, 10, 20, ...'
+                onChange={(e) => setData('max_intentos', e.target.value ? parseInt(e.target.value) : null)}
+              />
+              <InputError message={errors.max_intentos} />
             </div>
           </div>
 
@@ -331,8 +344,8 @@ export default function TemaEdit({ tema, curso, modulo, materia }: any) {
         )}
 
         {/* Preguntas */}
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-          <div className="flex justify-between items-center sticky top-0 bg-white pb-6 pt-4 dark:bg-gray-800">
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 z-0!">
+          <div className="flex justify-between items-center sticky top-0 bg-white pb-6 pt-4 dark:bg-gray-800 z-0!">
             <h3 className="text-lg font-semibold">Preguntas del Quiz</h3>
             <Button type="button" onClick={addQuestion} variant="outline">
               <Plus size={16} className="mr-1" /> Agregar Pregunta

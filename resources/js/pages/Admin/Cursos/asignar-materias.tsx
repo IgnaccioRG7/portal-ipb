@@ -13,7 +13,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Switch } from '@/components/ui/switch'; // ✅ Importar Switch
+import { Switch } from '@/components/ui/switch';
 import { useState } from 'react';
 import { Trash2, ChevronDown, ChevronUp, Plus, Calendar, User, AlertCircle, Power } from 'lucide-react';
 
@@ -30,7 +30,7 @@ interface MateriaEnModulo {
   materia_id: number;
   prof_id: number | null;
   orden: number;
-  estado: 'activo' | 'inactivo'; // ✅ Requerido
+  estado: 'activo' | 'inactivo';
 }
 
 interface Profesor {
@@ -45,7 +45,7 @@ interface Modulo {
   nombre: string;
   fecha_inicio: string;
   fecha_fin: string;
-  estado: 'activo' | 'inactivo'; // ✅ Requerido
+  estado: 'activo' | 'inactivo';
   materias: MateriaEnModulo[];
   tiene_dependencias?: boolean;
 }
@@ -60,7 +60,7 @@ interface Props {
   curso: Curso;
   todasLasMaterias: Materia[];
   profesores: Profesor[];
-  modulos: Modulo[]; // ✅ Recibimos TODOS los módulos (activos e inactivos)
+  modulos: Modulo[];
   errors: Record<string, string>;
   processing: boolean;
 }
@@ -81,7 +81,7 @@ export default function AsignarMaterias({
     { title: 'Asignar Materias', href: '#' },
   ];
 
-  // ✅ Estado para TODOS los módulos (activos e inactivos) en orden secuencial
+  // Estado para TODOS los módulos (activos e inactivos) en orden secuencial
   const [modulosState, setModulosState] = useState<Modulo[]>(() => {
     if (modulos.length > 0) {
       // Ordenar por código (m1, m2, m3...)
@@ -106,7 +106,7 @@ export default function AsignarMaterias({
 
   const [modulosExpandidos, setModulosExpandidos] = useState<number[]>([0]);
 
-  // ✅ Agregar módulo - SIEMPRE con código secuencial
+  // Agregar módulo - SIEMPRE con código secuencial
   const agregarModulo = () => {
     const nuevoNumero = modulosState.length + 1;
     const fechaInicio = new Date();
@@ -119,7 +119,7 @@ export default function AsignarMaterias({
       const ultimaFecha = new Date(ultimoModulo.fecha_fin);
       ultimaFecha.setDate(ultimaFecha.getDate() + 1);
       fechaInicio.setTime(ultimaFecha.getTime());
-      fechaFin.setMonth(fechaInicio.getMonth() + 3);
+      fechaFin.setMonth(fechaInicio.getMonth() + 1);
     }
 
     setModulosState([
@@ -138,7 +138,7 @@ export default function AsignarMaterias({
     setModulosExpandidos([...modulosExpandidos, modulosState.length]);
   };
 
-  // ✅ TOGGLE estado del módulo (activo/inactivo)
+  // TOGGLE estado del módulo (activo/inactivo)
   const toggleModuloEstado = (index: number) => {
     setModulosState(
       modulosState.map((mod, i) =>
@@ -198,7 +198,7 @@ export default function AsignarMaterias({
     );
   };
 
-  // ✅ TOGGLE estado de la materia (activo/inactivo)
+  // TOGGLE estado de la materia (activo/inactivo)
   const toggleMateriaEstado = (moduloIndex: number, materiaId: number) => {
     setModulosState(
       modulosState.map((mod, i) => {
@@ -260,7 +260,7 @@ export default function AsignarMaterias({
     );
   };
 
-  // ✅ SUBMIT - Enviar TODOS los módulos con sus estados
+  // SUBMIT - Enviar TODOS los módulos con sus estados
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -270,12 +270,12 @@ export default function AsignarMaterias({
       nombre: modulo.nombre,
       fecha_inicio: modulo.fecha_inicio,
       fecha_fin: modulo.fecha_fin,
-      estado: modulo.estado, // ✅ Enviamos el estado
+      estado: modulo.estado,
       materias: modulo.materias.map(m => ({
         materia_id: m.materia_id,
         prof_id: m.prof_id,
         orden: m.orden,
-        estado: m.estado // ✅ Enviamos el estado
+        estado: m.estado
       }))
     }));
 
@@ -285,7 +285,7 @@ export default function AsignarMaterias({
       {
         preserveScroll: true,
         onSuccess: () => {
-          console.log('✅ Módulos y materias guardados');
+          console.log('Módulos y materias guardados');
         },
         onError: (errors) => {
           console.error('❌ Error:', errors);
@@ -299,7 +299,7 @@ export default function AsignarMaterias({
   };
 
 
-  // ✅ ELIMINAR módulo (solo si no tiene dependencias)
+  // ELIMINAR módulo (solo si no tiene dependencias)
   const eliminarModulo = (index: number) => {
     const modulo = modulosState[index];
 
@@ -309,7 +309,12 @@ export default function AsignarMaterias({
     }
 
     if (confirm(`¿Eliminar permanentemente el módulo "${modulo.nombre}"?\n\nEsta acción no se puede deshacer.`)) {
-      setModulosState(modulosState.filter((_, i) => i !== index));
+      const nuevosModulos = modulosState.filter((_, i) => i !== index)
+
+      console.log(nuevosModulos);
+      
+
+      setModulosState(nuevosModulos);
       setModulosExpandidos(modulosExpandidos.filter(i => i !== index));
     }
   };
@@ -432,9 +437,9 @@ export default function AsignarMaterias({
                               className={`w-64 ${esInactivo ? 'opacity-70' : ''}`}
                               placeholder={`Módulo ${numeroModulo}`}
                               required
-                              disabled={esInactivo} // ❌ No editar si está inactivo
+                              disabled={esInactivo} // No editar si está inactivo
                             />
-                            {/* ✅ SWITCH PARA ACTIVAR/INACTIVAR MÓDULO */}
+                            {/* SWITCH PARA ACTIVAR/INACTIVAR MÓDULO */}
                             <div className="flex items-center gap-2 ml-2">
                               <Switch
                                 checked={modulo.estado === 'activo'}
@@ -485,7 +490,7 @@ export default function AsignarMaterias({
                           )}
                         </span>
 
-                        {/* ✅ BOTÓN DE ELIMINAR - Solo si NO tiene dependencias */}
+                        {/* BOTÓN DE ELIMINAR - Solo si NO tiene dependencias */}
                         {!modulo.tiene_dependencias && (
                           <Button
                             type="button"
@@ -572,7 +577,7 @@ export default function AsignarMaterias({
                                         <p className={`font-semibold ${materiaInactiva ? 'text-gray-500' : ''}`}>
                                           {materiaInfo.nombre}
                                         </p>
-                                        {/* ✅ SWITCH para materia (solo si módulo activo) */}
+                                        {/* SWITCH para materia (solo si módulo activo) */}
                                         {!esInactivo && (
                                           <div className="flex items-center gap-1">
                                             <Switch

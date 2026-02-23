@@ -21,6 +21,7 @@ class Tema extends Model
         'visibilidad',
         'randomizar_preguntas',
         'randomizar_respuestas', 
+        'max_intentos',
         'fecha_publicacion',
         'created_by'
     ];

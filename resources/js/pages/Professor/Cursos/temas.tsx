@@ -2,8 +2,8 @@ import ContentLayout from '@/layouts/content-layout';
 import { Head, Link } from '@inertiajs/react';
 import { DataTable } from '@/components/data-table';
 import { Edit, Plus, Eye, BarChart3 } from 'lucide-react';
-import { BreadcrumbItem } from '@/types';
 import cursos from '@/routes/cursos';
+import { BreadcrumbItem } from '@/types';
 import { Button } from '@/components/ui/button';
 
 export default function MateriaTemas({ curso, modulo, materia, temas, modulo_materia_id }: any) {

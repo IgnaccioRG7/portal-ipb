@@ -15,8 +15,12 @@ export default ({ children, breadcrumbs, ...props }: AppLayoutProps) => (
             />
         </Head>
         <AppLayoutTemplate breadcrumbs={breadcrumbs} {...props}>
-            <Toaster />
-            {children}
+            <div className='z-10'>
+                <Toaster />
+            </div>
+            <div className='z-0'>
+                {children}
+            </div>
         </AppLayoutTemplate>
     </>
 );

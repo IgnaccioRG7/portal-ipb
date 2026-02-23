@@ -11,6 +11,7 @@ export default function CursosIndex({ cursos : cursosData }: { cursos: any[] }) 
     { key: 'codigo_curso', label: 'Código' },
     { key: 'nombre', label: 'Nombre del Curso' },
     { key: 'nivel', label: 'Nivel' },
+    { key: 'total_modulos', label: 'Módulos' },
     {
       key: 'estado',
       label: 'Estado',

@@ -12,6 +12,7 @@ use App\Models\Modulo;
 use App\Models\ModuloMateria;
 use App\Models\Tema;
 use App\Models\User;
+use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -173,7 +174,7 @@ class CursoController extends Controller
             ->orderBy('nombre')
             ->get();
 
-        // ✅ Obtener profesores (usuarios con rol Profesor)
+        // Obtener profesores (usuarios con rol Profesor)
         $profesores = User::whereHas('rol', function ($query) {
             $query->where('nombre', 'Profesor');
         })
@@ -191,7 +192,7 @@ class CursoController extends Controller
         // Obtener los módulos del curso con sus materias y profesores
         $modulos = Modulo::where('curso_id', $curso->id)
             // ->where('estado', 'activo')
-            ->orderBy('fecha_inicio')
+            ->orderBy('id')
             ->with(['moduloMaterias' => function ($query) {
                 $query->where('estado', 'activo')
                     ->with(['materia', 'profesor'])
@@ -257,6 +258,11 @@ class CursoController extends Controller
      */
     public function guardarMaterias(Request $request, Curso $curso)
     {
+        $messages = [
+            'modulos.required' => 'El curso debe tener por lo menos un modulo',
+            'modulos.*.fecha_fin.after_or_equal' => 'La fecha fin debe ser igual o posterior a la fecha inicio',
+        ];
+
         $validated = $request->validate([
             'modulos' => 'required|array',
             'modulos.*.codigo_modulo' => 'required|string|max:20',
@@ -269,7 +275,7 @@ class CursoController extends Controller
             'modulos.*.materias.*.prof_id' => 'nullable|exists:users,id',
             'modulos.*.materias.*.orden' => 'integer|min:1',
             'modulos.*.materias.*.estado' => 'required|in:activo,inactivo',
-        ]);
+        ], $messages);
 
         DB::transaction(function () use ($curso, $validated) {
             // 1 Obtener TODOS los módulos actuales (con dependencias)
@@ -303,9 +309,9 @@ class CursoController extends Controller
                 }
             }
 
-            // 4️⃣ PROCESAR módulos del formulario (ACTUALIZAR/CREAR)
+            // 4 PROCESAR módulos del formulario (ACTUALIZAR/CREAR)
             foreach ($validated['modulos'] as $index => $moduloData) {
-                // 🔥 RENUMERAR: Forzar código secuencial basado en posición
+                // RENUMERAR: Forzar código secuencial basado en posición
                 $nuevoCodigo = 'm' . ($index + 1);
 
                 // Buscar módulo por ID (si existe) o por código anterior
@@ -316,7 +322,7 @@ class CursoController extends Controller
                 if ($modulo) {
                     // ACTUALIZAR - Incluyendo posible cambio de código
                     $modulo->update([
-                        'codigo_modulo' => $nuevoCodigo, // 🔄 RENUMERAR
+                        'codigo_modulo' => $nuevoCodigo, // RENUMERAR
                         'nombre' => $moduloData['nombre'],
                         'fecha_inicio' => $moduloData['fecha_inicio'],
                         'fecha_fin' => $moduloData['fecha_fin'],
@@ -334,7 +340,7 @@ class CursoController extends Controller
                     ]);
                 }
 
-                // 5️⃣ Sincronizar materias (siempre con el módulo actualizado)
+                // 5 Sincronizar materias (siempre con el módulo actualizado)
                 $this->sincronizarMateriasModulo($modulo, $moduloData['materias'] ?? []);
             }
         });
@@ -353,11 +359,6 @@ class CursoController extends Controller
             ->keyBy(function ($item) {
                 return $item->mat_id . '_' . ($item->prof_id ?? 'null');
             });
-
-        // Log::info("Registros actuales en BD:");
-        // foreach ($registrosActuales as $key => $registro) {
-        //     Log::info("  Key: {$key} → ID: {$registro->id}, Materia: {$registro->mat_id}, Profesor: " . ($registro->prof_id ?? 'NULL') . ", Estado: {$registro->estado}");
-        // }
 
         // 2️⃣ Procesar cada materia que viene del formulario
         foreach ($materiasData as $index => $materiaData) {
@@ -523,8 +524,8 @@ class CursoController extends Controller
         Log::info($profesorId);
 
         // Obtener cursos donde el profesor tiene materias asignadas en algún módulo
-        // TODOhoy: revisar esta relacion porque no esta contabilizando el moduloMaterias
-        $cursos = Curso::where('estado', 'activo')
+        $cursos = Curso::select('id', 'codigo_curso', 'nombre', 'nivel', 'estado')
+            ->where('estado', 'activo')
             ->whereHas('modulos', function ($q) {
                 $q->where('estado', 'activo');
             })
@@ -533,11 +534,12 @@ class CursoController extends Controller
                     ->where('estado', 'activo');
             })
             ->withCount(['modulos as total_modulos' => function ($query) use ($profesorId) {
-                $query->whereHas('moduloMaterias', function ($q) use ($profesorId) {
-                    $q->where('prof_id', $profesorId);
+                $query->where('estado', 'activo')
+                    ->whereHas('moduloMaterias', function ($q) use ($profesorId) {
+                    $q->where('prof_id', $profesorId)
+                        ->where('estado', 'activo');
                 });
             }])
-            ->select('id', 'codigo_curso', 'nombre', 'nivel', 'estado')
             ->orderBy('nombre')
             ->get()
             ->map(function ($curso) {
@@ -702,6 +704,7 @@ class CursoController extends Controller
                 'descripcion' => $tema->descripcion,
                 'tipo' => $tema->tipo,
                 'estado' => $tema->estado,
+                'max_intentos' => $tema->max_intentos,
                 'contenido' => $contenido,
                 'modulo_materia_id' => $moduloMateria->id,
                 'randomizar_preguntas' => $tema->randomizar_preguntas ?? false,
@@ -761,6 +764,7 @@ class CursoController extends Controller
             'descripcion' => 'nullable|string',
             'tipo' => 'required|in:lectura,opcional,configurable',
             'estado' => 'required|in:activo,inactivo,borrador',
+            'max_intentos' => 'nullable|integer|min:0|max:100',
             'contenido' => 'required|array',
             'contenido.reading' => $request->tipo === 'lectura' ? 'required|string|min:10' : 'nullable|string',
             'contenido.questions' => 'required|array|min:1',
@@ -781,6 +785,7 @@ class CursoController extends Controller
             'descripcion' => $validated['descripcion'],
             'tipo' => $validated['tipo'],
             'estado' => $validated['estado'],
+            'max_intentos' => $validated['max_intentos'],
             'contenido_json' => json_encode($validated['contenido']),
             'visibilidad' => 'estudiantes',
             'fecha_publicacion' => now(),
@@ -819,6 +824,7 @@ class CursoController extends Controller
             'descripcion' => 'nullable|string',
             'tipo' => 'required|in:lectura,opcional,configurable',
             'estado' => 'required|in:activo,inactivo,borrador',
+            'max_intentos' => 'nullable|integer|min:0|max:100',
             'contenido' => 'required|array',
             'contenido.reading' => $request->tipo === 'lectura' ? 'required|string|min:10' : 'nullable|string',
             'contenido.questions' => 'required|array|min:1',
@@ -837,6 +843,7 @@ class CursoController extends Controller
             'descripcion' => $validated['descripcion'],
             'tipo' => $validated['tipo'],
             'estado' => $validated['estado'],
+            'max_intentos' => $validated['max_intentos'],
             'contenido_json' => json_encode($validated['contenido']),
             'randomizar_preguntas' => $validated['randomizar_preguntas'] ?? false,
             'randomizar_respuestas' => $validated['randomizar_respuestas'] ?? false,
@@ -851,8 +858,6 @@ class CursoController extends Controller
             ->with('success', 'Tema actualizado correctamente');
     }
 
-
-    // TODO: ver si vamos a mover esta funcion a la parte de profesores o a un controlador a parte
     /**
      * Mostrar resultados de un tema para todos los estudiantes
      */
@@ -949,6 +954,27 @@ class CursoController extends Controller
             'intentos' => $intentosDetallados,
         ]);
     }
+
+    /**
+     * Eliminar tema
+     */
+    public function destroyTema(Curso $curso, Modulo $modulo, Materia $materia, Tema $tema) {
+        try {
+            $tema->delete();
+            return redirect()->route('cursos.temas', [
+                'curso' => $curso->id,
+                'modulo' => $modulo->id,
+                'materia' => $materia->id,
+            ])->with('success', 'Tema eliminado exitosamente');
+            
+        } catch (QueryException $e) {
+            Log::info('No es posible eliminar este tema');
+            return redirect()->back()
+                ->withErrors(['error' => 'No es posible eliminar este tema']);
+        }
+    }
+
+
     /*
      *****************************************************************
                     RUTAS PARA EL PROFESOR

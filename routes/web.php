@@ -20,19 +20,6 @@ Route::get('/', function () {
 Route::get('/recursos', [RecursoController::class, 'index'])->name('recursos.index');
 Route::get('/recursos/{recurso}', [RecursoController::class, 'show'])->name('recursos.show');
 
-
-// Route::get('dashboard', function () {
-//     $user = request()->user()->loadMissing('rol');
-
-//     return match ($user->rol->nombre) {
-//         'Admin' => Inertia::render('Admin/dashboard'),
-//         'Profesor' => Inertia::render('Professor/dashboard'),
-//         'Estudiante' => Inertia::render('dashboard'),
-//         default      => abort(403),
-//     };
-
-// })->middleware(['auth', 'verified'])->name('dashboard');
-
 Route::get('/dashboard', function () {
     $user = request()->user()->loadMissing('rol');
 
@@ -47,19 +34,11 @@ Route::get('/dashboard', function () {
 
 Route::middleware(['auth', 'verified'])->group(function () {
 
-    // Route::get('/admin', fn () =>
-    //     Inertia::render('Admin/dashboard')
-    // )->middleware('role:Admin')->name('admin.dashboard');
-
     Route::get(
         '/profesor',
         fn() =>
         Inertia::render('Professor/dashboard')
     )->middleware('role:Profesor')->name('profesor.dashboard');
-
-    // Route::get('/estudiante', fn () =>
-    //     Inertia::render('dashboard')
-    // )->middleware('role:Estudiante')->name('estudiante.dashboard');
 });
 
 // Rutas para el administrador
@@ -92,10 +71,6 @@ Route::middleware(['auth', 'verified', 'role:Admin'])->prefix('admin')->name('ad
 
         Route::get('/estudiante/{user}/curso/{curso}/modulos', [MatriculaController::class, 'modulos'])->name('modulos');
         Route::post('/estudiante/{user}/curso/{curso}/guardar-modulos', [MatriculaController::class, 'guardarModulos'])->name('guardar-modulos');
-
-
-        // Route::get('/estudiante/{user}/curso/{curso}/materias', [MatriculaController::class, 'materias'])->name('materias');
-        // Route::post('/estudiante/{user}/curso/{curso}/guardar-temas', [MatriculaController::class, 'guardarTemas'])->name('guardar-temas');
 
         Route::delete('/{matricula}', [MatriculaController::class, 'destroy'])->name('destroy');
 
@@ -149,7 +124,7 @@ Route::middleware(['auth', 'verified', 'role:Admin'])->prefix('admin')->name('ad
         )->name('resultados');
     });
 
-    // TODO: Validar la ruta directa publica para que no puedan ingresar directamente desde la url
+    // TOD: Validar la ruta directa publica para que no puedan ingresar directamente desde la url
     // Route::get('/files/recursos/{filename}', function ($filename) {
     //     $path = storage_path('app/public/recursos/' . $filename);
 
@@ -182,17 +157,8 @@ Route::middleware(['auth', 'verified', 'role:Estudiante,Admin'])->prefix('estudi
         ->name('tema.resultados');
 });
 
-// Rutas para el profesor con el admin
-// Route::middleware(['auth', 'verified', 'role:Profesor,Admin'])->prefix('cursos')->name('cursos.')->group(function () {;
-//     Route::get('/', [CursoController::class, 'index'])->name('index');
-//     Route::get('/{curso}/materias', [CursoController::class, 'materias'])->name('materias');
-//     Route::get('/{curso}/materias/{materia}/temas', [CursoController::class, 'temas'])->name('materias.temas');
-//     Route::get('/{curso}/materias/{materia}/temas/{tema}/edit', [CursoController::class, 'editTema'])->name('temas.edit');
-//     Route::put('/{curso}/materias/{materia}/temas/{tema}', [CursoController::class, 'updateTema'])->name('temas.update');
-// });
 
-
-// Rutas para el profesor - AHORA CON MÓDULOS
+// Rutas para el profesor
 Route::middleware(['auth', 'verified', 'role:Profesor,Admin'])->prefix('cursos')->name('cursos.')->group(function () {
     Route::get('/', [CursoController::class, 'index'])->name('index');
 
@@ -227,19 +193,3 @@ Route::middleware(['auth', 'verified', 'role:Profesor,Admin'])->prefix('cursos')
 
 
 require __DIR__ . '/settings.php';
-
-
-
-// Route::middleware(['auth', 'verified'])->group(function () {
-//     Route::get('/dashboard', fn () =>
-//         Inertia::render('dashboard')
-//     )->middleware('role:estudiante')->name('dashboard');
-
-//     Route::get('/admin', fn () =>
-//         Inertia::render('Admin/Dashboard')
-//     )->middleware('role:admin')->name('admin-dashboard');
-
-//     Route::get('/profesor', fn () =>
-//         Inertia::render('Profesor/Dashboard')
-//     )->middleware('role:profesor')->name('profesor-dashboard');
-// });

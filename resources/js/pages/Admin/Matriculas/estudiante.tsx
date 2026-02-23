@@ -45,6 +45,11 @@ export default function MatriculaEstudiante({
   matriculas_actuales: Matricula[];
 }) {
 
+  console.log({
+    estudiante
+  });
+  
+
   const { errors: pageErrors } = usePage().props;
   console.log(pageErrors);
   
@@ -87,7 +92,6 @@ export default function MatriculaEstudiante({
   };
 
   return (
-    // TODOhoy: arreglar el nombre completo del estudiante aqui
     <ContentLayout
       title={`Matricular Estudiante: ${estudiante.nombre ?? ''}`}
       subtitle={`Email: ${estudiante.email}`}

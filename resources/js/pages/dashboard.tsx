@@ -46,6 +46,7 @@ export interface MatriculaCurso {
 }
 
 interface Props {
+    nombre_completo: string;
     matriculas: MatriculaCurso[];
 }
 
@@ -106,18 +107,6 @@ function CourseCard({ data }: { data: MatriculaCurso }) {
                         </div>
                     </div>
                 </div>
-                {/* TODO: ARREGLAR ESTE VALOR EN LA CONSULTA O QUITARLO DEFINITIVAMENTE. esta mostrando temas totales en el dashboard */}
-                {/* <div className="rounded-lg bg-purple-50 p-4 dark:bg-gray-700">
-                    <div className="flex items-center gap-3">
-                        <BookOpen className="h-5 w-5 text-purple-600" />
-                        <div>
-                            <p className="text-sm text-gray-600 dark:text-gray-300">Temas totales</p>
-                            <p className="text-xl font-bold text-gray-900 dark:text-white">
-                                {totalTemas}
-                            </p>
-                        </div>
-                    </div>
-                </div> */}
             </div>
 
             {/* Lista de módulos */}
@@ -215,7 +204,8 @@ function MateriaCard({ materia, modulo }: { materia: MateriaModulo, modulo: Modu
     );
 }
 
-export default function Dashboard({ matriculas }: Props) {
+export default function Dashboard({ matriculas, nombre_completo }: Props) {
+    console.log(nombre_completo);    
     console.log(matriculas);
     
     const totalCursos = matriculas?.length || 0;
@@ -224,10 +214,9 @@ export default function Dashboard({ matriculas }: Props) {
     }, 0) || 0;
 
     return (
-        // TODOHOY colocar el nombre del estudiantes aqui
         <ContentLayout
             breadcrumbs={breadcrumbs}
-            title='Bienvenido!'
+            title={`Bienvenido ${nombre_completo}!`}
             subtitle={`Estas inscrito en ${totalCursos} curso(s) con ${totalMaterias} materia(s) activas actualmente.`}
         >
             <div className="w-full grid grid-cols-1 lg:grid-cols-12 gap-6">

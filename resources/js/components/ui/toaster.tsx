@@ -36,7 +36,7 @@ export function Toaster() {
   return (
     <Toast.Provider swipeDirection="right">
       <Toast.Root
-        className={`fixed bottom-4 right-4 z-50 rounded-lg p-4 shadow-lg text-white ${type === 'success' ? 'bg-green-700' : 'bg-red-700'
+        className={`fixed bottom-4 right-4 z-100! rounded-lg p-4 shadow-lg text-white ${type === 'success' ? 'bg-green-700' : 'bg-red-700'
           }`}
         open={open}
         onOpenChange={setOpen}

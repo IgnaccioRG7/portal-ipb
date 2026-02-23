@@ -55,7 +55,7 @@ class MatriculaController extends Controller
         return Inertia::render('Admin/Matriculas/estudiante', [
             'estudiante' => [
                 'id' => $user->id,
-                'nombre' => $user->nombre_completo,
+                'nombre' => $user->persona->nombre_completo,
                 'email' => $user->email,
                 'rol' => $user->rol->nombre,
             ],

@@ -39,6 +39,7 @@ export default function TemaCreate({
     contenido: TemaContent;
     randomizar_preguntas: boolean;
     randomizar_respuestas: boolean;
+    max_intentos: number | null;
   }>({
     codigo_tema: codigo_sugerido || 't1',
     nombre: '',
@@ -49,7 +50,8 @@ export default function TemaCreate({
       questions: []
     },
     randomizar_preguntas: false,
-    randomizar_respuestas:false,
+    randomizar_respuestas: false,
+    max_intentos: null
   });
 
   const breadcrumbs: BreadcrumbItem[] = [
@@ -178,7 +180,7 @@ export default function TemaCreate({
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 space-y-4">
           <h3 className="text-lg font-semibold border-b pb-2">Información del Tema</h3>
 
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
             <div>
               <Label htmlFor="codigo_tema">Código del Tema *</Label>
               <Input
@@ -216,24 +218,37 @@ export default function TemaCreate({
             </div>
           </div>
 
-          <div>
-            <Label htmlFor="tipo">Tipo de Tema *</Label>
-            <select
-              id="tipo"
-              value={data.tipo}
-              onChange={e => handleTipoChange(e.target.value)}
-              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2"
-            >
-              <option value="opcional">Opcional (Quiz estándar)</option>
-              <option value="lectura">Lectura (Con texto previo)</option>
-              <option value="configurable">Configurable (Quiz personalizable)</option>
-            </select>
-            <InputError message={errors.tipo} />
-            <p className="text-xs text-gray-500 mt-1">
-              {data.tipo === 'lectura' && '📖 Incluye texto de lectura que los estudiantes deben leer antes de responder'}
-              {data.tipo === 'opcional' && '📝 Quiz estándar con preguntas de opción múltiple'}
-              {data.tipo === 'configurable' && '⚙️ El estudiante puede elegir cuántas preguntas responder'}
-            </p>
+          <div className='grid grid-cols-1 lg:grid-cols-3 gap-4'>
+            <div className='col-span-1 lg:col-span-2'>
+              <Label htmlFor="tipo">Tipo de Tema *</Label>
+              <select
+                id="tipo"
+                value={data.tipo}
+                onChange={e => handleTipoChange(e.target.value)}
+                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2"
+              >
+                <option value="opcional">Opcional (Quiz estándar)</option>
+                <option value="lectura">Lectura (Con texto previo)</option>
+                <option value="configurable">Configurable (Quiz personalizable)</option>
+              </select>
+              <InputError message={errors.tipo} />
+              <p className="text-xs text-gray-500 mt-1">
+                {data.tipo === 'lectura' && '📖 Incluye texto de lectura que los estudiantes deben leer antes de responder'}
+                {data.tipo === 'opcional' && '📝 Quiz estándar con preguntas de opción múltiple'}
+                {data.tipo === 'configurable' && '⚙️ El estudiante puede elegir cuántas preguntas responder'}
+              </p>
+            </div>
+            <div>
+              <Label htmlFor='max_intentos'>Intentos permitidos</Label>
+              <Input 
+                id='max_intentos'
+                value={data.max_intentos ?? ''}
+                type='number'
+                placeholder='0, 1, 2, 10, 20, ...'
+                onChange={(e) => setData('max_intentos', e.target.value ? parseInt(e.target.value) : null)}
+              />              
+              <InputError message={errors.max_intentos} />
+            </div>
           </div>
 
           <div>
@@ -246,7 +261,7 @@ export default function TemaCreate({
               placeholder="Describe brevemente el tema..."
             />
           </div>
-          <div className="grid grid-cols-2 gap-4 mt-4">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-4">
             <div className="flex items-center space-x-2 border rounded-lg p-4 bg-gray-50 dark:bg-gray-900">
               <input
                 type="checkbox"

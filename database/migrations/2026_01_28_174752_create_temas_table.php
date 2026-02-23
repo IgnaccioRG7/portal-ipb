@@ -11,7 +11,6 @@ return new class extends Migration
      */
     public function up(): void
     {
-        // TODO: arreglar esta foranea ya que si elimina el registro de la tabla modulo_materia entonces eliminara todos los temas asociados a esta. Entonces si un profesor creo temas en esta materia y por x motivo le volvemos a asignar entonces elimina esos temas eso es un ERROR
         Schema::create('temas', function (Blueprint $table) {
             $table->id();
             $table->foreignId('modulo_materia_id')->constrained('modulos_materias')->onDelete('cascade');
@@ -24,6 +23,7 @@ return new class extends Migration
             $table->enum('visibilidad', ['publico', 'estudiantes', 'profesores'])->default('estudiantes');
             $table->boolean('randomizar_preguntas')->default(false);
             $table->boolean('randomizar_respuestas')->default(false);
+            $table->unsignedInteger('max_intentos')->nullable();
             $table->date('fecha_publicacion')->nullable();
             $table->foreignId('created_by')->constrained('users');
             $table->timestamps();

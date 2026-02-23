@@ -111,7 +111,6 @@ export default function Resultados({
     });
   };
 
-  // TODOimportante: validar esta ruta solo si modulomateria es activo. es con la validacion de modulomateria materia y tema con el profe. Esto paso porque estamos validando que un profe tendra sus propios temas y si la materia cambia de tema entonces los temas del antiguo profesor no deben ser compartidos al nuevo
   return (
     <ContentLayout breadcrumbs={breadcrumbs} title={`Resultados: ${tema.nombre || materia.nombre}`}>
       <Head title="Resultados del Examen" />

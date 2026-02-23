@@ -63,7 +63,7 @@ class StudentController extends Controller
         ]);
         Log::info($matriculas);
 
-        $data = $matriculas->map(function ($matricula) {
+        $data = $matriculas->map(function ($matricula) use ($student) {
             // Filtrar módulos que tienen moduloMaterias con acceso
             $modulosData = $matricula->curso->modulos->map(function ($modulo) use ($matricula) {
                 // Filtrar moduloMaterias que tienen acceso para esta matrícula
@@ -92,7 +92,7 @@ class StudentController extends Controller
             })->values();
 
             return [
-                'matricula_id' => $matricula->id,
+                'matricula_id' => $matricula->id,                
                 'codigo_matricula' => $matricula->codigo_matricula,
                 'curso' => [
                     'id' => $matricula->curso->id,
@@ -105,6 +105,7 @@ class StudentController extends Controller
         });
 
         return Inertia::render('dashboard', [
+            'nombre_completo' => $student->persona->nombre_completo,
             'matriculas' => $data,
         ]);
     }
@@ -112,7 +113,7 @@ class StudentController extends Controller
     public function subjects(Curso $course)
     {
         $studentId = auth()->guard()->id();
-
+        
         // Buscar la matrícula activa del estudiante en este curso
         $matricula = Matricula::where('estudiante_id', $studentId)
             ->where('curso_id', $course->id)
@@ -296,6 +297,19 @@ class StudentController extends Controller
             ->where('estado', 'activo')
             ->firstOrFail();
 
+        // Validamos que no haya cumplido todos los intentos permitidos
+        $intentos_realizados = ExamenRealizado::where('tema_id', $tema->id)
+            ->where('matricula_id', $matricula->id)
+            ->count();
+
+        if (!is_null($tema->max_intentos) && $intentos_realizados >= $tema->max_intentos) {
+            return redirect()->route('estudiante.subjects', [
+                'course' => $curso->id
+            ])->withErrors([
+                'error' => 'Has alcanzado el número maximo de intentos permitidos.'
+            ]);
+        }
+
         // Validar que el estudiante tiene acceso a este módulo-materia-tema
         $temaValidado = Tema::where('id', $tema->id)
             ->where('estado', 'activo')
@@ -351,6 +365,7 @@ class StudentController extends Controller
                 'nombre' => $temaValidado->nombre,
                 'descripcion' => $temaValidado->descripcion,
                 'tipo' => $temaValidado->tipo ?? 'quiz',
+                'max_intentos' => $temaValidado->max_intentos,
                 'contenido_json' => $contenidoFiltrado,
                 'modulo_materia_id' => $moduloMateria->id ?? null,
                 'modulo_id' => $modulo->id,
@@ -372,6 +387,16 @@ class StudentController extends Controller
             ->where('curso_id', $curso->id)
             ->where('estado', 'activo')
             ->firstOrFail();
+
+        $intentos_realizados = ExamenRealizado::where('tema_id', $tema->id)
+            ->where('matricula_id', $matricula->id)
+            ->count();
+
+        if (!is_null($tema->max_intentos) && $intentos_realizados >= $tema->max_intentos) {
+            return back()->withErrors([
+                'error' => 'Has alcanzado el número maximo de intentos permitidos.'
+            ]);
+        }
 
         $validated = $request->validate([
             'respuestas' => 'required|array',

@@ -166,16 +166,6 @@ function MateriaCard({ data, modulo, cursoId }: {
                     <BarChart3 size={16} />
                     Puntaje
                   </button>
-                  {/* // TODO: Aquí iría la acción para entrar directamente al tema */}
-                  {/* <button 
-                    className="flex items-center gap-1 text-sm font-semibold text-blue-600 hover:underline"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                    }}
-                  >
-                    <PlayCircle size={16} />
-                    Entrar
-                  </button> */}
                 </li>
               ))}
             </ul>
