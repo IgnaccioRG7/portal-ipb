@@ -1,5 +1,5 @@
 
-Título del Proyecto: Sistema de Gestión Educativa - Instituto privado boliviaa
+# Sistema de Gestión Educativa - Instituto privado boliviaa
 Objetivo Principal: Crear una interfaz base responsive (desktop/mobile) con Material Design (Stitch) para un sistema web que gestiona cursos, exámenes y usuarios con múltiples roles.
 Especificaciones técnicas:
 Responsive: Mobile-first pero optimizado para desktop
