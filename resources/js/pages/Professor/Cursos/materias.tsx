@@ -7,7 +7,7 @@ import cursos from '@/routes/cursos';
 
 export default function ModuloMaterias({ curso, modulo, materias }: any) {
     console.log({ curso, modulo, materias });
-    
+
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'Cursos', href: cursos.index().url },
         { title: curso.nombre, href: cursos.modulos(curso.id).url },
@@ -23,16 +23,28 @@ export default function ModuloMaterias({ curso, modulo, materias }: any) {
             key: 'acciones',
             label: 'Temas',
             render: (materia: any) => (
-                <Link
-                    href={cursos.temas({
-                        curso: curso.id,
-                        modulo: modulo.id,
-                        materia: materia.id
-                    })}
-                    className="text-blue-600 hover:text-blue-900 flex items-center gap-1 dark:hover:text-blue-500"
-                >
-                    <FileText size={18} /> Gestionar Temas
-                </Link>
+                <>
+                    <Link
+                        href={cursos.temas({
+                            curso: curso.id,
+                            modulo: modulo.id,
+                            materia: materia.id
+                        })}
+                        className="text-blue-600 hover:text-blue-900 flex items-center gap-1 dark:text-blue-400 dark:hover:text-blue-300"
+                    >
+                        <FileText size={18} /> Gestionar Temas
+                    </Link>
+                    <Link
+                        href={cursos.recursos.index({
+                            curso: curso.id,
+                            modulo: modulo.id,
+                            materia: materia.id
+                        })}
+                        className="text-blue-600 hover:text-blue-900 flex items-center gap-1 dark:text-blue-400 dark:hover:text-blue-300"
+                    >
+                        <FileText size={18} /> Gestionar Recursos
+                    </Link>
+                </>
             )
         }
     ];

@@ -6,6 +6,7 @@ use App\Http\Controllers\Admin\MateriaController;
 use App\Http\Controllers\Admin\MatriculaController;
 use App\Http\Controllers\Admin\RecursoController as AdminRecursoController;
 use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\Profesor\RecursoEstudioController;
 use App\Http\Controllers\RecursoController;
 use App\Http\Controllers\Student\StudentController;
 use Illuminate\Support\Facades\Route;
@@ -190,6 +191,40 @@ Route::middleware(['auth', 'verified', 'role:Profesor,Admin'])->prefix('cursos')
         ->name('temas.resultados');
 });
 
+
+// Rutas para los usuarios Admin, Profesor y Estudiante
+Route::middleware(['auth', 'verified', 'role:Profesor,Admin,Estudiante'])->prefix('cursos')->name('cursos.')->group(function () {
+
+    // Rutas para el profesor
+    Route::prefix('{curso}/modulo/{modulo}/materia/{materia}/recursos')
+        ->name('recursos.')
+        ->group(function () {
+
+            Route::get('/', [RecursoEstudioController::class, 'index'])
+                ->name('index');
+
+            Route::get('/create', [RecursoEstudioController::class, 'create'])
+                ->name('create');
+
+            Route::post('/', [RecursoEstudioController::class, 'store'])
+                ->name('store');
+
+            Route::get('/{recurso}/edit', [RecursoEstudioController::class, 'edit'])
+                ->name('edit');
+
+            Route::put('/{recurso}', [RecursoEstudioController::class, 'update'])
+                ->name('update');
+
+            Route::get('/{recurso}/download', [RecursoEstudioController::class, 'download'])
+                ->name('download');
+
+            Route::delete('/{recurso}', [RecursoEstudioController::class, 'destroy'])
+                ->name('destroy');
+
+            Route::get('/{recurso}/preview', [RecursoEstudioController::class, 'preview'])
+                ->name('preview');
+        });
+});
 
 
 require __DIR__ . '/settings.php';

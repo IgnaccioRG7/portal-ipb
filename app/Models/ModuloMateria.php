@@ -11,7 +11,11 @@ class ModuloMateria extends Model
     protected $table = 'modulos_materias';
 
     protected $fillable = [
-        'mod_id', 'mat_id', 'prof_id', 'orden', 'estado'
+        'mod_id',
+        'mat_id',
+        'prof_id',
+        'orden',
+        'estado'
     ];
 
     protected $casts = [
@@ -41,5 +45,10 @@ class ModuloMateria extends Model
     public function accesos(): HasMany
     {
         return $this->hasMany(Acceso::class, 'modulo_materia_id');
+    }
+
+    public function recursos(): HasMany
+    {
+        return $this->hasMany(RecursoEstudio::class, 'modulo_materia_id');
     }
 }
