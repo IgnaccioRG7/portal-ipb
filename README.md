@@ -1,7 +1,7 @@
 # 🎓 Portal IPB - Sistema de Gestión Educativa Instituto Privado Bolivia
 
 Sistema web profesional para el **Instituto Privado Bolivia**, diseñado para la gestión integral de cursos, quizzes y seguimiento académico multirrol.
-
+abc
 ---
 
 ## 🚀 Guía de Instalación Rápida
