@@ -6,6 +6,7 @@ use App\Http\Controllers\Admin\MateriaController;
 use App\Http\Controllers\Admin\MatriculaController;
 use App\Http\Controllers\Admin\RecursoController as AdminRecursoController;
 use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\ImageController;
 use App\Http\Controllers\RecursoController;
 use App\Http\Controllers\Student\StudentController;
 use Illuminate\Support\Facades\Route;
@@ -190,6 +191,9 @@ Route::middleware(['auth', 'verified', 'role:Profesor,Admin'])->prefix('cursos')
         ->name('temas.resultados');
 });
 
-
+Route::get('/private/{folder}/{filename}', [ImageController::class, 'getPrivateImage'])
+    ->middleware(['auth'])
+    ->where('folder', 'preguntas|respuestas')
+    ->name('private.image');
 
 require __DIR__ . '/settings.php';

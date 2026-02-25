@@ -3,7 +3,7 @@ import { useEffect, useMemo, useRef } from "react";
 import Progress from "./progress";
 import { useHydration, useQuizStore } from "@/store/quiz";
 import { prepareQuestions } from "@/lib/quiz-utils";
-import { BookOpen } from "lucide-react";
+import { BookOpen, ImageIcon } from "lucide-react";
 
 export interface ContenidoJson {
   reading?: string,
@@ -14,7 +14,11 @@ export interface Question {
   id: string;
   type: 'select' | 'input';
   text: string;
-  options: string[];
+  image?: string | null; // 👈 NUEVO: imagen de la pregunta (opcional)
+  options: {              // 👈 CAMBIO: ahora es array de objetos
+    text: string;
+    image?: string | null;
+  }[];
   correctAnswer: number;
 }
 
@@ -137,6 +141,17 @@ export function Quiz({ tema, cursoId, moduloId, materiaId }: DirectTopicProps) {
   const tipo = tema?.tipo || 'opcional'
   const reading = contenido.reading || ''
 
+  // 👇 Función para construir URL de imagen privada
+  const getImageUrl = (path: string | null | undefined) => {
+    if (!path) return null;
+    // Si ya es una URL completa o comienza con http, devolverla tal cual
+    if (path.startsWith('http')) return path;
+    // Si comienza con /private/, ya está en el formato correcto
+    if (path.startsWith('/private/')) return path;
+    // Si no, asumimos que es una ruta relativa y la prefijamos
+    return `/private/${path}`;
+  };
+
   return (
     <section className="space-y-6">
       <Progress total={total} current={currentQuestion} />
@@ -156,6 +171,22 @@ export function Quiz({ tema, cursoId, moduloId, materiaId }: DirectTopicProps) {
           <span className="tag px-4 py-1 flex items-center leading-normal bg-gray-200 shadow-xs w-fit rounded-full text-xs font-black uppercase mx-auto dark:bg-gray-600">
             {`Pregunta ${currentQuestion + 1}`}
           </span>
+          
+          {/* 👇 Mostrar imagen de la pregunta si existe */}
+          {question?.image && (
+            <div className="flex justify-center my-2">
+              <img 
+                src={getImageUrl(question.image)} 
+                alt="Imagen de la pregunta"
+                className="max-w-full max-h-64 rounded-lg shadow-md object-contain"
+                onError={(e) => {
+                  console.error('Error cargando imagen:', question.image);
+                  e.currentTarget.style.display = 'none';
+                }}
+              />
+            </div>
+          )}
+          
           <h3 className="text-base md:text-lg font-semibold border border-gray-200 px-2 py-4 rounded-md text-center shadow-xs">
             {question?.text}
           </h3>
@@ -165,19 +196,49 @@ export function Quiz({ tema, cursoId, moduloId, materiaId }: DirectTopicProps) {
           {question?.options.map((opt, i) => (
             <li
               key={i}
-              className={`p-3 rounded-lg border-4 flex items-center gap-2 cursor-pointer ${selectedIndex === i
+              className={`p-3 rounded-lg border-4 flex items-center gap-2 cursor-pointer ${
+                selectedIndex === i
                   ? 'border-[#fde047] bg-[#fde047]/20 dark:bg-yellow-700 dark:border-[#d4b61c]'
                   : 'dark:bg-gray-800 dark:hover:bg-gray-700 hover:bg-gray-100 border-gray-200'
-                }`}
+              }`}
               onClick={() => selectOption(i)}
             >
-              <span className={`font-black size-8 min-w-8 grid place-content-center rounded-full leading-0 ${selectedIndex === i
+              <span className={`font-black size-8 min-w-8 grid place-content-center rounded-full leading-0 ${
+                selectedIndex === i
                   ? 'bg-[#fddd3c] text-gray-800'
                   : 'bg-gray-200 text-gray-800 dark:bg-gray-500 dark:text-gray-300'
-                }`}>
+              }`}>
                 {String.fromCharCode(65 + i)}
               </span>
-              <p className="text-sm md:text-base">{opt}</p>
+              
+              <div className="flex-1 flex items-center gap-3">
+                {/* 👇 Mostrar imagen de la opción si existe */}
+                {opt.image && (
+                  <div className="flex-shrink-0">
+                    <img 
+                      src={getImageUrl(opt.image)} 
+                      alt={`Opción ${String.fromCharCode(65 + i)}`}
+                      className="w-10 h-10 md:w-12 md:h-12 rounded-lg object-cover border border-gray-300"
+                      onError={(e) => {
+                        console.error('Error cargando imagen de opción:', opt.image);
+                        e.currentTarget.style.display = 'none';
+                      }}
+                    />
+                  </div>
+                )}
+                
+                {/* 👇 Texto de la opción (puede ser null si solo hay imagen) */}
+                {opt.text && (
+                  <p className="text-sm md:text-base">{opt.text}</p>
+                )}
+                
+                {/* 👇 Si no hay texto pero hay imagen, mostrar indicador */}
+                {!opt.text && opt.image && (
+                  <p className="text-sm md:text-base text-gray-500 italic">
+                    Opción con imagen
+                  </p>
+                )}
+              </div>
             </li>
           ))}
         </ul>

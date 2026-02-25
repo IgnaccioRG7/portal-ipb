@@ -271,25 +271,38 @@ class AcademicSeeder extends Seeder
                         "id" => "mat_1",
                         "type" => "select",
                         "text" => "Si 3x - 7 = 11, ¿cuál es el valor de x?",
-                        "options" => ["4", "6", "5", "3"],
+                        "image" => null,
+                        "options" => [
+                            ["text" => "4", "image" => null],
+                            ["text" => "6", "image" => null],
+                            ["text" => "5", "image" => null],
+                            ["text" => "3", "image" => null]
+                        ],
                         "correctAnswer" => 0
                     ],
                     [
                         "id" => "mat_2",
                         "type" => "select",
                         "text" => "¿Cuál es el valor de 2^5?",
-                        "options" => ["10", "16", "32", "64"],
+                        "image" => null,
+                        "options" => [
+                            ["text" => "10", "image" => null],
+                            ["text" => "16", "image" => null],
+                            ["text" => "32", "image" => null],
+                            ["text" => "64", "image" => null]
+                        ],
                         "correctAnswer" => 2
                     ],
                     [
                         "id" => "mat_3",
                         "type" => "select",
                         "text" => "¿Cuándo un número es divisible entre 9?",
+                        "image" => null,
                         "options" => [
-                            "Cuando termina en 0",
-                            "Cuando la suma de sus dígitos es múltiplo de 9",
-                            "Cuando es múltiplo de 3",
-                            "Cuando es par"
+                            ["text" => "Cuando termina en 0", "image" => null],
+                            ["text" => "Cuando la suma de sus dígitos es múltiplo de 9", "image" => null],
+                            ["text" => "Cuando es múltiplo de 3", "image" => null],
+                            ["text" => "Cuando es par", "image" => null]
                         ],
                         "correctAnswer" => 1
                     ]
@@ -314,18 +327,25 @@ class AcademicSeeder extends Seeder
                         "id" => "quim_1",
                         "type" => "select",
                         "text" => "¿Cuál es el símbolo del oxígeno?",
-                        "options" => ["Ox", "O", "Oxg", "Oz"],
+                        "image" => "/private/preguntas/oxigeno.jfif",
+                        "options" => [
+                            ["text" => "Ox", "image" => null],
+                            ["text" => "O", "image" => "/private/respuestas/o.png"],
+                            ["text" => "Oxg", "image" => null],
+                            ["text" => "Oz", "image" => null]
+                        ],
                         "correctAnswer" => 1
                     ],
                     [
                         "id" => "quim_2",
                         "type" => "select",
-                        "text" => "¿Qué es un elemento químico?",
+                        "text" => "¿Qué elemento tiene número atómico 1?",
+                        "image" => "/private/preguntas/hidrogeno.jpg",
                         "options" => [
-                            "Una mezcla de sustancias",
-                            "Una sustancia pura que no se puede descomponer",
-                            "Un compuesto químico",
-                            "Una solución"
+                            ["text" => "Oxígeno", "image" => null],
+                            ["text" => "Hidrógeno", "image" => "/private/respuestas/h.jpg"],
+                            ["text" => "Helio", "image" => null],
+                            ["text" => "Carbono", "image" => null]
                         ],
                         "correctAnswer" => 1
                     ]
@@ -351,18 +371,25 @@ class AcademicSeeder extends Seeder
                         "id" => "cl1_1",
                         "type" => "select",
                         "text" => "¿Cuál fue la reducción porcentual de la cobertura glaciar desde 1975?",
-                        "options" => ["85 %", "15 %", "20 %", "2 %"],
+                        "image" => "/private/preguntas/glaciar.jpg",
+                        "options" => [
+                            ["text" => "85 %", "image" => null],
+                            ["text" => "15 %", "image" => null],
+                            ["text" => "20 %", "image" => null],
+                            ["text" => "2 %", "image" => null]
+                        ],
                         "correctAnswer" => 0
                     ],
                     [
                         "id" => "cl1_2",
                         "type" => "select",
                         "text" => "¿Cuál es una consecuencia de la deforestación mencionada en el texto?",
+                        "image" => null,
                         "options" => [
-                            "Disminución de temperatura",
-                            "Aumento de 60 °C",
-                            "Aumento de 16 °C",
-                            "Aumento de 0,6 °C"
+                            ["text" => "Disminución de temperatura", "image" => null],
+                            ["text" => "Aumento de 60 °C", "image" => null],
+                            ["text" => "Aumento de 16 °C", "image" => null],
+                            ["text" => "Aumento de 0,6 °C", "image" => null]
                         ],
                         "correctAnswer" => 3
                     ]
@@ -374,7 +401,7 @@ class AcademicSeeder extends Seeder
             'created_by' => $admin->id,
         ]);
 
-        // Tema 4: LECTURA 2 para LECTURAS DE COMPRENSION (modMat2)
+        // Tema 4: LECTURA 2 para LECTURAS DE COMPRENSION (modMat3)
         $tema4 = Tema::create([
             'modulo_materia_id' => $modMat3->id,
             'codigo_tema' => 't4',
@@ -388,14 +415,25 @@ class AcademicSeeder extends Seeder
                         "id" => "cl2_1",
                         "type" => "select",
                         "text" => "¿Qué porcentaje de reducción de emisiones se necesita para 2030?",
-                        "options" => ["25%", "45%", "60%", "75%"],
+                        "image" => null,
+                        "options" => [
+                            ["text" => "25 %", "image" => null],
+                            ["text" => "45 %", "image" => null],
+                            ["text" => "60 %", "image" => null],
+                            ["text" => "75 %", "image" => null],
+                        ],
                         "correctAnswer" => 1
                     ],
                     [
                         "id" => "cl2_2",
                         "type" => "select",
                         "text" => "¿Qué organización emite el informe mencionado?",
-                        "options" => ["ONU", "IPCC", "OMS", "UNESCO"],
+                        "options" => [
+                            ["text" => "ONU", "image" => null],
+                            ["text" => "IPCC", "image" => null],
+                            ["text" => "OMS", "image" => null],
+                            ["text" => "UNESCO", "image" => null],
+                        ],
                         "correctAnswer" => 1
                     ]
                 ]
@@ -406,7 +444,7 @@ class AcademicSeeder extends Seeder
             'created_by' => $admin->id,
         ]);
 
-        // Tema 5: ECUACIONES para MATEMATICA (modMat3)
+        // Tema 5: ECUACIONES para MATEMATICA (modMat4)
         $tema5 = Tema::create([
             'modulo_materia_id' => $modMat4->id,
             'codigo_tema' => 't5',
@@ -419,14 +457,26 @@ class AcademicSeeder extends Seeder
                         "id" => "ecu_1",
                         "type" => "select",
                         "text" => "Resuelve: 2x + 5 = 15",
-                        "options" => ["x = 5", "x = 10", "x = 7.5", "x = 2"],
+                        "image" => null,
+                        "options" => [
+                            ["text" => "x = 5", "image" => "/private/respuestas/ecuacion1_5.jfif"],
+                            ["text" => "x = 10", "image" => null],
+                            ["text" => "x = 7.5", "image" => null],
+                            ["text" => "x = 2", "image" => null]
+                        ],
                         "correctAnswer" => 0
                     ],
                     [
                         "id" => "ecu_2",
                         "type" => "select",
                         "text" => "¿Cuál es la solución de x² - 4 = 0?",
-                        "options" => ["x = 2", "x = -2", "x = ±2", "x = 4"],
+                        "image" => "/private/preguntas/ecuacion2.png",
+                        "options" => [
+                            ["text" => "x = 2", "image" => null],
+                            ["text" => "x = -2", "image" => null],
+                            ["text" => "x = ±2", "image" => null],
+                            ["text" => "x = 4", "image" => null]
+                        ],
                         "correctAnswer" => 2
                     ]
                 ]
@@ -437,10 +487,11 @@ class AcademicSeeder extends Seeder
             'created_by' => $admin->id,
         ]);
 
-        // Tema 7: MRU para FISICA (modMat4)
-        $tema7 = Tema::create([
+
+        // Tema 6: MRU para FISICA (modMat5)
+        $tema6 = Tema::create([
             'modulo_materia_id' => $modMat5->id,
-            'codigo_tema' => 't7',
+            'codigo_tema' => 't6',
             'nombre' => 'MRU',
             'tipo' => 'opcional',
             'descripcion' => 'Movimiento Rectilíneo Uniforme',
@@ -450,11 +501,12 @@ class AcademicSeeder extends Seeder
                         "id" => "mru_1",
                         "type" => "select",
                         "text" => "¿Qué es el MRU?",
+                        "image" => null,
                         "options" => [
-                            "Movimiento con aceleración constante",
-                            "Movimiento con velocidad constante",
-                            "Movimiento circular",
-                            "Movimiento acelerado"
+                            ["text" => "Movimiento con aceleración constante", "image" => null],
+                            ["text" => "Movimiento con velocidad constante", "image" => null],
+                            ["text" => "Movimiento circular", "image" => null],
+                            ["text" => "Movimiento acelerado", "image" => null]
                         ],
                         "correctAnswer" => 1
                     ],
@@ -462,7 +514,13 @@ class AcademicSeeder extends Seeder
                         "id" => "mru_2",
                         "type" => "select",
                         "text" => "Fórmula del MRU",
-                        "options" => ["v = d/t", "a = Δv/Δt", "F = m·a", "E = m·c²"],
+                        "image" => null,
+                        "options" => [
+                            ["text" => "v = d/t", "image" => null],
+                            ["text" => "a = Δv/Δt", "image" => null],
+                            ["text" => "F = m·a", "image" => null],
+                            ["text" => "E = m·c²", "image" => null]
+                        ],
                         "correctAnswer" => 0
                     ]
                 ]
@@ -473,10 +531,10 @@ class AcademicSeeder extends Seeder
             'created_by' => $admin->id,
         ]);
 
-        // Tema 8: MRUV para FISICA (modMat4)
-        $tema8 = Tema::create([
+        // Tema 7: MRUV para FISICA (modMat5)
+        $tema7 = Tema::create([
             'modulo_materia_id' => $modMat5->id,
-            'codigo_tema' => 't8',
+            'codigo_tema' => 't7',
             'nombre' => 'MRUV',
             'tipo' => 'opcional',
             'descripcion' => 'Movimiento Rectilíneo Uniformemente Variado',
@@ -485,12 +543,13 @@ class AcademicSeeder extends Seeder
                     [
                         "id" => "mruv_1",
                         "type" => "select",
-                        "text" => "¿Qué caracteriza al MRUV?",
+                        "text" => "Observa el gráfico de velocidad vs tiempo. ¿Qué tipo de movimiento representa?",
+                        "image" => "/private/preguntas/grafico_mruv.jpg",
                         "options" => [
-                            "Velocidad constante",
-                            "Aceleración constante",
-                            "Trayectoria circular",
-                            "Sin aceleración"
+                            ["text" => "MRU", "image" => "/private/respuestas/grafico_mru_r.jpg"],
+                            ["text" => "MRUV", "image" => "/private/respuestas/grafico_mruv_r.jpg"],
+                            ["text" => "MCU", "image" => null],
+                            ["text" => "Caída libre", "image" => null]
                         ],
                         "correctAnswer" => 1
                     ],
@@ -498,11 +557,12 @@ class AcademicSeeder extends Seeder
                         "id" => "mruv_2",
                         "type" => "select",
                         "text" => "Fórmula de posición en MRUV",
+                        "image" => null,
                         "options" => [
-                            "x = x₀ + v·t",
-                            "x = x₀ + v₀·t + ½·a·t²",
-                            "v = v₀ + a·t",
-                            "v² = v₀² + 2·a·Δx"
+                            ["text" => "x = x₀ + v·t", "image" => null],
+                            ["text" => "x = x₀ + v₀·t + ½·a·t²", "image" => "/private/respuestas/formula_posicion.png"],
+                            ["text" => "v = v₀ + a·t", "image" => null],
+                            ["text" => "v² = v₀² + 2·a·Δx", "image" => null]
                         ],
                         "correctAnswer" => 1
                     ]
@@ -513,7 +573,7 @@ class AcademicSeeder extends Seeder
             'fecha_publicacion' => '2026-05-15',
             'created_by' => $admin->id,
         ]);
-
+        
         // =====================================================
         // MATRÍCULAS
         // =====================================================
@@ -553,9 +613,9 @@ class AcademicSeeder extends Seeder
             'estado' => 'activo',
         ]);
 
-        Acceso::create([ 
+        Acceso::create([
             'mat_id' => $matriculaESFM->id,
-            'modulo_materia_id' => $modMat3->id, 
+            'modulo_materia_id' => $modMat3->id,
             'orden' => 3,
             'estado' => 'activo',
         ]);
