@@ -9,11 +9,17 @@ use App\Models\Materia;
 use App\Models\ModuloMateria;
 use App\Models\RecursoEstudio;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 
 class RecursoEstudioController extends Controller
 {
+    /*
+     *****************************************************************
+                    RUTAS PARA EL PROFESOR
+    *****************************************************************
+    */
     private function getModuloMateria($modulo, $materia)
     {
         $userId = auth()->guard()->id();
@@ -48,6 +54,9 @@ class RecursoEstudioController extends Controller
 
     public function store(Request $request, Curso $curso, Modulo $modulo, Materia $materia)
     {
+        Log::info('Datos recibidos CREATE:', $request->all());
+        Log::info($request);
+
         $moduloMateria = $this->getModuloMateria($modulo, $materia);
 
         $validated = $request->validate([
@@ -121,6 +130,8 @@ class RecursoEstudioController extends Controller
         Materia $materia,
         RecursoEstudio $recurso
     ) {
+        Log::info('Datos recibidos:', $request->all());
+
         $moduloMateria = $this->getModuloMateria($modulo, $materia);
 
         abort_unless(
@@ -136,21 +147,24 @@ class RecursoEstudioController extends Controller
 
         // Si se sube nuevo archivo
         if ($request->hasFile('archivo')) {
-
-            // borrar archivo anterior
             Storage::disk('private')->delete($recurso->url);
 
-            // guardar nuevo
             $ruta = $request->file('archivo')->store('recursos', 'private');
 
-            $recurso->tipo = $request->file('archivo')->getClientMimeType();
-            $recurso->url = $ruta;
-            $recurso->descargas = 0;
+            // ✅ Usar update() en lugar de asignar propiedades sueltas
+            $recurso->update([
+                'tipo' => $request->file('archivo')->getClientMimeType(),
+                'url' => $ruta,
+                'descargas' => 0,
+            ]);
+
+            Log::info('Archivo actualizado a: ' . $ruta); // debug
         }
 
-        $recurso->titulo = $validated['titulo'];
-        $recurso->descripcion = $validated['descripcion'];
-        $recurso->save();
+        $recurso->update([
+            'titulo' => $validated['titulo'],
+            'descripcion' => $validated['descripcion'],
+        ]);
 
         return redirect()->route('cursos.recursos.index', [
             'curso' => $curso->id,
@@ -181,4 +195,22 @@ class RecursoEstudioController extends Controller
 
         return response()->download($rutaCompleta);
     }
+    /*
+     *****************************************************************
+                    RUTAS PARA EL PROFESOR
+    *****************************************************************
+    */
+
+    /*
+     *****************************************************************
+                    RUTAS PARA EL PROFESOR
+    *****************************************************************
+    */
+
+
+    /*
+     *****************************************************************
+                    RUTAS PARA EL PROFESOR
+    *****************************************************************
+    */
 }

@@ -31,6 +31,10 @@ composer run dev
 http://localhost:8000/
 ```
 
+## Credenciales
+
+admin@instituto.com
+
 ---
 
 ## 📂 Estructura del Proyecto

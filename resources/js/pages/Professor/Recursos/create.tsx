@@ -1,5 +1,5 @@
 import ContentLayout from '@/layouts/content-layout'
-import { Head, router, useForm } from '@inertiajs/react'
+import { Head, useForm } from '@inertiajs/react'  // ✅ router eliminado, no se necesita
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
@@ -16,13 +16,11 @@ export default function Create({ curso, modulo, materia }: any) {
   const submit = (e: React.FormEvent) => {
     e.preventDefault()
 
-    router.post(
-      cursos.recursos.store({
-        curso: curso.id,
-        modulo: modulo.id,
-        materia: materia.id
-      })
-    )
+    post(cursos.recursos.store({
+      curso: curso.id,
+      modulo: modulo.id,
+      materia: materia.id
+    }).url)
   }
 
   return (
